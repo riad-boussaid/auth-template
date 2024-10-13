@@ -1,16 +1,9 @@
 "use client";
 
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight } from "lucide-react";
-
 import { useForm } from "react-hook-form";
-import { useCountdown } from "usehooks-ts";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Separator } from "./separator";
-
 import {
   Form,
   FormControl,
@@ -21,6 +14,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+// import { useRouter } from "next/navigation";
+import { useCountdown } from "usehooks-ts";
+import { useEffect, useState } from "react";
+import { SignUpSchema } from "@/lib/validators";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { resendVerificationEmail, signUp } from "@/actions/auth";
+import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
 import { Social } from "./social";
 import {
   Card,
@@ -30,12 +31,8 @@ import {
 } from "@/components/ui/card";
 import { BackButton } from "./back-button";
 
-import { SignInSchema } from "@/lib/validators";
-import { resendVerificationEmail, signIn } from "@/actions/auth";
-import { useToast } from "@/hooks/use-toast";
-
-export const SigninForm = () => {
-  const router = useRouter();
+export const RegisterForm = () => {
+  // const router = useRouter();
   const { toast } = useToast();
 
   const [count, { startCountdown, stopCountdown, resetCountdown }] =
@@ -54,26 +51,28 @@ export const SigninForm = () => {
   const [showResendVerificationEmail, setShowResendVerificationEmail] =
     useState(false);
 
-  const form = useForm<z.infer<typeof SignInSchema>>({
-    resolver: zodResolver(SignInSchema),
+  const form = useForm<z.infer<typeof SignUpSchema>>({
+    resolver: zodResolver(SignUpSchema),
     defaultValues: {
+      username: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof SignInSchema>) {
-    const res = await signIn(values);
+  async function onSubmit(values: z.infer<typeof SignUpSchema>) {
+    const res = await signUp(values);
+    startCountdown();
     if (res.error) {
       toast({ variant: "destructive", description: res.error });
-
-      if (res?.key === "email_not_verified") {
-        setShowResendVerificationEmail(true);
-      }
     } else if (res.success) {
-      toast({ variant: "default", description: "Signed in successfully" });
-
-      router.push("/");
+      toast({
+        variant: "default",
+        description:
+          "We've sent an verification email to your inbox. Please verify your email to continue.",
+      });
+      setShowResendVerificationEmail(true);
     }
   }
 
@@ -83,17 +82,15 @@ export const SigninForm = () => {
       toast({ variant: "destructive", description: res.error });
     } else if (res.success) {
       toast({ variant: "default", description: res.success });
-
       startCountdown();
     }
   };
-
   return (
     <Card className="w-[400px]">
       <CardHeader>
         <div className="flex w-full flex-col items-center justify-center gap-y-4">
-          <h1 className={"text-3xl font-semibold"}>{"Sign in"}</h1>
-          <p className="text-sm text-muted-foreground">{"Welcome back"}</p>
+          <h1 className={"text-3xl font-semibold"}>{"Register"}</h1>
+          <p className="text-sm text-muted-foreground">{""}</p>
         </div>
       </CardHeader>
 
@@ -111,6 +108,25 @@ export const SigninForm = () => {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
+                <FormField
+                  name="username"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="username"
+                          autoComplete="name"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   name="email"
                   control={form.control}
@@ -148,16 +164,35 @@ export const SigninForm = () => {
                   )}
                 />
 
-                <Button type="submit" className="w-full" disabled={false}>
+                <FormField
+                  name="confirmPassword"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="********"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button className="w-full" disabled={false}>
                   Continue
                   <ArrowRight className="size-4" />
                 </Button>
               </form>
             </Form>
-            <CardFooter>
+
+            <CardFooter className="mt-4">
               <BackButton
-                label={"Don't have an account? Register"}
-                href={"/register"}
+                label={"Already have an account? Sign-in"}
+                href={"/sign-in"}
               />
             </CardFooter>
 
@@ -169,11 +204,13 @@ export const SigninForm = () => {
             </CardFooter>
           </>
         )}
+
         {showResendVerificationEmail && (
           <Button
             disabled={count > 0 && count < 60}
             onClick={onResendVerificationEmail}
             variant={"link"}
+            className="w-full"
           >
             Send verification email {count > 0 && count < 60 && `in ${count}s`}
           </Button>

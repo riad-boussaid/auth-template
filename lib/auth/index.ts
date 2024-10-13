@@ -61,6 +61,7 @@ declare module "lucia" {
 interface DatabaseUserAttributes {
   username: string;
   email: string;
+  emailVerified: boolean;
   avatar: string;
   role: (typeof roleEnums.enumValues)[number];
 }

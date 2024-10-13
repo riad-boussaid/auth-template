@@ -1,6 +1,9 @@
 import { validateRequest } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import React from "react";
+import { DashboardTable } from "./_components/dashboard-table";
+import { DashboardTablecolumns } from "./_components/dashboard-table-columns";
+import { db } from "@/lib/db";
 
 export default async function DashboardPage() {
   const { user } = await validateRequest();
@@ -9,9 +12,11 @@ export default async function DashboardPage() {
 
   if (user.role !== "ADMIN") redirect("/");
 
+  const data = await db.query.usersTable.findMany();
+
   return (
     <div className="min-h-[calc(100dvh-80px)] container py-8">
-      DashboardPage
+      <DashboardTable columns={DashboardTablecolumns} data={data} />
     </div>
   );
 }

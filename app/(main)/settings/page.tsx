@@ -14,6 +14,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { validateRequest } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { UsernameForm } from "./_components/username-form";
+import { PasswordForm } from "./_components/password-form";
+import { db } from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { usersTable } from "@/lib/db/schema";
 
 export const description =
   "A settings page. The settings page has a sidebar navigation and a main content area. The main content area has a form to update the store name and a form to update the plugins directory. The sidebar navigation has links to general, security, integrations, support, organizations, and advanced settings.";
@@ -22,6 +27,10 @@ export default async function SettingsPage() {
   const { user } = await validateRequest();
 
   if (!user) redirect("/");
+
+  const data = await db.query.usersTable.findFirst({
+    where: eq(usersTable.id, user.id),
+  });
 
   return (
     <div className="flex min-h-screen w-full flex-col ">
@@ -44,51 +53,9 @@ export default async function SettingsPage() {
             <Link href="#">Advanced</Link>
           </nav>
           <div className="grid gap-6">
-            <Card x-chunk="dashboard-04-chunk-1">
-              <CardHeader>
-                <CardTitle>Store Name</CardTitle>
-                <CardDescription>
-                  Used to identify your store in the marketplace.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form>
-                  <Input placeholder="Store Name" />
-                </form>
-              </CardContent>
-              <CardFooter className="border-t px-6 py-4">
-                <Button>Save</Button>
-              </CardFooter>
-            </Card>
-            <Card x-chunk="dashboard-04-chunk-2">
-              <CardHeader>
-                <CardTitle>Plugins Directory</CardTitle>
-                <CardDescription>
-                  The directory within your project, in which your plugins are
-                  located.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form className="flex flex-col gap-4">
-                  <Input
-                    placeholder="Project Name"
-                    defaultValue="/content/plugins"
-                  />
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="include" defaultChecked />
-                    <label
-                      htmlFor="include"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Allow administrators to change the directory.
-                    </label>
-                  </div>
-                </form>
-              </CardContent>
-              <CardFooter className="border-t px-6 py-4">
-                <Button>Save</Button>
-              </CardFooter>
-            </Card>
+            <UsernameForm />
+
+            <PasswordForm />
           </div>
         </div>
       </main>
