@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -31,20 +32,22 @@ export const SettingsNav = () => {
   ] as const;
 
   return (
-    <nav className="grid gap-4 text-sm text-muted-foreground ">
+    <nav className="grid gap-1 text-sm text-muted-foreground ">
       {items.map((item) => (
-        <Link
+        <Button
           key={item.id}
-          href={item.href}
-          className={cn(
-            "font-semibold ",
+          variant={
             item.label.toLowerCase() === tab?.toLowerCase()
-              ? "text-primary"
-              : "text-muted-foreground"
-          )}
+              ? "default"
+              : "ghost"
+          }
+          className="justify-start rounded-lg"
+          asChild
         >
-          {item.label}
-        </Link>
+          <Link href={item.href} className={cn("font-semibold ")}>
+            {item.label}
+          </Link>
+        </Button>
       ))}
 
       {/* <Link href={`${pathname}?tab=display`}>Display</Link>

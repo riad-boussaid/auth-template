@@ -74,13 +74,12 @@ export default async function SettingsPage({
             {tab === "general" && (
               <>
                 <UsernameForm />
-                <PasswordForm />
               </>
             )}
 
             {tab === "display" && <ChangeTheme />}
 
-            {tab === "security" && <div>comming soon...</div>}
+            {tab === "security" && <PasswordForm />}
           </div>
         </div>
       </main>

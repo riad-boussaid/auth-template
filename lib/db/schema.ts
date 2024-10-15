@@ -21,7 +21,7 @@ export const usersTable = pgTable(
     // lastName: varchar("last_name", { length: 255 }),
 
     username: varchar("username", { length: 255 }),
-    avatar: text("avatar").default("/user.png"),
+    avatar: text("avatar"),
 
     email: varchar("email", { length: 255 }).unique(),
     emailVerified: boolean("email_verified").default(false).notNull(),

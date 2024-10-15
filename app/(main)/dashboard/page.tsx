@@ -15,7 +15,10 @@ export default async function DashboardPage() {
   const data = await db.query.usersTable.findMany();
 
   return (
-    <div className="min-h-[calc(100dvh-80px)] container py-8">
+    <div className="min-h-[calc(100dvh-80px)] container py-8 space-y-8">
+      <div className="  grid w-full  gap-2">
+        <h1 className="text-3xl font-semibold">Dashboard</h1>
+      </div>
       <DashboardTable columns={DashboardTablecolumns} data={data} />
     </div>
   );

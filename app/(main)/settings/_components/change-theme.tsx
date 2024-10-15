@@ -24,8 +24,8 @@ export const ChangeTheme = () => {
         <button disabled={theme === "light"} onClick={() => setTheme("light")}>
           <div
             className={cn(
-              "items-center rounded-md border-2 border-muted p-1 hover:border-indigo-400 hover:bg-accent ",
-              theme === "light" && "border-indigo-400"
+              "items-center rounded-md border-2 border-muted p-1 hover:border-primary hover:bg-accent ",
+              theme === "light" && "border-primary"
             )}
           >
             <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
@@ -50,8 +50,8 @@ export const ChangeTheme = () => {
         <button disabled={theme === "dark"} onClick={() => setTheme("dark")}>
           <div
             className={cn(
-              "items-center rounded-md border-2 border-muted bg-popover p-1 hover:border-indigo-400 hover:bg-accent hover:text-accent-foreground",
-              theme === "dark" && "border-indigo-400"
+              "items-center rounded-md border-2 border-muted bg-popover p-1 hover:border-primary hover:bg-accent hover:text-accent-foreground",
+              theme === "dark" && "border-primary"
             )}
           >
             <div className="space-y-2 rounded-sm bg-slate-950 p-2">
@@ -77,8 +77,8 @@ export const ChangeTheme = () => {
         >
           <div
             className={cn(
-              "rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:border-indigo-400 hover:text-accent-foreground  !h-[148px] w-[168px] text-3xl font-bold cursor-pointer flex items-center justify-center",
-              theme === "system" && "border-indigo-400"
+              "rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:border-primary hover:text-accent-foreground  !h-[148px] w-[168px] text-3xl font-bold cursor-pointer flex items-center justify-center",
+              theme === "system" && "border-primary"
             )}
           >
             ?

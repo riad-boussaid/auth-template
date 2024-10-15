@@ -27,8 +27,10 @@ export const UserButton = ({ user }: { user: User | null }) => {
       <DropdownMenuTrigger className="rounded-full">
         <Avatar>
           <AvatarImage src={user?.avatar || ""} />
-          <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/75 text-primary-foreground">
-            {avatarFallback}
+          <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50   ">
+            <p className="font-bold text-primary-foreground text-xl">
+              {avatarFallback}
+            </p>
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -40,8 +42,10 @@ export const UserButton = ({ user }: { user: User | null }) => {
         <div className="flex items-start gap-x-4 p-4">
           <Avatar className="">
             <AvatarImage src={user?.avatar || ""} />
-            <AvatarFallback className="bg-secondary">
-              {avatarFallback}
+            <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50   ">
+              <p className="font-bold text-primary-foreground text-xl">
+                {avatarFallback}
+              </p>
             </AvatarFallback>
           </Avatar>
           <div className="space-y-0">

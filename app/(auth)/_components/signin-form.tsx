@@ -28,11 +28,11 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { BackButton } from "./back-button";
 
 import { SignInSchema } from "@/lib/validators";
 import { resendVerificationEmail, signIn } from "@/actions/auth";
 import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 export const SigninForm = () => {
   const router = useRouter();
@@ -155,21 +155,27 @@ export const SigninForm = () => {
               </form>
             </Form>
 
-            <CardFooter className="mt-4">
-              <BackButton
-                label={"Don't have an account? Register"}
-                href={"/register"}
-              />
-            </CardFooter>
+            <CardFooter className="mt-4 py-0 flex-col">
+              <div className="flex items-center">
+                <span className="text-xs">Don&apos;t have an account?</span>
+                <Button
+                  variant="link"
+                  className=" font-normal"
+                  size="sm"
+                  asChild
+                >
+                  <Link href={"/register"}>Register</Link>
+                </Button>
+              </div>
 
-            <CardFooter>
-              <p className="text-center text-xs text-muted-foreground">
+              <p className="mt-2 text-center text-xs text-muted-foreground">
                 By clicking continue, you agree to our Terms of Service and
                 Privacy Policy.
               </p>
             </CardFooter>
           </>
         )}
+
         {showResendVerificationEmail && (
           <Button
             disabled={count > 0 && count < 60}
