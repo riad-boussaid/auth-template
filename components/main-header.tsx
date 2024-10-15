@@ -1,18 +1,20 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+import { useSession } from "@/components/providers/session-provider";
+import { UserButton } from "@/components/user-button";
+import { SigninButton } from "@/components/signin-button";
 
 import { cn } from "@/lib/utils";
-import { useSession } from "./session-provider";
+
 import { useScrollPosition } from "@/hooks/use-scroll-position";
-import { UserButton } from "./user-button";
-import Link from "next/link";
-import { SigninButton } from "./signin-button";
 
 export const MainHeader = () => {
   const scrollPosition = useScrollPosition();
 
-  const router = useRouter();
+  // const router = useRouter();
   //   const { theme } = useTheme();
 
   const { user } = useSession();
@@ -26,10 +28,10 @@ export const MainHeader = () => {
           : "border-none dark:border-none"
       )}
     >
-      <div className="container flex items-center justify-between gap-4  ">
+      <div className="container  flex items-center justify-between gap-4  ">
         <div className="size-full">
           <Link href={"/"}>
-            <h3 className="font-bold text-2xl">Logo</h3>
+            <h3 className="font-bold text-2xl">next-lucia-template</h3>
           </Link>
         </div>
 

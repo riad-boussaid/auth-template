@@ -1,6 +1,9 @@
 "use client";
 
 import { LayoutDashboard, LogOut, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
+// import { type User } from "@/lib/db/schema";
+import { type User } from "lucia";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -8,25 +11,24 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
+  // DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/actions/auth";
-import { User } from "lucia";
-import { useRouter } from "next/navigation";
 
 export const UserButton = ({ user }: { user: User | null }) => {
   const router = useRouter();
+
+  if (!user) return null;
+
+  const avatarFallback = user?.username?.charAt(0).toUpperCase();
 
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger className="rounded-full">
         <Avatar>
-          <AvatarImage src={user?.avatar} />
+          <AvatarImage src={user?.avatar || ""} />
           <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/75 text-primary-foreground">
-            {/* {`${user?.firstName?.charAt(0)}${user?.lastName?.charAt(
-              0
-            )}`} */}
-            {user?.username.charAt(0)}
+            {avatarFallback}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -37,12 +39,9 @@ export const UserButton = ({ user }: { user: User | null }) => {
       >
         <div className="flex items-start gap-x-4 p-4">
           <Avatar className="">
-            <AvatarImage src={user?.avatar} />
+            <AvatarImage src={user?.avatar || ""} />
             <AvatarFallback className="bg-secondary">
-              {/* {`${user?.firstName?.charAt(0)}${user?.lastName?.charAt(
-                0
-              )}`} */}
-              {user?.username.charAt(0)}
+              {avatarFallback}
             </AvatarFallback>
           </Avatar>
           <div className="space-y-0">

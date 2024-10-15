@@ -87,3 +87,5 @@ export const sessionTable = pgTable("session", {
     mode: "date",
   }).notNull(),
 });
+
+export type Session = InferSelectModel<typeof sessionTable>;

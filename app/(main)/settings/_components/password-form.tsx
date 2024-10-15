@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import { updatePasswordAction } from "@/actions/user-action";
-import { User } from "@/lib/db/schema";
+// import { User } from "@/lib/db/schema";
 
 export const PasswordForm = () => {
   const { toast } = useToast();

@@ -3,6 +3,7 @@
 import { validateRequest } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { usersTable } from "@/lib/db/schema";
+import { passwordSchema } from "@/lib/validators";
 import { hash, verify } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -21,15 +22,6 @@ export const updateUsernameAction = async (username: string) => {
 
   return { success: "Successefully updated" };
 };
-
-const passwordSchema = z.object({
-  password: z
-    .string()
-    .min(1, { message: "Password must be at least 8 characters long" }),
-  newPassword: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters long" }),
-});
 
 export const updatePasswordAction = async (
   values: z.infer<typeof passwordSchema>

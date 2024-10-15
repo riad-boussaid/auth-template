@@ -23,7 +23,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 // import { User } from "@/lib/db/schema";
-import { useSession } from "@/components/session-provider";
+import { useSession } from "@/components/providers/session-provider";
 import { useState } from "react";
 import { updateUsernameAction } from "@/actions/user-action";
 // import { cn } from "@/lib/utils";
