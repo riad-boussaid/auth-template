@@ -12,6 +12,8 @@ export default async function AuthLayout({
   if (session) redirect("/");
 
   return (
-    <div className="min-h-dvh flex items-center justify-center">{children}</div>
+    <div className="min-h-dvh flex items-center py-8 justify-center">
+      {children}
+    </div>
   );
 }

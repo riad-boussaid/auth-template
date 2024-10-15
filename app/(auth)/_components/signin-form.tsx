@@ -154,7 +154,8 @@ export const SigninForm = () => {
                 </Button>
               </form>
             </Form>
-            <CardFooter>
+
+            <CardFooter className="mt-4">
               <BackButton
                 label={"Don't have an account? Register"}
                 href={"/register"}

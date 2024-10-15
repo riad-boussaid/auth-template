@@ -4,9 +4,9 @@ import { UsernameForm } from "./_components/username-form";
 import { PasswordForm } from "./_components/password-form";
 import { SettingsNav } from "./_components/settings-nav";
 import { ChangeTheme } from "./_components/change-theme";
-
-// export const description =
-//   "A settings page. The settings page has a sidebar navigation and a main content area. The main content area has a form to update the store name and a form to update the plugins directory. The sidebar navigation has links to general, security, integrations, support, organizations, and advanced settings.";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default async function SettingsPage({
   searchParams,
@@ -14,13 +14,10 @@ export default async function SettingsPage({
   searchParams?: { tab: string };
 }) {
   const { user } = await validateRequest();
+
   if (!user) redirect("/");
 
   const tab = searchParams?.tab;
-
-  // const data = await db.query.usersTable.findFirst({
-  //   where: eq(usersTable.id, user.id),
-  // });
 
   return (
     <div className="flex min-h-screen w-full flex-col ">
@@ -28,10 +25,52 @@ export default async function SettingsPage({
         <div className=" container  grid w-full  gap-2">
           <h1 className="text-3xl font-semibold">Settings</h1>
         </div>
-        <div className="  grid w-full container items-start gap-6 md:grid-cols-[180px_1fr] lg:grid-cols-[250px_1fr]">
-          <SettingsNav />
+        <div
+          className={cn(
+            "grid w-full container items-start gap-6 ",
+            tab && "md:grid-cols-[180px_1fr] lg:grid-cols-[250px_1fr]"
+          )}
+        >
+          {tab && <SettingsNav />}
 
           <div className="grid gap-6">
+            {!tab && (
+              <>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <Card className="w-full">
+                    <CardHeader>
+                      <CardTitle>General</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Link href={"/settings?tab=general"}>
+                        <p className="text-xs">Go to Setting</p>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                  <Card className="w-full">
+                    <CardHeader>
+                      <CardTitle>Display</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Link href={"/settings?tab=display"}>
+                        <p className="text-xs">Go to Setting</p>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                  <Card className="w-full">
+                    <CardHeader>
+                      <CardTitle>Security</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Link href={"/settings?tab=security"}>
+                        <p className="text-xs">Go to Setting</p>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            )}
+
             {tab === "general" && (
               <>
                 <UsernameForm />
