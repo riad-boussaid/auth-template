@@ -1,4 +1,4 @@
-import { validateRequest } from "@/lib/auth";
+import { getCurrentSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 import React from "react";
 
@@ -7,7 +7,7 @@ export default async function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { session } = await validateRequest();
+  const { session } = await getCurrentSession();
 
   if (session) redirect("/");
 

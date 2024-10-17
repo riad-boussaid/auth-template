@@ -1,12 +1,14 @@
-import { validateRequest } from "@/lib/auth";
+
 import { redirect } from "next/navigation";
-import React from "react";
+
 import { DashboardTable } from "./_components/dashboard-table";
 import { DashboardTablecolumns } from "./_components/dashboard-table-columns";
+
 import { db } from "@/lib/db";
+import { getCurrentSession } from "@/lib/auth/session";
 
 export default async function DashboardPage() {
-  const { user } = await validateRequest();
+  const { user } = await getCurrentSession();
 
   if (!user) redirect("/");
 

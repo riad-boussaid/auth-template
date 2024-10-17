@@ -2,11 +2,18 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
+import { type GoogleTokens } from "arctic";
+
 import { db } from "@/lib/db";
 import { accountsTable, usersTable } from "@/lib/db/schema";
-import { lucia } from "@/lib/auth";
 import { google } from "@/lib/auth/oauth";
 import { getErrorMessages } from "@/lib/error-message";
+import {
+  createSession,
+  generateSessionToken,
+  setSessionTokenCookie,
+} from "@/lib/auth/session";
+// import { generateRandomString } from "@oslojs/crypto/random";
 
 interface GoogleUser {
   id: string;
@@ -25,6 +32,8 @@ export const GET = async (req: NextRequest) => {
 
     const code = searchParams.get("code");
     const state = searchParams.get("state");
+    const savedState = cookies().get("state")?.value ?? null;
+    const codeVerifier = cookies().get("codeVerifier")?.value ?? null;
 
     if (!code || !state) {
       return Response.json(
@@ -34,11 +43,6 @@ export const GET = async (req: NextRequest) => {
         }
       );
     }
-
-    const codeVerifier = cookies().get("codeVerifier")?.value;
-    const savedState = cookies().get("state")?.value;
-
-    console.log({ codeVerifier, savedState, state });
 
     if (!codeVerifier || !savedState) {
       return Response.json(
@@ -60,40 +64,63 @@ export const GET = async (req: NextRequest) => {
       );
     }
 
-    const { accessToken, idToken, accessTokenExpiresAt, refreshToken } =
-      await google.validateAuthorizationCode(code, codeVerifier);
+    let tokens: GoogleTokens;
 
-    const googleRes = await fetch(
+    try {
+      tokens = await google.validateAuthorizationCode(code, codeVerifier);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      // Invalid code or client credentials
+      return Response.json({
+        error: "Invalid code or client credentials",
+        status: 400,
+      });
+    }
+
+    // const claims = decodeIdToken(tokens.idToken());
+    // const googleUserId = claims.sub;
+    // const username = claims.name;
+
+    const googleResponse = await fetch(
       "https://www.googleapis.com/oauth2/v1/userinfo",
       {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
         method: "GET",
+        headers: {
+          Authorization: `Bearer ${tokens.accessToken}`,
+        },
       }
     );
-    console.log({ accessToken, idToken, accessTokenExpiresAt, refreshToken });
 
-    const googleData = (await googleRes.json()) as GoogleUser;
+    const googleData = (await googleResponse.json()) as GoogleUser;
 
-    console.log("google data", googleData);
+    console.log(googleData);
 
     await db.transaction(async (trx) => {
-      const user = await trx.query.usersTable.findFirst({
-        where: eq(usersTable.id, googleData.id),
+      const existingUser = await trx.query.usersTable.findFirst({
+        where: eq(usersTable.email, googleData.email),
       });
-      console.debug("User", user);
-      //   let session = null;
-      if (!user) {
-        console.log("Creating user", user);
+      console.debug("User", existingUser);
+      // let session = null;
 
+      if (!existingUser) {
+        console.log("Creating user", existingUser);
+        // const userId = generateRandomString(
+        //   {
+        //     read(bytes: Uint8Array): void {
+        //       crypto.getRandomValues(bytes);
+        //     },
+        //   },
+        //   "abcdefghijklmnopqrstuvwxyz0123456789",
+        //   15
+        // );
         const createdUserRes = await trx
           .insert(usersTable)
           .values({
-            email: googleData.email,
             id: googleData.id,
+            email: googleData.email,
             username: googleData.name,
             avatar: googleData.picture,
+            emailVerified: true,
           })
           .returning({
             id: usersTable.id,
@@ -110,13 +137,13 @@ export const GET = async (req: NextRequest) => {
         }
 
         const createdOAuthAccountRes = await trx.insert(accountsTable).values({
-          accessToken,
-          expiresAt: accessTokenExpiresAt,
           id: googleData.id,
           provider: "google",
           providerUserId: googleData.id,
           userId: googleData.id,
-          refreshToken: refreshToken,
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+          expiresAt: tokens.accessTokenExpiresAt,
         });
 
         if (createdOAuthAccountRes.rowCount === 0) {
@@ -132,9 +159,9 @@ export const GET = async (req: NextRequest) => {
         const updatedOAuthAccountRes = await trx
           .update(accountsTable)
           .set({
-            accessToken,
-            expiresAt: accessTokenExpiresAt,
-            refreshToken,
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            expiresAt: tokens.accessTokenExpiresAt,
           })
           .where(eq(accountsTable.id, googleData.id));
 
@@ -157,23 +184,9 @@ export const GET = async (req: NextRequest) => {
       );
     });
 
-    const session = await lucia.createSession(googleData.id, {
-      expiresIn: 60 * 60 * 24 * 30,
-    });
-    const sessionCookie = lucia.createSessionCookie(session.id);
-
-    cookies().set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    );
-
-    cookies().set("state", "", {
-      expires: new Date(0),
-    });
-    cookies().set("codeVerifier", "", {
-      expires: new Date(0),
-    });
+    const sessionToken = generateSessionToken();
+    const session = await createSession(sessionToken, googleData.id);
+    setSessionTokenCookie(sessionToken, session.expiresAt);
 
     return NextResponse.redirect(
       new URL("/", process.env.NEXT_PUBLIC_APP_URL),

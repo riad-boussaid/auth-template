@@ -1,13 +1,31 @@
 import { and, eq } from "drizzle-orm";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { generateId } from "lucia";
+import { type FacebookTokens } from "arctic";
 
 import { db } from "@/lib/db";
 import { accountsTable, usersTable } from "@/lib/db/schema";
-import { lucia } from "@/lib/auth";
 import { facebook } from "@/lib/auth/oauth";
 import { getErrorMessages } from "@/lib/error-message";
+import {
+  createSession,
+  generateSessionToken,
+  setSessionTokenCookie,
+} from "@/lib/auth/session";
+import { generateRandomString } from "@oslojs/crypto/random";
+
+interface FacebookUser {
+  name: string;
+  id: string;
+  email: string;
+  picture: {
+    data: {
+      height: number;
+      is_silhouette: boolean;
+      url: string;
+      width: number;
+    };
+  };
+}
 
 export const GET = async (req: NextRequest) => {
   try {
@@ -25,53 +43,61 @@ export const GET = async (req: NextRequest) => {
       );
     }
 
-    const { accessToken, accessTokenExpiresAt } =
-      await facebook.validateAuthorizationCode(code);
+    let tokens: FacebookTokens;
 
-    const facebookRes = await fetch(
-      `https://graph.facebook.com/me?access_token=${accessToken}&fields=id,name,email,picture`,
+    try {
+      tokens = await facebook.validateAuthorizationCode(code);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      // Invalid code or client credentials
+      return Response.json({
+        error: "Invalid code or client credentials",
+        status: 400,
+      });
+    }
+
+    const facebookResponse = await fetch(
+      `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${tokens.accessToken}`,
       {
         method: "GET",
       }
     );
 
-    const facebookData = (await facebookRes.json()) as {
-      name: string;
-      id: string;
-      email: string;
-      picture: {
-        height: number;
-        is_silhouette: boolean;
-        url: string;
-        width: number;
-      };
-    };
+    const facebookData = (await facebookResponse.json()) as FacebookUser;
 
     console.log(facebookData);
 
-    const transactionRes = await db.transaction(async (trx) => {
+    const transactionResponse = await db.transaction(async (trx) => {
       try {
         const existingUser = await trx.query.usersTable.findFirst({
-          where: (table) => eq(table.email, facebookData.email),
+          where: eq(usersTable.email, facebookData.email),
         });
 
         if (!existingUser) {
-          const userId = generateId(15);
+          const userId = generateRandomString(
+            {
+              read(bytes: Uint8Array): void {
+                crypto.getRandomValues(bytes);
+              },
+            },
+            "abcdefghijklmnopqrstuvwxyz0123456789",
+            15
+          );
           await trx.insert(usersTable).values({
             id: userId,
             email: facebookData.email,
             username: facebookData.name,
-            avatar: facebookData.picture.url,
+            avatar: facebookData.picture.data.url,
             emailVerified: true,
           });
 
           await trx.insert(accountsTable).values({
-            accessToken,
-            expiresAt: accessTokenExpiresAt,
+            id: userId,
             provider: "facebook",
             providerUserId: facebookData.id,
             userId,
-            id: generateId(15),
+            accessToken: tokens.accessToken,
+            expiresAt: tokens.accessTokenExpiresAt,
           });
 
           return {
@@ -85,8 +111,8 @@ export const GET = async (req: NextRequest) => {
           await trx
             .update(accountsTable)
             .set({
-              accessToken,
-              expiresAt: accessTokenExpiresAt,
+              accessToken: tokens.accessToken,
+              expiresAt: tokens.accessTokenExpiresAt,
             })
             .where(
               and(
@@ -112,19 +138,12 @@ export const GET = async (req: NextRequest) => {
       }
     });
 
-    if (!transactionRes.success || !transactionRes.data)
-      throw new Error(transactionRes.message);
+    if (!transactionResponse.success || !transactionResponse.data)
+      throw new Error(transactionResponse.message);
 
-    const session = await lucia.createSession(transactionRes?.data?.id, {
-      expiresIn: 60 * 60 * 24 * 30,
-    });
-    const sessionCookie = lucia.createSessionCookie(session.id);
-
-    cookies().set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    );
+    const sessionToken = generateSessionToken();
+    const session = await createSession(sessionToken, transactionResponse?.data?.id);
+    setSessionTokenCookie(sessionToken, session.expiresAt);
 
     return NextResponse.redirect(
       new URL("/", process.env.NEXT_PUBLIC_APP_URL),

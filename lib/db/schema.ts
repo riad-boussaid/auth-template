@@ -40,17 +40,7 @@ export const usersTable = pgTable(
   })
 );
 
-export type User = InferSelectModel<typeof usersTable>;
-
 export const accountsTable = pgTable("accounts", {
-  // providerId: text("provider_id").notNull().unique(),
-  // providerUserId: text("provider_user_id").notNull().unique(),
-  // userId: text("user_id")
-  //   .notNull()
-  //   .references(() => usersTable.id),
-
-  // PRIMARY KEY (provider_id, provider_user_id),
-
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
@@ -88,4 +78,5 @@ export const sessionTable = pgTable("session", {
   }).notNull(),
 });
 
+export type User = InferSelectModel<typeof usersTable>;
 export type Session = InferSelectModel<typeof sessionTable>;

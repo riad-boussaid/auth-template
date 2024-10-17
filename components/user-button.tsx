@@ -2,8 +2,8 @@
 
 import { LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
-// import { type User } from "@/lib/db/schema";
-import { type User } from "lucia";
+
+import { type User } from "@/lib/db/schema";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 export const Social = () => {
   const onGoogleSignInClicked = async () => {
     console.debug("google sign in clicked");
+
     const res = await createGoogleAuthorizationURL();
     if (res.error) {
       toast.error(res.error);
@@ -23,6 +24,7 @@ export const Social = () => {
 
   const onFacebookSignInClicked = async () => {
     console.debug("facebook sign in clicked");
+    
     const res = await createFacebookAuthorizationURL();
     if (res.error) {
       toast.error(res.error);

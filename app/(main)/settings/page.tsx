@@ -1,4 +1,3 @@
-import { validateRequest } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { UsernameForm } from "./_components/username-form";
 import { PasswordForm } from "./_components/password-form";
@@ -7,13 +6,14 @@ import { ChangeTheme } from "./_components/change-theme";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { getCurrentSession } from "@/lib/auth/session";
 
 export default async function SettingsPage({
   searchParams,
 }: {
   searchParams?: { tab: string };
 }) {
-  const { user } = await validateRequest();
+  const { user } = await getCurrentSession();
 
   if (!user) redirect("/");
 

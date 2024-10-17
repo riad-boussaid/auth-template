@@ -4,31 +4,30 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { generateCodeVerifier, generateState } from "arctic";
-import { generateId } from "lucia";
 import { hash, verify } from "@node-rs/argon2";
 import jwt from "jsonwebtoken";
+import { generateRandomString } from "@oslojs/crypto/random";
 
-import { lucia, validateRequest } from "@/lib/auth";
 import { google, facebook } from "@/lib/auth/oauth";
 import { getErrorMessages } from "@/lib/error-message";
 import { db } from "@/lib/db";
 import { emailVerificationTable, usersTable } from "@/lib/db/schema";
 import { SignInSchema, SignUpSchema } from "@/lib/validators";
 import { sendEmail } from "@/lib/email";
+import {
+  createSession,
+  deleteSessionTokenCookie,
+  generateSessionToken,
+  getCurrentSession,
+  invalidateSession,
+  setSessionTokenCookie,
+} from "@/lib/auth/session";
+import { redirect } from "next/navigation";
 
 export const createGoogleAuthorizationURL = async () => {
   try {
     const state = generateState();
     const codeVerifier = generateCodeVerifier();
-
-    cookies().set("codeVerifier", codeVerifier, {
-      httpOnly: true,
-    });
-
-    cookies().set("state", state, {
-      httpOnly: true,
-    });
-
     const authorizationURL = await google.createAuthorizationURL(
       state,
       codeVerifier,
@@ -37,9 +36,25 @@ export const createGoogleAuthorizationURL = async () => {
       }
     );
 
+    cookies().set("state", state, {
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 10, // 10 minutes
+      sameSite: "lax",
+    });
+
+    cookies().set("codeVerifier", codeVerifier, {
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 10, // 10 minutes
+      sameSite: "lax",
+    });
+
     return {
       success: true,
-      data: authorizationURL,
+      data: authorizationURL.toString(),
     };
   } catch (error) {
     return {
@@ -58,7 +73,7 @@ export const createFacebookAuthorizationURL = async () => {
 
     return {
       success: true,
-      data: authorizationURL,
+      data: authorizationURL.toString(),
     };
   } catch (error) {
     return {
@@ -126,7 +141,7 @@ export const resendVerificationEmail = async (email: string) => {
       }
     );
 
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/verify-email?token=${token}`;
+    const url = `${process.env.NEXT_PUBLIC_APP_URL}/api/verify-email?token=${token}`;
 
     await sendEmail({
       html: `<a href="${url}">Verify your email</a>`,
@@ -159,7 +174,15 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
   console.log(values);
 
   const hashedPassword = await hash(values.password);
-  const userId = generateId(15);
+  const userId = generateRandomString(
+    {
+      read(bytes: Uint8Array): void {
+        crypto.getRandomValues(bytes);
+      },
+    },
+    "abcdefghijklmnopqrstuvwxyz0123456789",
+    15
+  );
 
   try {
     await db.insert(usersTable).values({
@@ -175,7 +198,7 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
     await db.insert(emailVerificationTable).values({
       code,
       userId,
-      id: generateId(15),
+      id: userId,
       sentAt: new Date(),
     });
 
@@ -266,18 +289,9 @@ export const signIn = async (values: z.infer<typeof SignInSchema>) => {
       key: "email_not_verified",
     };
   }
-
-  const session = await lucia.createSession(existingUser.id, {
-    expiresIn: 60 * 60 * 24 * 30,
-  });
-
-  const sessionCookie = lucia.createSessionCookie(session.id);
-
-  cookies().set(
-    sessionCookie.name,
-    sessionCookie.value,
-    sessionCookie.attributes
-  );
+  const sessionToken = generateSessionToken();
+  const session = await createSession(sessionToken, existingUser.id);
+  setSessionTokenCookie(sessionToken, session.expiresAt);
 
   return {
     success: "Logged in successfully",
@@ -286,23 +300,16 @@ export const signIn = async (values: z.infer<typeof SignInSchema>) => {
 
 export const signOut = async () => {
   try {
-    const { session } = await validateRequest();
-
+    const { session } = await getCurrentSession();
     if (!session) {
       return {
         error: "Unauthorized",
       };
     }
 
-    await lucia.invalidateSession(session.id);
-
-    const sessionCookie = lucia.createBlankSessionCookie();
-
-    cookies().set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    );
+    await invalidateSession(session.id);
+    deleteSessionTokenCookie();
+    return redirect("/");
   } catch (error) {
     return {
       error: getErrorMessages(error),

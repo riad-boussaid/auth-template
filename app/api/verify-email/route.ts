@@ -4,9 +4,12 @@ import jwt from "jsonwebtoken";
 
 import { db } from "@/lib/db";
 import { emailVerificationTable, usersTable } from "@/lib/db/schema";
-import { lucia } from "@/lib/auth";
-import { cookies } from "next/headers";
 import { getErrorMessages } from "@/lib/error-message";
+import {
+  createSession,
+  generateSessionToken,
+  setSessionTokenCookie,
+} from "@/lib/auth/session";
 
 export const GET = async (req: NextRequest) => {
   try {
@@ -62,17 +65,9 @@ export const GET = async (req: NextRequest) => {
       })
       .where(eq(usersTable.email, decoded.email));
 
-    const session = await lucia.createSession(decoded.userId, {
-      expiresIn: 60 * 60 * 24 * 30,
-    });
-
-    const sessionCookie = lucia.createSessionCookie(session.id);
-
-    cookies().set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    );
+    const sessionToken = generateSessionToken();
+    const session = await createSession(sessionToken, decoded.userId);
+    setSessionTokenCookie(sessionToken, session.expiresAt);
 
     return Response.redirect(new URL(process.env.NEXT_PUBLIC_APP_URL!), 302);
   } catch (error) {

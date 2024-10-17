@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+// import localFont from "next/font/local";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 
 import { Toaster } from "@/components/ui/toaster";
-import { validateRequest } from "@/lib/auth";
 
 import { SessionProvider } from "@/components/providers/session-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { getCurrentSession } from "@/lib/auth/session";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+// const geistSans = localFont({
+//   src: "./fonts/GeistVF.woff",
+//   variable: "--font-geist-sans",
+//   weight: "100 900",
+// });
+// const geistMono = localFont({
+//   src: "./fonts/GeistMonoVF.woff",
+//   variable: "--font-geist-mono",
+//   weight: "100 900",
+// });
 
 const font = Poppins({
   weight: "400",
@@ -35,7 +35,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const sessionData = await validateRequest();
+  const sessionData = await getCurrentSession();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${font.className} antialiased`}>

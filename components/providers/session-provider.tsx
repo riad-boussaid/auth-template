@@ -2,8 +2,7 @@
 
 import React, { createContext, useContext } from "react";
 
-// import { type Session, type User } from "@/lib/db/schema";
-import { type Session, type User } from "lucia";
+import { type Session, type User } from "@/lib/db/schema";
 
 interface sessionProviderProps {
   user: User | null;

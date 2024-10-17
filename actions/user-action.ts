@@ -1,15 +1,16 @@
 "use server";
 
-import { validateRequest } from "@/lib/auth";
+import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { hash, verify } from "@node-rs/argon2";
+
 import { db } from "@/lib/db";
+import { getCurrentSession } from "@/lib/auth/session";
 import { usersTable } from "@/lib/db/schema";
 import { passwordSchema } from "@/lib/validators";
-import { hash, verify } from "@node-rs/argon2";
-import { eq } from "drizzle-orm";
-import { z } from "zod";
 
 export const updateUsernameAction = async (username: string) => {
-  const { user } = await validateRequest();
+  const { user } = await getCurrentSession();
 
   if (!user) {
     throw new Error("Unauthorized");
@@ -26,9 +27,9 @@ export const updateUsernameAction = async (username: string) => {
 export const updatePasswordAction = async (
   values: z.infer<typeof passwordSchema>
 ) => {
-  const { user } = await validateRequest();
+  const { user } = await getCurrentSession();
 
-  if (!user) {
+  if (!user || !user.email) {
     throw new Error("Unauthorized");
   }
 
