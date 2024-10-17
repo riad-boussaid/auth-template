@@ -26,7 +26,7 @@ export const GET = async (req: NextRequest) => {
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -50,7 +50,7 @@ export const GET = async (req: NextRequest) => {
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -77,7 +77,7 @@ export const GET = async (req: NextRequest) => {
       },
       {
         status: 400,
-      }
+      },
     );
   }
 };

@@ -113,7 +113,7 @@ export const PasswordForm = () => {
               )}
             />
           </CardContent>
-          <CardFooter className="border-t px-6 py-4 gap-x-2 justify-end">
+          <CardFooter className="justify-end gap-x-2 border-t px-6 py-4">
             <Button
               type="button"
               variant={"outline"}

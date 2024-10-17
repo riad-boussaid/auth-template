@@ -24,8 +24,8 @@ export const ChangeTheme = () => {
         <button disabled={theme === "light"} onClick={() => setTheme("light")}>
           <div
             className={cn(
-              "items-center rounded-md border-2 border-muted p-1 hover:border-primary hover:bg-accent ",
-              theme === "light" && "border-primary"
+              "items-center rounded-md border-2 border-muted p-1 hover:border-primary hover:bg-accent",
+              theme === "light" && "border-primary",
             )}
           >
             <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
@@ -51,7 +51,7 @@ export const ChangeTheme = () => {
           <div
             className={cn(
               "items-center rounded-md border-2 border-muted bg-popover p-1 hover:border-primary hover:bg-accent hover:text-accent-foreground",
-              theme === "dark" && "border-primary"
+              theme === "dark" && "border-primary",
             )}
           >
             <div className="space-y-2 rounded-sm bg-slate-950 p-2">
@@ -77,8 +77,8 @@ export const ChangeTheme = () => {
         >
           <div
             className={cn(
-              "rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:border-primary hover:text-accent-foreground  !h-[148px] w-[168px] text-3xl font-bold cursor-pointer flex items-center justify-center",
-              theme === "system" && "border-primary"
+              "flex !h-[148px] w-[168px] cursor-pointer items-center justify-center rounded-md border-2 border-muted bg-popover p-1 text-3xl font-bold hover:border-primary hover:bg-accent hover:text-accent-foreground",
+              theme === "system" && "border-primary",
             )}
           >
             ?

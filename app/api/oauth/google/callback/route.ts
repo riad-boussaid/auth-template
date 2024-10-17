@@ -40,7 +40,7 @@ export const GET = async (req: NextRequest) => {
         { error: "Invalid request" },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -49,7 +49,7 @@ export const GET = async (req: NextRequest) => {
         { error: "Code verifier or saved state is not exists" },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -60,7 +60,7 @@ export const GET = async (req: NextRequest) => {
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -88,7 +88,7 @@ export const GET = async (req: NextRequest) => {
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`,
         },
-      }
+      },
     );
 
     const googleData = (await googleResponse.json()) as GoogleUser;
@@ -132,7 +132,7 @@ export const GET = async (req: NextRequest) => {
             { error: "Failed to create user" },
             {
               status: 500,
-            }
+            },
           );
         }
 
@@ -152,7 +152,7 @@ export const GET = async (req: NextRequest) => {
             { error: "Failed to create OAuthAccountRes" },
             {
               status: 500,
-            }
+            },
           );
         }
       } else {
@@ -171,7 +171,7 @@ export const GET = async (req: NextRequest) => {
             { error: "Failed to update OAuthAccountRes" },
             {
               status: 500,
-            }
+            },
           );
         }
       }
@@ -180,7 +180,7 @@ export const GET = async (req: NextRequest) => {
         new URL("/dashboard", process.env.NEXT_PUBLIC_APP_URL),
         {
           status: 302,
-        }
+        },
       );
     });
 
@@ -192,14 +192,14 @@ export const GET = async (req: NextRequest) => {
       new URL("/", process.env.NEXT_PUBLIC_APP_URL),
       {
         status: 302,
-      }
+      },
     );
   } catch (error) {
     return Response.json(
       { error: getErrorMessages(error) },
       {
         status: 500,
-      }
+      },
     );
   }
 };

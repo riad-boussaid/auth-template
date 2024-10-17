@@ -22,16 +22,16 @@ export const MainHeader = () => {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 h-[80px] w-full bg-background py-4 transition-shadow ",
+        "sticky top-0 z-30 h-[80px] w-full bg-background py-4 transition-shadow",
         scrollPosition > 0
           ? "border-b dark:border-b"
-          : "border-none dark:border-none"
+          : "border-none dark:border-none",
       )}
     >
-      <div className="container  flex items-center justify-between gap-4  ">
+      <div className="container flex items-center justify-between gap-4">
         <div className="size-full">
           <Link href={"/"}>
-            <h3 className="font-bold text-2xl">next-lucia-template</h3>
+            <h3 className="text-2xl font-bold">next-lucia-template</h3>
           </Link>
         </div>
 

@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  // DropdownMenuSeparator,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/actions/auth";
 
@@ -27,8 +27,8 @@ export const UserButton = ({ user }: { user: User | null }) => {
       <DropdownMenuTrigger className="rounded-full">
         <Avatar>
           <AvatarImage src={user?.avatar || ""} />
-          <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50   ">
-            <p className="font-bold text-primary-foreground text-xl">
+          <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50">
+            <p className="text-xl font-bold text-primary-foreground">
               {avatarFallback}
             </p>
           </AvatarFallback>
@@ -37,13 +37,14 @@ export const UserButton = ({ user }: { user: User | null }) => {
 
       <DropdownMenuContent
         align="end"
-        className="w-[300px] rounded-xl border-none bg-secondary p-0"
+        sideOffset={10}
+        className="w-[300px] rounded-xl p-0"
       >
         <div className="flex items-start gap-x-4 p-4">
           <Avatar className="">
             <AvatarImage src={user?.avatar || ""} />
-            <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50   ">
-              <p className="font-bold text-primary-foreground text-xl">
+            <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50">
+              <p className="text-xl font-bold text-primary-foreground">
                 {avatarFallback}
               </p>
             </AvatarFallback>
@@ -56,7 +57,7 @@ export const UserButton = ({ user }: { user: User | null }) => {
 
         {user?.role === "ADMIN" && (
           <DropdownMenuItem
-            className="cursor-pointer gap-x-4 rounded-none px-8 py-4 focus:bg-background/50 focus:text-foreground"
+            className="cursor-pointer gap-x-4 rounded-none px-8 py-4 focus:bg-muted focus:text-foreground"
             onClick={() => router.push("/dashboard")}
           >
             <LayoutDashboard className="size-4" />
@@ -65,14 +66,14 @@ export const UserButton = ({ user }: { user: User | null }) => {
         )}
 
         <DropdownMenuItem
-          className="cursor-pointer gap-x-4 rounded-none px-8 py-4 focus:bg-background/50 focus:text-foreground"
+          className="cursor-pointer gap-x-4 rounded-none px-8 py-4 focus:bg-muted focus:text-foreground"
           onClick={() => router.push("/settings?tab=general")}
         >
           <Settings className="size-4" />
           Settings
         </DropdownMenuItem>
 
-        {/* <DropdownMenuSeparator className="bg-foreground/25" /> */}
+        <DropdownMenuSeparator className="m-0 bg-muted" />
 
         <DropdownMenuItem
           className="cursor-pointer gap-x-4 rounded-none px-8 py-4 focus:bg-destructive focus:text-destructive-foreground"

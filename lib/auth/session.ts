@@ -8,7 +8,12 @@ import {
 import { sha256 } from "@oslojs/crypto/sha2";
 
 import { db } from "@/lib/db";
-import { usersTable, sessionTable, type User, type Session } from "@/lib/db/schema";
+import {
+  usersTable,
+  sessionTable,
+  type User,
+  type Session,
+} from "@/lib/db/schema";
 
 export function generateSessionToken(): string {
   const bytes = new Uint8Array(20);
@@ -19,7 +24,7 @@ export function generateSessionToken(): string {
 
 export async function createSession(
   token: string,
-  userId: string
+  userId: string,
 ): Promise<Session> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
 
@@ -33,7 +38,7 @@ export async function createSession(
 }
 
 export async function validateSessionToken(
-  token: string
+  token: string,
 ): Promise<SessionValidationResult> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
   const result = await db
@@ -97,5 +102,5 @@ export const getCurrentSession = cache(
     }
     const result = await validateSessionToken(token);
     return result;
-  }
+  },
 );

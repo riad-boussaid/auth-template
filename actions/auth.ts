@@ -33,7 +33,7 @@ export const createGoogleAuthorizationURL = async () => {
       codeVerifier,
       {
         scopes: ["email", "profile"],
-      }
+      },
     );
 
     cookies().set("state", state, {
@@ -138,7 +138,7 @@ export const resendVerificationEmail = async (email: string) => {
       process.env.JWT_SECRET!,
       {
         expiresIn: "5m",
-      }
+      },
     );
 
     const url = `${process.env.NEXT_PUBLIC_APP_URL}/api/verify-email?token=${token}`;
@@ -181,7 +181,7 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
       },
     },
     "abcdefghijklmnopqrstuvwxyz0123456789",
-    15
+    15,
   );
 
   try {
@@ -207,7 +207,7 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
       process.env.JWT_SECRET!,
       {
         expiresIn: "5m",
-      }
+      },
     );
 
     const url = `${process.env.NEXT_PUBLIC_APP_URL}/api/verify-email?token=${token}`;
@@ -274,7 +274,7 @@ export const signIn = async (values: z.infer<typeof SignInSchema>) => {
 
   const isValidPassword = await verify(
     existingUser.hashedPassword,
-    values.password
+    values.password,
   );
 
   if (!isValidPassword) {

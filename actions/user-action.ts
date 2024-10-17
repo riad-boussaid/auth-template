@@ -6,8 +6,10 @@ import { hash, verify } from "@node-rs/argon2";
 
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/auth/session";
-import { usersTable } from "@/lib/db/schema";
+import { roleEnums, usersTable } from "@/lib/db/schema";
 import { passwordSchema } from "@/lib/validators";
+import { revalidatePath } from "next/cache";
+import { getErrorMessages } from "@/lib/error-message";
 
 export const updateUsernameAction = async (username: string) => {
   const { user } = await getCurrentSession();
@@ -25,7 +27,7 @@ export const updateUsernameAction = async (username: string) => {
 };
 
 export const updatePasswordAction = async (
-  values: z.infer<typeof passwordSchema>
+  values: z.infer<typeof passwordSchema>,
 ) => {
   const { user } = await getCurrentSession();
 
@@ -51,7 +53,7 @@ export const updatePasswordAction = async (
 
   const isValidPassword = await verify(
     existingUser.hashedPassword,
-    values.password
+    values.password,
   );
 
   if (!isValidPassword) {
@@ -75,4 +77,37 @@ export const updatePasswordAction = async (
     .where(eq(usersTable.id, user.id));
 
   return { success: "Successefully updated" };
+};
+
+export const updateRoleAction = async (
+  userId: string | undefined,
+  // role: (typeof roleEnums.enumValues)[number],
+  role: string,
+) => {
+  try {
+    const { user } = await getCurrentSession();
+
+    if (!user || user.role !== "ADMIN") {
+      throw new Error("Unauthorized");
+    }
+
+    if (!userId) {
+      throw new Error("Invalid");
+    }
+
+    if (user.id === userId) {
+      throw new Error("You can't change role for current user");
+    }
+
+    await db
+      .update(usersTable)
+      .set({ role: role as (typeof roleEnums.enumValues)[number] })
+      .where(eq(usersTable.id, userId));
+
+    revalidatePath("/dashboard");
+
+    return { success: "User role updated successfully" };
+  } catch (error) {
+    return { error: getErrorMessages(error) };
+  }
 };

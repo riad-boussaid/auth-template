@@ -37,13 +37,13 @@ export const ResetPasswordSchema = z
   .refine((data) => data.newPassword !== data.password, {
     message: "New password must be different from the current password",
     path: ["newPassword"],
-  })
-
-  export const passwordSchema = z.object({
-    password: z
-      .string()
-      .min(1, { message: "Password must be at least 8 characters long" }),
-    newPassword: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters long" }),
   });
+
+export const passwordSchema = z.object({
+  password: z
+    .string()
+    .min(1, { message: "Password must be at least 8 characters long" }),
+  newPassword: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters long" }),
+});

@@ -32,7 +32,7 @@ export const SettingsNav = () => {
   ] as const;
 
   return (
-    <nav className="grid gap-1 text-sm text-muted-foreground ">
+    <nav className="grid gap-2 text-sm text-muted-foreground">
       {items.map((item) => (
         <Button
           key={item.id}
@@ -44,7 +44,7 @@ export const SettingsNav = () => {
           className="justify-start rounded-lg"
           asChild
         >
-          <Link href={item.href} className={cn("font-semibold ")}>
+          <Link href={item.href} className={cn("font-semibold")}>
             {item.label}
           </Link>
         </Button>

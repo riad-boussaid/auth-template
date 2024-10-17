@@ -24,7 +24,7 @@ export const Social = () => {
 
   const onFacebookSignInClicked = async () => {
     console.debug("facebook sign in clicked");
-    
+
     const res = await createFacebookAuthorizationURL();
     if (res.error) {
       toast.error(res.error);

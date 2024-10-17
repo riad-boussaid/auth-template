@@ -7,6 +7,8 @@ import { User } from "@/lib/db/schema";
 import { DashboardTableActions } from "./dashboard-table-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import { RoleForm } from "./role-form";
+
 export const DashboardTablecolumns: ColumnDef<User>[] = [
   {
     accessorKey: "avatar",
@@ -16,8 +18,8 @@ export const DashboardTablecolumns: ColumnDef<User>[] = [
       return (
         <Avatar>
           <AvatarImage src={user?.avatar || ""} />
-          <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50   ">
-            <p className="font-bold text-primary-foreground text-xl">
+          <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50">
+            <p className="text-xl font-bold text-primary-foreground">
               {user?.username?.charAt(0).toUpperCase()}
             </p>
           </AvatarFallback>
@@ -40,6 +42,12 @@ export const DashboardTablecolumns: ColumnDef<User>[] = [
   {
     accessorKey: "role",
     header: "Role",
+    cell: ({ row }) => {
+      const userId = row.original.id;
+      const role = row.original.role;
+
+      return <RoleForm userId={userId} role={role} />;
+    },
   },
   {
     id: "actions",

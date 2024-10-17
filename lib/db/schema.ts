@@ -32,12 +32,12 @@ export const usersTable = pgTable(
 
     createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updatedAt", { mode: "date" }).$onUpdate(
-      () => new Date()
+      () => new Date(),
     ),
   },
   (table) => ({
     emailIdx: index("user_email_idx").on(table.email),
-  })
+  }),
 );
 
 export const accountsTable = pgTable("accounts", {

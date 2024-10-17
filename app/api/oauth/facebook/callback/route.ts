@@ -39,7 +39,7 @@ export const GET = async (req: NextRequest) => {
         { error: "Invalid request" },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -60,7 +60,7 @@ export const GET = async (req: NextRequest) => {
       `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${tokens.accessToken}`,
       {
         method: "GET",
-      }
+      },
     );
 
     const facebookData = (await facebookResponse.json()) as FacebookUser;
@@ -81,7 +81,7 @@ export const GET = async (req: NextRequest) => {
               },
             },
             "abcdefghijklmnopqrstuvwxyz0123456789",
-            15
+            15,
           );
           await trx.insert(usersTable).values({
             id: userId,
@@ -117,8 +117,8 @@ export const GET = async (req: NextRequest) => {
             .where(
               and(
                 eq(accountsTable.providerUserId, facebookData.id),
-                eq(accountsTable.provider, "facebook")
-              )
+                eq(accountsTable.provider, "facebook"),
+              ),
             );
         }
 
@@ -142,21 +142,24 @@ export const GET = async (req: NextRequest) => {
       throw new Error(transactionResponse.message);
 
     const sessionToken = generateSessionToken();
-    const session = await createSession(sessionToken, transactionResponse?.data?.id);
+    const session = await createSession(
+      sessionToken,
+      transactionResponse?.data?.id,
+    );
     setSessionTokenCookie(sessionToken, session.expiresAt);
 
     return NextResponse.redirect(
       new URL("/", process.env.NEXT_PUBLIC_APP_URL),
       {
         status: 302,
-      }
+      },
     );
   } catch (error) {
     return Response.json(
       { error: getErrorMessages(error) },
       {
         status: 500,
-      }
+      },
     );
   }
 };

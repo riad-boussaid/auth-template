@@ -9,7 +9,7 @@ interface sessionProviderProps {
   session: Session | null;
 }
 const SessionContext = createContext<sessionProviderProps>(
-  {} as sessionProviderProps
+  {} as sessionProviderProps,
 );
 
 export const SessionProvider = ({

@@ -189,12 +189,12 @@ export const RegisterForm = () => {
               </form>
             </Form>
 
-            <CardFooter className="mt-4 py-0 flex-col">
+            <CardFooter className="mt-4 flex-col py-0">
               <div className="flex items-center">
                 <span className="text-xs"> Already have an account?</span>
                 <Button
                   variant="link"
-                  className=" font-normal"
+                  className="font-normal"
                   size="sm"
                   asChild
                 >
