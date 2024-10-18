@@ -1,20 +1,28 @@
-// "use client";
+"use client";
 
-// import { ShieldAlert } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
+import Link from "next/link";
 
-// import { CardWrapper } from "./card-wrapper";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-// export const ErrorCard = () => {
-//   return (
-//     <CardWrapper
-//       headerLabel="Oops! Something went wrong!"
-//       backButtonHref="/sign-in"
-//       backButtonLabel="Back to sign in"
-//       showFooter={false}
-//     >
-//       <div className="flex w-full items-center justify-center">
-//         <ShieldAlert className=" text-destructive" />
-//       </div>
-//     </CardWrapper>
-//   );
-// };
+export const ErrorCard = () => {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Oops! Something went wrong!</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ShieldAlert className="text-destructive" />
+      </CardContent>
+      <CardFooter>
+        <Link href={"/sign-in"}>Back to sign in</Link>
+      </CardFooter>
+    </Card>
+  );
+};

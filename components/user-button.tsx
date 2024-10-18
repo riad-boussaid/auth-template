@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
+  // DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/actions/auth";
 
@@ -40,7 +40,7 @@ export const UserButton = ({ user }: { user: User | null }) => {
         sideOffset={10}
         className="w-[300px] rounded-xl p-0"
       >
-        <div className="flex items-start gap-x-4 p-4">
+        <div className="flex items-start gap-x-4 border-b p-4">
           <Avatar className="">
             <AvatarImage src={user?.avatar || ""} />
             <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50">
@@ -73,10 +73,10 @@ export const UserButton = ({ user }: { user: User | null }) => {
           Settings
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="m-0 bg-muted" />
+        {/* <DropdownMenuSeparator className="m-0 bg-muted" /> */}
 
         <DropdownMenuItem
-          className="cursor-pointer gap-x-4 rounded-none px-8 py-4 focus:bg-destructive focus:text-destructive-foreground"
+          className="cursor-pointer gap-x-4 rounded-none border-t px-8 py-4 focus:bg-destructive focus:text-destructive-foreground"
           onClick={async () => await signOut()}
         >
           <LogOut className="size-4" />

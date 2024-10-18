@@ -21,8 +21,8 @@ export const SettingsNav = () => {
     },
     {
       id: 2,
-      label: "Display",
-      href: `${pathname}?tab=display`,
+      label: "Appearance",
+      href: `${pathname}?tab=appearance`,
     },
     {
       id: 3,
@@ -50,7 +50,7 @@ export const SettingsNav = () => {
         </Button>
       ))}
 
-      {/* <Link href={`${pathname}?tab=display`}>Display</Link>
+      {/* <Link href={`${pathname}?tab=appearance`}>Appearance</Link>
 
       <Link href="#">Security</Link>
       <Link href="#">Support</Link>

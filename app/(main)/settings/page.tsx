@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { getCurrentSession } from "@/lib/auth/session";
+import { DeleteAccount } from "./_components/delete-account";
 
 export default async function SettingsPage({
   searchParams,
@@ -49,10 +50,10 @@ export default async function SettingsPage({
                   </Card>
                   <Card className="w-full">
                     <CardHeader>
-                      <CardTitle>Display</CardTitle>
+                      <CardTitle>Appearance</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <Link href={"/settings?tab=display"}>
+                      <Link href={"/settings?tab=appearance"}>
                         <p className="text-xs">Go to Setting</p>
                       </Link>
                     </CardContent>
@@ -74,12 +75,17 @@ export default async function SettingsPage({
             {tab === "general" && (
               <>
                 <UsernameForm />
+                <DeleteAccount />
               </>
             )}
 
-            {tab === "display" && <ChangeTheme />}
+            {tab === "appearance" && <ChangeTheme />}
 
-            {tab === "security" && <PasswordForm />}
+            {tab === "security" && (
+              <>
+                <PasswordForm />
+              </>
+            )}
           </div>
         </div>
       </main>

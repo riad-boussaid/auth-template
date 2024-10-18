@@ -111,3 +111,25 @@ export const updateRoleAction = async (
     return { error: getErrorMessages(error) };
   }
 };
+
+export const deleteAccountAction = async (userId: string | undefined) => {
+  try {
+    const { user } = await getCurrentSession();
+
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
+
+    if (!userId) {
+      throw new Error("Invalid");
+    }
+
+    await db.delete(usersTable).where(eq(usersTable.id, userId));
+
+    revalidatePath("/dashboard");
+
+    return { success: "User deleted successfully" };
+  } catch (error) {
+    return { error: getErrorMessages(error) };
+  }
+};

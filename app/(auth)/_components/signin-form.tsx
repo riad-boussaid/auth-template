@@ -30,9 +30,10 @@ import {
 } from "@/components/ui/card";
 
 import { SignInSchema } from "@/lib/validators";
-import { resendVerificationEmail, signIn } from "@/actions/auth";
+import { resendVerificationEmail } from "@/actions/auth";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { useLogin } from "@/features/auth/mutations/useLogin";
 
 export const SigninForm = () => {
   const router = useRouter();
@@ -54,6 +55,8 @@ export const SigninForm = () => {
   const [showResendVerificationEmail, setShowResendVerificationEmail] =
     useState(false);
 
+  const { mutate } = useLogin();
+
   const form = useForm<z.infer<typeof SignInSchema>>({
     resolver: zodResolver(SignInSchema),
     defaultValues: {
@@ -63,18 +66,41 @@ export const SigninForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof SignInSchema>) {
-    const res = await signIn(values);
-    if (res.error) {
-      toast({ variant: "destructive", description: res.error });
+    mutate(
+      { json: values },
+      {
+        onSuccess: (data) => {
+          if (data?.error) {
+            toast({ variant: "destructive", description: data.error });
 
-      if (res?.key === "email_not_verified") {
-        setShowResendVerificationEmail(true);
-      }
-    } else if (res.success) {
-      toast({ variant: "default", description: "Signed in successfully" });
+            if (data?.key === "email_not_verified") {
+              setShowResendVerificationEmail(true);
+            }
+          }
 
-      router.push("/");
-    }
+          if (data?.success) {
+            toast({ variant: "success", description: data.success });
+            router.push("/");
+          }
+        },
+        onError: (error) => {
+          toast({ variant: "destructive", description: error.message });
+        },
+      },
+    );
+
+    // const res = await signIn(values);
+    // if (res.error) {
+    //   toast({ variant: "destructive", description: res.error });
+
+    //   if (res?.key === "email_not_verified") {
+    //     setShowResendVerificationEmail(true);
+    //   }
+    // } else if (res.success) {
+    //   toast({ variant: "default", description: "Signed in successfully" });
+
+    //   router.push("/");
+    // }
   }
 
   const onResendVerificationEmail = async () => {

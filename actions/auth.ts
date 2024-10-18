@@ -85,7 +85,7 @@ export const createFacebookAuthorizationURL = async () => {
 export const resendVerificationEmail = async (email: string) => {
   try {
     const existingUser = await db.query.usersTable.findFirst({
-      where: (table) => eq(table.email, email),
+      where: eq(usersTable.email, email),
     });
 
     if (!existingUser) {
@@ -162,7 +162,7 @@ export const resendVerificationEmail = async (email: string) => {
 
 export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
   const existingUser = await db.query.usersTable.findFirst({
-    where: (table) => eq(table.email, values.email),
+    where: eq(usersTable.email, values.email),
   });
 
   if (existingUser) {
@@ -221,18 +221,6 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
       subject: "Verify your email",
       to: values.email,
     });
-
-    // const session = await lucia.createSession(userId, {
-    //   expiresIn: 60 * 60 * 24 * 30,
-    // })
-
-    // const sessionCookie = lucia.createSessionCookie(session.id)
-
-    // cookies().set(
-    //   sessionCookie.name,
-    //   sessionCookie.value,
-    //   sessionCookie.attributes
-    // )
 
     return {
       success: true,
