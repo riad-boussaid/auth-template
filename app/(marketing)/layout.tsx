@@ -1,6 +1,6 @@
 import { MainHeader } from "@/components/main-header";
 
-export default function MainLayout({
+export default function MarketingLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -8,9 +8,7 @@ export default function MainLayout({
   return (
     <div>
       <MainHeader />
-      <div className="min-h-[calc(100dvh-80px)] bg-gray-50 py-8 dark:bg-gray-950">
-        {children}
-      </div>
+      <div className="bg-gray-50 dark:bg-gray-950">{children}</div>
     </div>
   );
 }

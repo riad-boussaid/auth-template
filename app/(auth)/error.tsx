@@ -1,6 +1,6 @@
 "use client";
 
-import { ErrorCard } from "./_components/error-card";
+import { ErrorCard } from "@/features/auth/components/error-card";
 
 export default function Error() {
   return (

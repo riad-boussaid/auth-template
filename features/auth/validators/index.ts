@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+export const ForgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
 export const SignUpSchema = z
   .object({
     username: z.string().trim().min(1),
@@ -25,18 +29,29 @@ export const SignInSchema = z.object({
 
 export const ResetPasswordSchema = z
   .object({
-    password: z.string().min(8),
-    confirmPassword: z.string().min(8),
+    password: z.string().min(1),
     newPassword: z.string().min(8),
+    confirmNewPassword: z.string().min(8),
     logoutFromOtherDevices: z.boolean(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.password === data.confirmNewPassword, {
     message: "Passwords do not match",
-    path: ["confirmPassword"],
+    path: ["confirmNewPassword"],
   })
   .refine((data) => data.newPassword !== data.password, {
     message: "New password must be different from the current password",
     path: ["newPassword"],
+  });
+
+export const ResetPasswordAuthSchema = z
+  .object({
+    email: z.string().email(),
+    newPassword: z.string().min(8),
+    confirmNewPassword: z.string().min(8),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Passwords do not match",
+    path: ["confirmNewPassword"],
   });
 
 export const passwordSchema = z.object({

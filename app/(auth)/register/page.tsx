@@ -1,5 +1,13 @@
-import { RegisterForm } from "../_components/register-form";
+import { redirect } from "next/navigation";
 
-export default function RegisterPage() {
+import { RegisterForm } from "@/features/auth/components/register-form";
+
+import { getCurrentSession } from "@/lib/auth/session";
+
+export default async function RegisterPage() {
+  const { session } = await getCurrentSession();
+
+  if (session) redirect("/");
+
   return <RegisterForm />;
 }

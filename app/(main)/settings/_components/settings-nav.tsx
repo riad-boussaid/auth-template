@@ -11,8 +11,6 @@ export const SettingsNav = () => {
   const tab = searchParams.get("tab");
   const pathname = usePathname();
 
-  console.log(pathname);
-
   const items = [
     {
       id: 1,

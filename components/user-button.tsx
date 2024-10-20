@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -13,14 +14,24 @@ import {
   DropdownMenuItem,
   // DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { signOut } from "@/actions/auth";
+import { Button } from "./ui/button";
+
+import { ConfirmDialog } from "@/components/confirm-dialog";
+
+import { useLogout } from "@/features/auth/mutations/use-logout";
 
 export const UserButton = ({ user }: { user: User | null }) => {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const { mutate, isPending } = useLogout();
 
   if (!user) return null;
 
   const avatarFallback = user?.username?.charAt(0).toUpperCase();
+
+  const logout = () => {
+    mutate({});
+  };
 
   return (
     <DropdownMenu modal={false}>
@@ -57,7 +68,7 @@ export const UserButton = ({ user }: { user: User | null }) => {
 
         {user?.role === "ADMIN" && (
           <DropdownMenuItem
-            className="cursor-pointer gap-x-4 rounded-none px-8 py-4 focus:bg-muted focus:text-foreground"
+            className="cursor-pointer gap-x-4 rounded-none px-8 py-4"
             onClick={() => router.push("/dashboard")}
           >
             <LayoutDashboard className="size-4" />
@@ -66,7 +77,7 @@ export const UserButton = ({ user }: { user: User | null }) => {
         )}
 
         <DropdownMenuItem
-          className="cursor-pointer gap-x-4 rounded-none px-8 py-4 focus:bg-muted focus:text-foreground"
+          className="cursor-pointer gap-x-4 rounded-none px-8 py-4"
           onClick={() => router.push("/settings?tab=general")}
         >
           <Settings className="size-4" />
@@ -75,13 +86,22 @@ export const UserButton = ({ user }: { user: User | null }) => {
 
         {/* <DropdownMenuSeparator className="m-0 bg-muted" /> */}
 
-        <DropdownMenuItem
-          className="cursor-pointer gap-x-4 rounded-none border-t px-8 py-4 focus:bg-destructive focus:text-destructive-foreground"
-          onClick={async () => await signOut()}
+        <ConfirmDialog
+          open={open}
+          title="Confirm logout"
+          description="are you sure you want to logout?"
+          action="Logout"
+          disabled={isPending}
+          onConfirm={() => logout()}
+          onCancel={() => setOpen(false)}
+        />
+        <Button
+          onClick={() => setOpen(true)}
+          className="bg h-12 w-full justify-start gap-x-4 rounded-none border-t bg-background px-8 py-4 text-sm text-foreground outline-none hover:bg-destructive hover:text-destructive-foreground"
         >
           <LogOut className="size-4" />
           Logout
-        </DropdownMenuItem>
+        </Button>
       </DropdownMenuContent>
     </DropdownMenu>
   );

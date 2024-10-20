@@ -1,6 +1,6 @@
 import { MainHeader } from "@/components/main-header";
 
-export default function MainLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;

@@ -12,7 +12,7 @@ import { google, facebook } from "@/lib/auth/oauth";
 import { getErrorMessages } from "@/lib/error-message";
 import { db } from "@/lib/db";
 import { emailVerificationTable, usersTable } from "@/lib/db/schema";
-import { SignInSchema, SignUpSchema } from "@/lib/validators";
+import { SignInSchema, SignUpSchema } from "@/features/auth/validators";
 import { sendEmail } from "@/lib/email";
 import {
   createSession,
@@ -174,23 +174,16 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
   console.log(values);
 
   const hashedPassword = await hash(values.password);
-  const userId = generateRandomString(
-    {
-      read(bytes: Uint8Array): void {
-        crypto.getRandomValues(bytes);
-      },
-    },
-    "abcdefghijklmnopqrstuvwxyz0123456789",
-    15,
-  );
 
   try {
-    await db.insert(usersTable).values({
-      id: userId,
-      username: values.username,
-      email: values.email,
-      hashedPassword,
-    });
+    const [{ userId }] = await db
+      .insert(usersTable)
+      .values({
+        username: values.username,
+        email: values.email,
+        hashedPassword,
+      })
+      .returning({ userId: usersTable.id });
 
     // generate a random string 6 characters long
     const code = Math.random().toString(36).substring(2, 8);

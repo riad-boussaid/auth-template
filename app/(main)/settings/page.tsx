@@ -8,6 +8,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { getCurrentSession } from "@/lib/auth/session";
 import { DeleteAccount } from "./_components/delete-account";
+import { ChangeProfilePicture } from "./_components/change-profile-picture";
 
 export default async function SettingsPage({
   searchParams,
@@ -21,8 +22,8 @@ export default async function SettingsPage({
   const tab = searchParams?.tab;
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <main className="flex flex-col gap-4 md:gap-y-8 md:py-10">
+    <div className="flex w-full flex-col">
+      <main className="flex flex-col gap-4 md:gap-y-8">
         <div className="container grid w-full gap-2">
           <h1 className="text-3xl font-semibold">Settings</h1>
         </div>
@@ -75,6 +76,7 @@ export default async function SettingsPage({
             {tab === "general" && (
               <>
                 <UsernameForm />
+                <ChangeProfilePicture imageUrl={user.avatar} />
                 <DeleteAccount />
               </>
             )}

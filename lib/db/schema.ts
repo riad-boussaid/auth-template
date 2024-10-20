@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { InferSelectModel } from "drizzle-orm";
 import {
   boolean,
@@ -15,7 +16,7 @@ export const roleEnums = pgEnum("role", ["ADMIN", "USER"]);
 export const usersTable = pgTable(
   "users",
   {
-    id: text("id").primaryKey(),
+    id: text("id").primaryKey().$defaultFn(randomUUID),
 
     // firstName: varchar("first_name", { length: 255 }),
     // lastName: varchar("last_name", { length: 255 }),
@@ -41,7 +42,7 @@ export const usersTable = pgTable(
 );
 
 export const accountsTable = pgTable("accounts", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(randomUUID),
   userId: text("user_id")
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
@@ -56,7 +57,7 @@ export const accountsTable = pgTable("accounts", {
 });
 
 export const emailVerificationTable = pgTable("email_verification", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(randomUUID),
   userId: text("user_id")
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
