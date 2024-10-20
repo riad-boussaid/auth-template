@@ -27,16 +27,14 @@ export const useRegister = () => {
       return await response.json();
     },
     onSuccess: (data, variables) => {
-      if (data?.error) {
-        toast({ variant: "destructive", description: data.error });
-      }
-
-      if (data?.success) {
+      if (!data?.success) {
+        toast({ variant: "destructive", description: data.message });
+      } else {
         toast({
           variant: "success",
-          description:
-            "We've sent an verification email to your inbox. Please verify your email to continue.",
+          description: data.message,
         });
+
         queryClient.invalidateQueries({ queryKey: ["current"] });
         router.push(`/verify-email?email=${variables.json.email}`);
       }

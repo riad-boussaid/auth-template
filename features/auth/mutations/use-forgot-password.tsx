@@ -3,6 +3,7 @@ import { InferRequestType, InferResponseType } from "hono";
 import { useRouter } from "next/navigation";
 
 import { client } from "@/lib/rpc";
+import { useToast } from "@/hooks/use-toast";
 
 type ResponseType = InferResponseType<
   (typeof client.api.auth)["forgot-password"]["$post"]
@@ -13,6 +14,8 @@ type RequestType = InferRequestType<
 
 export const useForgotPassword = () => {
   const router = useRouter();
+  const { toast } = useToast();
+
   return useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ json }) => {
       const response = await client.api.auth["forgot-password"]["$post"]({
@@ -27,7 +30,12 @@ export const useForgotPassword = () => {
     },
     onSuccess: (data) => {
       console.log(data);
-      router.push(`/reset-password?email=${data.email}`);
+
+      if (!data.success) {
+        toast({ variant: "destructive", description: data.message });
+      } else {
+        router.push(`/reset-password?email=${data.message}`);
+      }
     },
     onError: (error) => {
       console.log(error);

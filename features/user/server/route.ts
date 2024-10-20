@@ -14,10 +14,10 @@ const app = new Hono().post("/delete", async (c) => {
     }
 
     await db.delete(usersTable).where(eq(usersTable.id, user.id));
-    
-    return c.json({ success: "User deleted successfully" });
+
+    return c.json({ success: true, message: "User deleted successfully" });
   } catch (error) {
-    return c.json({ error: getErrorMessages(error) });
+    return c.json({ success: false, message: getErrorMessages(error) });
   }
 });
 

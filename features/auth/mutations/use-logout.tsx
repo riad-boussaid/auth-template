@@ -3,12 +3,14 @@ import { InferRequestType, InferResponseType } from "hono";
 import { useRouter } from "next/navigation";
 
 import { client } from "@/lib/rpc";
+import { useToast } from "@/hooks/use-toast";
 
 type ResponseType = InferResponseType<(typeof client.api.auth.logout)["$post"]>;
 type RequestType = InferRequestType<(typeof client.api.auth.logout)["$post"]>;
 
-export const useLogout = () => {    
+export const useLogout = () => {
   const router = useRouter();
+  const { toast } = useToast();
 
   return useMutation<ResponseType, Error, RequestType>({
     mutationFn: async (json) => {
@@ -22,8 +24,13 @@ export const useLogout = () => {
     },
     onSuccess: (data) => {
       console.log(data);
-      router.push("/");
-      router.refresh();
+
+      if (!data.success) {
+        toast({ variant: "destructive", description: data.message });
+      } else {
+        router.push("/");
+        router.refresh();
+      }
     },
     onError: (error) => {
       console.log(error);

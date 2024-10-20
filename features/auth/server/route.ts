@@ -31,31 +31,20 @@ const app = new Hono()
     return c.json({ data: "user" });
   })
   .post("/register", zValidator("json", SignUpSchema), async (c) => {
-    const { username, email, password } = c.req.valid("json");
-
-    const existingUser = await db.query.usersTable.findFirst({
-      where: eq(usersTable.email, email),
-    });
-
-    if (existingUser) {
-      return c.json({
-        error: "User Already exist",
-      });
-    }
-
-    const hashedPassword = await argon2.hash(password);
-
-    // const userId = generateRandomString(
-    //   {
-    //     read(bytes: Uint8Array): void {
-    //       crypto.getRandomValues(bytes);
-    //     },
-    //   },
-    //   "abcdefghijklmnopqrstuvwxyz0123456789",
-    //   15,
-    // );
-
     try {
+      const { username, email, password } = c.req.valid("json");
+
+      const existingUser = await db.query.usersTable.findFirst({
+        where: eq(usersTable.email, email),
+      });
+
+      if (existingUser) {
+        throw new Error("User Already exist");
+      }
+
+      const hashedPassword = await argon2.hash(password);
+
+      // try {
       const [{ userId }] = await db
         .insert(usersTable)
         .values({
@@ -93,74 +82,83 @@ const app = new Hono()
 
       return c.json({
         success: true,
+        message:
+          "We've sent an verification email to your inbox. Please verify your email to continue.",
         data: {
           userId,
         },
       });
     } catch (error) {
       return c.json({
-        error: getErrorMessages(error),
+        success: false,
+        message: getErrorMessages(error),
       });
     }
   })
   .post("/login", zValidator("json", SignInSchema), async (c) => {
-    const { email, password } = c.req.valid("json");
+    try {
+      const { email, password } = c.req.valid("json");
 
-    const existingUser = await db.query.usersTable.findFirst({
-      where: eq(usersTable.email, email),
-    });
+      const existingUser = await db.query.usersTable.findFirst({
+        where: eq(usersTable.email, email),
+      });
 
-    if (!existingUser) {
+      if (!existingUser) {
+        throw new Error("User not found");
+      }
+
+      if (!existingUser.hashedPassword) {
+        throw new Error("User not found");
+      }
+
+      const isValidPassword = await argon2.verify(
+        existingUser.hashedPassword,
+        password,
+      );
+
+      if (!isValidPassword) {
+        throw new Error("Incorrect username or password");
+      }
+
+      if (existingUser.emailVerified === false) {
+        return c.json({
+          success: false,
+          message: "email_not_verified",
+        });
+      }
+
+      const sessionToken = generateSessionToken();
+      const session = await createSession(sessionToken, existingUser.id);
+      setSessionTokenCookie(sessionToken, session.expiresAt);
+
+      return c.json({ success: true, message: "Logged in successfully" });
+    } catch (error) {
       return c.json({
-        error: "User not found",
+        success: false,
+        message: getErrorMessages(error),
       });
     }
-
-    if (!existingUser.hashedPassword) {
-      return c.json({
-        error: "User not found",
-      });
-    }
-
-    const isValidPassword = await argon2.verify(
-      existingUser.hashedPassword,
-      password,
-    );
-
-    if (!isValidPassword) {
-      return c.json({
-        error: "Incorrect username or password",
-      });
-    }
-
-    if (existingUser.emailVerified === false) {
-      return c.json({
-        error: "Email not verified",
-        key: "email_not_verified",
-      });
-    }
-
-    const sessionToken = generateSessionToken();
-    const session = await createSession(sessionToken, existingUser.id);
-    setSessionTokenCookie(sessionToken, session.expiresAt);
-
-    return c.json({ success: "Logged in successfully" });
   })
   .post("/logout", async (c) => {
     try {
       const { session } = await getCurrentSession();
+
       if (!session) {
-        return c.json({
-          error: "Unauthorized",
-        });
+        throw new Error("Unauthorized");
       }
 
       await invalidateSession(session.id);
+
       deleteSessionTokenCookie();
-      return c.json({ success: "Logout successfully" });
+
+      return c.json({
+        success: true,
+        message: "Logout successfully",
+      });
     } catch (error) {
       return c.json({
-        error: getErrorMessages(error),
+        success: false,
+        message: getErrorMessages(error),
       });
     }
   })
@@ -181,9 +179,9 @@ const app = new Hono()
           throw new Error("User not found");
         }
 
-        return c.json({ email: existingUser.email });
+        return c.json({ success: true, message: existingUser.email });
       } catch (error) {
-        return c.json({ error: getErrorMessages(error) });
+        return c.json({ success: false, message: getErrorMessages(error) });
       }
     },
   )
@@ -207,9 +205,12 @@ const app = new Hono()
           })
           .where(eq(usersTable.email, email));
 
-        return c.json({ success: "Password Reseted Successfully" });
+        return c.json({
+          success: true,
+          message: "Password Reseted Successfully",
+        });
       } catch (error) {
-        return c.json({ error: getErrorMessages(error) });
+        return c.json({ success: false, message: getErrorMessages(error) });
       }
     },
   );

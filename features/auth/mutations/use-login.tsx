@@ -25,16 +25,14 @@ export const useLogin = () => {
       return await response.json();
     },
     onSuccess: (data, variables) => {
-      if (data?.error) {
-        toast({ variant: "destructive", description: data.error });
+      if (!data.success) {
+        toast({ variant: "destructive", description: data.message });
 
-        if (data?.key === "email_not_verified") {
+        if (data.message === "email_not_verified") {
           router.push(`/verify-email?email=${variables.json.email}`);
         }
-      }
-
-      if (data?.success) {
-        toast({ variant: "success", description: data.success });
+      } else {
+        toast({ variant: "success", description: data.message });
         queryClient.invalidateQueries({ queryKey: ["current"] });
 
         router.push("/");

@@ -25,11 +25,10 @@ export const useDeleteAcoount = () => {
     onSuccess: (data) => {
       console.log(data);
 
-      if (data?.error) {
-        toast({ variant: "destructive", description: data.error });
-      }
-      if (data?.success) {
-        toast({ variant: "success", description: data.success });
+      if (!data.success) {
+        toast({ variant: "destructive", description: data.message });
+      } else {
+        toast({ variant: "success", description: data.message });
         router.push("/");
         router.refresh();
       }
