@@ -1,3 +1,7 @@
+"use client";
+
+import React from "react";
+
 import {
   Select,
   SelectContent,
@@ -11,7 +15,6 @@ import { useToast } from "@/hooks/use-toast";
 import { updateRoleAction } from "@/actions/user-action";
 
 import { roleEnums } from "@/lib/db/schema";
-import React from "react";
 
 export const RoleForm = ({
   userId,

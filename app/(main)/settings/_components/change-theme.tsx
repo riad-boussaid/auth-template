@@ -1,5 +1,8 @@
 "use client";
 
+import { useTheme } from "next-themes";
+import React from "react";
+
 import {
   Card,
   CardContent,
@@ -8,8 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
-import React from "react";
 
 export const ChangeTheme = () => {
   const { theme, setTheme } = useTheme();
@@ -20,7 +21,7 @@ export const ChangeTheme = () => {
         <CardTitle>Theme</CardTitle>
         <CardDescription>Change theme mode</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-row gap-x-4 *:cursor-pointer">
+      <CardContent className="flex flex-wrap gap-x-4 *:cursor-pointer">
         <button disabled={theme === "light"} onClick={() => setTheme("light")}>
           <div
             className={cn(

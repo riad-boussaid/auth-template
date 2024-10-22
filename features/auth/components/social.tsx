@@ -2,13 +2,13 @@
 
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
   createGoogleAuthorizationURL,
   createFacebookAuthorizationURL,
 } from "@/actions/auth";
-import { toast } from "sonner";
 
 export const Social = () => {
   const onGoogleSignInClicked = async () => {

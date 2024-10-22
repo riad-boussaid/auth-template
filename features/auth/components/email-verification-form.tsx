@@ -1,15 +1,14 @@
 "use client";
 
-import { resendVerificationEmail } from "@/actions/auth";
+import { useEffect } from "react";
+import { useCountdown } from "usehooks-ts";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+
+import { resendVerificationEmail } from "@/actions/auth";
+
 import { useToast } from "@/hooks/use-toast";
-// import { SignUpSchema } from "@/lib/validators";
-// import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-// import { useForm } from "react-hook-form";
-import { useCountdown } from "usehooks-ts";
-// import { z } from "zod";
 
 export const EmailVerificationForm = ({ email }: { email: string }) => {
   const { toast } = useToast();

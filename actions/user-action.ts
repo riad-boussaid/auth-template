@@ -2,6 +2,7 @@
 
 import "server-only";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { hash, verify } from "@node-rs/argon2";
@@ -10,8 +11,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/auth/session";
 import { roleEnums, usersTable } from "@/lib/db/schema";
-import { passwordSchema } from "@/features/auth/validators";
-import { revalidatePath } from "next/cache";
+import { ResetPasswordSchema } from "@/features/user/validators";
 import { getErrorMessages } from "@/lib/error-message";
 
 cloudinary.config({
@@ -36,13 +36,15 @@ export const updateUsernameAction = async (username: string) => {
 };
 
 export const updatePasswordAction = async (
-  values: z.infer<typeof passwordSchema>,
+  values: z.infer<typeof ResetPasswordSchema>,
 ) => {
   const { user } = await getCurrentSession();
 
   if (!user || !user.email) {
     throw new Error("Unauthorized");
   }
+
+  const { password, newPassword } = values;
 
   const existingUser = await db.query.usersTable.findFirst({
     where: eq(usersTable.email, user.email),
@@ -60,10 +62,7 @@ export const updatePasswordAction = async (
     };
   }
 
-  const isValidPassword = await verify(
-    existingUser.hashedPassword,
-    values.password,
-  );
+  const isValidPassword = await verify(existingUser.hashedPassword, password);
 
   if (!isValidPassword) {
     return {
@@ -78,7 +77,7 @@ export const updatePasswordAction = async (
     };
   }
 
-  const hashedNewPassword = await hash(values.newPassword);
+  const hashedNewPassword = await hash(newPassword);
 
   await db
     .update(usersTable)

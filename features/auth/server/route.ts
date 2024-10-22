@@ -1,8 +1,9 @@
 import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
 import * as argon2 from "@node-rs/argon2";
-import jwt from "jsonwebtoken";
+import jwt from "hono/jwt";
 
 import { db } from "@/lib/db";
 import { emailVerificationTable, usersTable } from "@/lib/db/schema";
@@ -64,9 +65,16 @@ const app = new Hono()
         sentAt: new Date(),
       });
 
-      const token = jwt.sign({ email, userId, code }, process.env.JWT_SECRET!, {
-        expiresIn: "5m",
-      });
+      const token = await jwt.sign(
+        {
+          email,
+          userId,
+          code,
+          expiresIn: Math.floor(Date.now() / 1000) + 60 * 5, // Token expires in 5 minutes
+        },
+        process.env.JWT_SECRET!,
+        "HS256",
+      );
 
       const url = `${process.env.NEXT_PUBLIC_APP_URL}/api/verify-email?token=${token}`;
 
@@ -144,7 +152,7 @@ const app = new Hono()
       const { session } = await getCurrentSession();
 
       if (!session) {
-        throw new Error("Unauthorized");
+        throw new HTTPException(401, { message: "Unauthorized" });
       }
 
       await invalidateSession(session.id);
@@ -186,11 +194,11 @@ const app = new Hono()
     },
   )
   .post(
-    "/reset-password",
+    "/resetPassword",
     zValidator("json", ResetPasswordAuthSchema),
     async (c) => {
       try {
-        const { email, newPassword, confirmNewPassword } = c.req.valid("json");
+        const { email, newPassword } = c.req.valid("json");
 
         if (!email) {
           throw new Error("Email not found");

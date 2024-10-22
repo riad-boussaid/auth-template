@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export default async function Home() {
   return (
-    <div className="container flex min-h-[calc(100dvh-80px)] items-center justify-center border">
+    <div className="container flex min-h-[calc(100dvh-80px)] items-center justify-center">
       <Link
         href={"https://github.com/riad-boussaid/lucia-auth-template"}
         target="_blank"

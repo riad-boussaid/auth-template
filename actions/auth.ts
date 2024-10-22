@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm";
 import { generateCodeVerifier, generateState } from "arctic";
 import { hash, verify } from "@node-rs/argon2";
 import jwt from "jsonwebtoken";
-import { generateRandomString } from "@oslojs/crypto/random";
 
 import { google, facebook } from "@/lib/auth/oauth";
 import { getErrorMessages } from "@/lib/error-message";

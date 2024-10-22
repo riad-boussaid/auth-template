@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight, Loader } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import {
   Form,
@@ -21,12 +22,12 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 
-import { ResetPasswordAuthSchema } from "../validators";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import { useResetPassword } from "../mutations/use-reset-password";
-import { useSearchParams } from "next/navigation";
+
+import { ResetPasswordAuthSchema } from "../validators";
 
 export const ResetPasswordForm = () => {
   const { mutate, isPending } = useResetPassword();

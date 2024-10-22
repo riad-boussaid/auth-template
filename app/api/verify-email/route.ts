@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
-import { eq } from "drizzle-orm";
-import jwt from "jsonwebtoken";
+import { and, eq } from "drizzle-orm";
+import jwt from "hono/jwt";
 
 import { db } from "@/lib/db";
 import { emailVerificationTable, usersTable } from "@/lib/db/schema";
@@ -30,17 +30,23 @@ export const GET = async (req: NextRequest) => {
       );
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+    const decodedPayload = (await jwt.verify(
+      token,
+      process.env.JWT_SECRET!,
+      "HS256",  
+    )) as {
       email: string;
       code: string;
       userId: string;
+      expiresIn: Date;
     };
 
     const emailVerificationQueryResult =
       await db.query.emailVerificationTable.findFirst({
-        where:
-          eq(emailVerificationTable.userId, decoded.userId) &&
-          eq(emailVerificationTable.code, decoded.code),
+        where: and(
+          eq(emailVerificationTable.userId, decodedPayload.userId),
+          eq(emailVerificationTable.code, decodedPayload.code),
+        ),
       });
 
     if (!emailVerificationQueryResult) {
@@ -56,17 +62,17 @@ export const GET = async (req: NextRequest) => {
 
     await db
       .delete(emailVerificationTable)
-      .where(eq(emailVerificationTable.userId, decoded.userId));
+      .where(eq(emailVerificationTable.userId, decodedPayload.userId));
 
     await db
       .update(usersTable)
       .set({
         emailVerified: true,
       })
-      .where(eq(usersTable.email, decoded.email));
+      .where(eq(usersTable.email, decodedPayload.email));
 
     const sessionToken = generateSessionToken();
-    const session = await createSession(sessionToken, decoded.userId);
+    const session = await createSession(sessionToken, decodedPayload.userId);
     setSessionTokenCookie(sessionToken, session.expiresAt);
 
     return Response.redirect(new URL(process.env.NEXT_PUBLIC_APP_URL!), 302);

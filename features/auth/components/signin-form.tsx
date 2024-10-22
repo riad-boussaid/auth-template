@@ -3,18 +3,15 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Loader } from "lucide-react";
-
 import { useForm } from "react-hook-form";
-// import { useCountdown } from "usehooks-ts";
-// import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { Separator } from "./separator";
 
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -22,7 +19,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Social } from "./social";
 import {
   Card,
   CardContent,
@@ -30,12 +26,11 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 
+import { Social } from "@/features/auth/components/social";
+
 import { SignInSchema } from "@/features/auth/validators";
-// import { resendVerificationEmail } from "@/actions/auth";
-// import { useToast } from "@/hooks/use-toast";
-import Link from "next/link";
+
 import { useLogin } from "@/features/auth/mutations/use-login";
-// import { useQueryClient } from "@tanstack/react-query";
 
 export const SigninForm = () => {
   const router = useRouter();
@@ -65,7 +60,7 @@ export const SigninForm = () => {
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent >
         <div>
           <Social />
         </div>

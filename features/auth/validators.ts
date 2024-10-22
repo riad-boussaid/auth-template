@@ -27,22 +27,6 @@ export const SignInSchema = z.object({
     .min(1, { message: "Password must be at least % characters long" }),
 });
 
-export const ResetPasswordSchema = z
-  .object({
-    password: z.string().min(1),
-    newPassword: z.string().min(8),
-    confirmNewPassword: z.string().min(8),
-    logoutFromOtherDevices: z.boolean(),
-  })
-  .refine((data) => data.password === data.confirmNewPassword, {
-    message: "Passwords do not match",
-    path: ["confirmNewPassword"],
-  })
-  .refine((data) => data.newPassword !== data.password, {
-    message: "New password must be different from the current password",
-    path: ["newPassword"],
-  });
-
 export const ResetPasswordAuthSchema = z
   .object({
     email: z.string().email(),

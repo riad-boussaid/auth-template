@@ -1,6 +1,8 @@
 "use client";
 
-import { deleteAvatarAction, updateAvatarAction } from "@/actions/user-action";
+import { RefreshCw, Trash } from "lucide-react";
+import Image from "next/image";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,9 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, Trash } from "lucide-react";
-import Image from "next/image";
+
+import { deleteAvatarAction, updateAvatarAction } from "@/actions/user-action";
 
 export const ChangeProfilePicture = ({
   imageUrl,

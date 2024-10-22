@@ -20,11 +20,12 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-
-import { ForgotPasswordSchema } from "../validators";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useForgotPassword } from "../mutations/use-forgot-password";
+
+import { ForgotPasswordSchema } from "@/features/auth/validators";
+
+import { useForgotPassword } from "@/features/auth/mutations/use-forgot-password";
 
 export const ForgotPasswordForm = () => {
   const { mutate, isPending } = useForgotPassword();

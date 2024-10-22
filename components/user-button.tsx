@@ -78,7 +78,7 @@ export const UserButton = ({ user }: { user: User | null }) => {
 
         <DropdownMenuItem
           className="cursor-pointer gap-x-4 rounded-none px-8 py-4"
-          onClick={() => router.push("/settings?tab=general")}
+          onClick={() => router.push("/settings?tab=account")}
         >
           <Settings className="size-4" />
           Settings

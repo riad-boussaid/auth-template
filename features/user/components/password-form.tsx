@@ -3,8 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { Loader } from "lucide-react";
 
 import {
   Form,
@@ -25,53 +25,38 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import { updatePasswordAction } from "@/actions/user-action";
-// import { User } from "@/lib/db/schema";
+import { ResetPasswordSchema } from "@/features/user/validators";
+import { useResetPassword } from "../mutations/use-update-password";
 
 export const PasswordForm = () => {
-  const { toast } = useToast();
-
   const [isEditing, setIsEditing] = useState(false);
 
   const toggleEditMode = () => {
     setIsEditing((current) => !current);
+    form.reset();
   };
 
-  const passwordSchema = z.object({
-    password: z
-      .string()
-      .min(1, { message: "Password must be at least 8 characters long" }),
-    newPassword: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters long" }),
-  });
-
-  const form = useForm<z.infer<typeof passwordSchema>>({
-    resolver: zodResolver(passwordSchema),
+  const form = useForm<z.infer<typeof ResetPasswordSchema>>({
+    resolver: zodResolver(ResetPasswordSchema),
     defaultValues: {
       password: "",
       newPassword: "",
+      confirmNewPassword: "",
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof passwordSchema>) => {
-    if (isEditing) {
-      updatePasswordAction(values)
-        .then((data) => {
-          if (data?.success)
-            toast({ variant: "default", description: data.success });
-          if (data?.error)
-            toast({ variant: "destructive", description: data.error });
-        })
-        .catch(() => toast({ variant: "destructive", description: "error" }));
-    }
+  const { mutateAsync, isPending } = useResetPassword();
+
+  const onSubmit = async (values: z.infer<typeof ResetPasswordSchema>) => {
+    await mutateAsync({ json: values });
+    toggleEditMode();
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card x-chunk="dashboard-04-chunk-1">
-          <CardHeader>
+    <Card>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="">
+          <CardHeader className="">
             <CardTitle>Password Settings</CardTitle>
             <CardDescription>Change your security settings.</CardDescription>
           </CardHeader>
@@ -86,7 +71,7 @@ export const PasswordForm = () => {
                     <Input
                       type="password"
                       disabled={!isEditing}
-                      placeholder="***"
+                      placeholder="********"
                       {...field}
                     />
                   </FormControl>
@@ -94,6 +79,7 @@ export const PasswordForm = () => {
                 </FormItem>
               )}
             />
+
             <FormField
               name="newPassword"
               control={form.control}
@@ -104,7 +90,26 @@ export const PasswordForm = () => {
                     <Input
                       type="password"
                       disabled={!isEditing}
-                      placeholder="***"
+                      placeholder="********"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="confirmNewPassword"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm New Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      disabled={!isEditing}
+                      placeholder="********"
                       {...field}
                     />
                   </FormControl>
@@ -113,7 +118,7 @@ export const PasswordForm = () => {
               )}
             />
           </CardContent>
-          <CardFooter className="justify-end gap-x-2 border-t px-6 py-4">
+          <CardFooter className="ml-auto justify-end gap-x-2 border-t px-6 py-4">
             <Button
               type="button"
               variant={"outline"}
@@ -121,10 +126,14 @@ export const PasswordForm = () => {
             >
               {!isEditing ? "Edit" : "Cancel"}
             </Button>
-            <Button disabled={!isEditing}>Save</Button>
+
+            <Button type="submit" disabled={!isEditing || isPending}>
+              {isPending && <Loader className="size-4 animate-spin" />}
+              Save
+            </Button>
           </CardFooter>
-        </Card>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </Card>
   );
 };

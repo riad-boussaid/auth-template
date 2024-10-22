@@ -1,10 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import React from "react";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const SettingsNav = () => {
   const searchParams = useSearchParams();
@@ -12,20 +13,25 @@ export const SettingsNav = () => {
   const pathname = usePathname();
 
   const items = [
-    {
-      id: 1,
-      label: "General",
-      href: `${pathname}?tab=general`,
-    },
+    // {
+    //   id: 1,
+    //   label: "General",
+    //   href: `${pathname}?tab=general`,
+    // },
     {
       id: 2,
-      label: "Appearance",
-      href: `${pathname}?tab=appearance`,
+      label: "Account",
+      href: `${pathname}?tab=account`,
     },
     {
       id: 3,
       label: "Security",
       href: `${pathname}?tab=security`,
+    },
+    {
+      id: 4,
+      label: "Appearance",
+      href: `${pathname}?tab=appearance`,
     },
   ] as const;
 
@@ -47,13 +53,6 @@ export const SettingsNav = () => {
           </Link>
         </Button>
       ))}
-
-      {/* <Link href={`${pathname}?tab=appearance`}>Appearance</Link>
-
-      <Link href="#">Security</Link>
-      <Link href="#">Support</Link>
-      <Link href="#">Organizations</Link>
-      <Link href="#">Advanced</Link> */}
     </nav>
   );
 };

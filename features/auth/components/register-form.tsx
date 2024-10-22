@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-// import { useRouter } from "next/navigation";
 
 import {
   Form,
@@ -24,11 +23,10 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 
-import { Separator } from "./separator";
-import { Social } from "./social";
+import { Separator } from "@/features/auth/components/separator";
+import { Social } from "@/features/auth/components/social";
 
 import { SignUpSchema } from "@/features/auth/validators";
-// import { useToast } from "@/hooks/use-toast";
 
 import { useRegister } from "@/features/auth/mutations/use-register";
 

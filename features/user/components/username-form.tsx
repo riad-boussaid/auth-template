@@ -1,5 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { useState } from "react";
+
 import {
   Form,
   FormControl,
@@ -18,18 +23,18 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { useToast } from "@/hooks/use-toast";
-// import { User } from "@/lib/db/schema";
+
 import { useSession } from "@/components/providers/session-provider";
-import { useState } from "react";
-import { updateUsernameAction } from "@/actions/user-action";
+
+import { useUpdateUsername } from "../mutations/use-update-username";
+
+// import { useToast } from "@/hooks/use-toast";
+// import { updateUsernameAction } from "@/actions/user-action";
+// import { User } from "@/lib/db/schema";
 // import { cn } from "@/lib/utils";
 
 export const UsernameForm = () => {
-  const { toast } = useToast();
+  // const { toast } = useToast();
   const { user } = useSession();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -49,21 +54,25 @@ export const UsernameForm = () => {
     },
   });
 
+  const { mutateAsync, isPending } = useUpdateUsername();
+
   const onSubmit = async (values: z.infer<typeof usernameSchema>) => {
-    if (isEditing && values.username !== user?.username) {
-      updateUsernameAction(values.username)
-        .then((data) => {
-          if (data?.success)
-            toast({ variant: "default", description: data.success });
-        })
-        .catch(() => toast({ variant: "destructive", description: "error" }));
+    if (isEditing) {
+      await mutateAsync({ json: values });
+      setIsEditing(false);
+      // updateUsernameAction(values.username)
+      //   .then((data) => {
+      //     if (data?.success)
+      //       toast({ variant: "default", description: data.success });
+      //   })
+      //   .catch(() => toast({ variant: "destructive", description: "error" }));
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <Card x-chunk="dashboard-04-chunk-1">
+        <Card>
           <CardHeader>
             <CardTitle>Full name</CardTitle>
             <CardDescription>Change your name.</CardDescription>
@@ -97,7 +106,7 @@ export const UsernameForm = () => {
             >
               {!isEditing ? "Edit" : "Cancel"}
             </Button>
-            <Button disabled={!isEditing}>Save</Button>
+            <Button disabled={!isEditing || isPending}>Save</Button>
           </CardFooter>
         </Card>
       </form>
