@@ -6,7 +6,12 @@ import * as argon2 from "@node-rs/argon2";
 import jwt from "hono/jwt";
 
 import { db } from "@/lib/db";
-import { emailVerificationTable, usersTable } from "@/lib/db/schema";
+import {
+  emailVerificationsTable,
+  passwordResetSessionsTable,
+  sessionsTable,
+  usersTable,
+} from "@/lib/db/schema";
 import {
   ForgotPasswordSchema,
   ResetPasswordAuthSchema,
@@ -24,6 +29,12 @@ import {
 // import { generateRandomString } from "@oslojs/crypto/random";
 // import { sendEmail } from "@/lib/email";
 import { getErrorMessages } from "@/lib/error-message";
+import {
+  createPasswordResetSession,
+  validatePasswordResetSessionRequest,
+} from "@/lib/password-reset";
+import { cookies } from "next/headers";
+import { z } from "zod";
 
 const app = new Hono()
   .get("/current", (c) => {
@@ -59,7 +70,7 @@ const app = new Hono()
       // generate a random string 6 characters long
       const code = Math.random().toString(36).substring(2, 8);
 
-      await db.insert(emailVerificationTable).values({
+      await db.insert(emailVerificationsTable).values({
         userId,
         code,
         sentAt: new Date(),
@@ -171,22 +182,51 @@ const app = new Hono()
     }
   })
   .post(
-    "/passwordReset",
+    "/forgotPassword",
     zValidator("json", ForgotPasswordSchema),
     async (c) => {
       try {
         const { email } = c.req.valid("json");
 
-        if (!email) throw new Error("Email not found");
-
-        const existingUser = await db.query.usersTable.findFirst({
-          where: eq(usersTable.email, email),
-        });
-
-        if (!existingUser) {
-          throw new Error("User not found");
+        if (!email) {
+          throw new HTTPException(400, { message: "Email not found" });
         }
 
+        const [existingUser] = await db
+          .select()
+          .from(usersTable)
+          .where(eq(usersTable.email, email))
+          .limit(1);
+
+        if (!existingUser || !existingUser.email) {
+          throw new HTTPException(400, { message: "User not found" });
+        }
+
+        // invalidateUserPasswordResetSessions(user.id);
+        await db
+          .delete(passwordResetSessionsTable)
+          .where(eq(passwordResetSessionsTable.userId, existingUser.id));
+
+        const sessionToken = generateSessionToken();
+        const session = await createPasswordResetSession(
+          sessionToken,
+          existingUser.id,
+          existingUser.email,
+        );
+
+        // sendPasswordResetEmail(session.email, session.code);
+        console.log(`To ${session.email}: Your reset code is ${session.code}`);
+
+        // setPasswordResetSessionTokenCookie(sessionToken, session.expiresAt);
+        cookies().set("password_reset_session", sessionToken, {
+          expires: session.expiresAt,
+          sameSite: "lax",
+          httpOnly: true,
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+        });
+
+        // return c.redirect("/password-reset/email-verification");
         return c.json({ success: true, message: existingUser.email });
       } catch (error) {
         return c.json({ success: false, message: getErrorMessages(error) });
@@ -194,24 +234,89 @@ const app = new Hono()
     },
   )
   .post(
-    "/passwordReset/:token",
+    "/passwordResetEmailVerification",
+    zValidator("form", z.object({ code: z.string().min(6) })),
+    async (c) => {
+      const { session } = await validatePasswordResetSessionRequest();
+
+      if (session === null) {
+        throw new HTTPException(400, { message: "Not authenticated" });
+      }
+      if (session.emailVerified) {
+        throw new HTTPException(400, { message: "Forbidden" });
+      }
+
+      const { code } = c.req.valid("form");
+
+      // setPasswordResetSessionAsEmailVerified(session.id);
+      await db
+        .update(passwordResetSessionsTable)
+        .set({ emailVerified: true })
+        .where(eq(passwordResetSessionsTable.id, session.id));
+
+      return c.json({ success: true, message: code });
+    },
+  )
+  .post(
+    "/passwordReset",
     zValidator("json", ResetPasswordAuthSchema),
     async (c) => {
       try {
-        const { email, newPassword } = c.req.valid("json");
+        const { session: passwordResetSession, user } =
+          await validatePasswordResetSessionRequest();
 
-        if (!email) {
-          throw new Error("Email not found");
+        if (passwordResetSession === null) {
+          throw new HTTPException(400, { message: "Not authenticated" });
+        }
+        if (!passwordResetSession.emailVerified) {
+          throw new HTTPException(400, { message: "Forbidden" });
         }
 
-        const hashedPassword = await argon2.hash(newPassword);
+        // invalidateUserPasswordResetSessions(passwordResetSession.userId);
+        await db
+          .delete(passwordResetSessionsTable)
+          .where(
+            eq(passwordResetSessionsTable.userId, passwordResetSession.userId),
+          );
+
+        // invalidateUserSessions(passwordResetSession.userId);
+        await db
+          .delete(sessionsTable)
+          .where(eq(sessionsTable.userId, passwordResetSession.userId));
+
+        // await updateUserPassword(passwordResetSession.userId, password);
+
+        const { newPassword } = c.req.valid("json");
+
+        const hashedNewPassword = await argon2.hash(newPassword);
 
         await db
           .update(usersTable)
           .set({
-            hashedPassword,
+            hashedPassword: hashedNewPassword,
           })
-          .where(eq(usersTable.email, email));
+          .where(eq(usersTable.id, passwordResetSession.userId));
+
+        const sessionToken = generateSessionToken();
+        const session = await createSession(sessionToken, user.id);
+
+        // setSessionTokenCookie(sessionToken, session.expiresAt);
+        cookies().set("session", sessionToken, {
+          httpOnly: true,
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          expires: session.expiresAt,
+        });
+
+        // deletePasswordResetSessionTokenCookie();
+        cookies().set("session", "", {
+          httpOnly: true,
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 0,
+        });
 
         return c.json({
           success: true,

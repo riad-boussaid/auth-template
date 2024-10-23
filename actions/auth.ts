@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 import { google, facebook } from "@/lib/auth/oauth";
 import { getErrorMessages } from "@/lib/error-message";
 import { db } from "@/lib/db";
-import { emailVerificationTable, usersTable } from "@/lib/db/schema";
+import { emailVerificationsTable, usersTable } from "@/lib/db/schema";
 import { SignInSchema, SignUpSchema } from "@/features/auth/validators";
 import { sendEmail } from "@/lib/email";
 import {
@@ -99,8 +99,8 @@ export const resendVerificationEmail = async (email: string) => {
       };
     }
 
-    const existedCode = await db.query.emailVerificationTable.findFirst({
-      where: eq(emailVerificationTable.userId, existingUser.id),
+    const existedCode = await db.query.emailVerificationsTable.findFirst({
+      where: eq(emailVerificationsTable.userId, existingUser.id),
     });
 
     if (!existedCode) {
@@ -125,12 +125,12 @@ export const resendVerificationEmail = async (email: string) => {
     const code = Math.random().toString(36).substring(2, 8);
 
     await db
-      .update(emailVerificationTable)
+      .update(emailVerificationsTable)
       .set({
         code,
         sentAt: new Date(),
       })
-      .where(eq(emailVerificationTable.userId, existingUser.id));
+      .where(eq(emailVerificationsTable.userId, existingUser.id));
 
     const token = jwt.sign(
       { email, userId: existingUser.id, code },
@@ -187,7 +187,7 @@ export const signUp = async (values: z.infer<typeof SignUpSchema>) => {
     // generate a random string 6 characters long
     const code = Math.random().toString(36).substring(2, 8);
 
-    await db.insert(emailVerificationTable).values({
+    await db.insert(emailVerificationsTable).values({
       code,
       userId,
       id: userId,

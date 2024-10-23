@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import jwt from "hono/jwt";
 
 import { db } from "@/lib/db";
-import { emailVerificationTable, usersTable } from "@/lib/db/schema";
+import { emailVerificationsTable, usersTable } from "@/lib/db/schema";
 import { getErrorMessages } from "@/lib/error-message";
 import {
   createSession,
@@ -42,10 +42,10 @@ export const GET = async (req: NextRequest) => {
     };
 
     const emailVerificationQueryResult =
-      await db.query.emailVerificationTable.findFirst({
+      await db.query.emailVerificationsTable.findFirst({
         where: and(
-          eq(emailVerificationTable.userId, decodedPayload.userId),
-          eq(emailVerificationTable.code, decodedPayload.code),
+          eq(emailVerificationsTable.userId, decodedPayload.userId),
+          eq(emailVerificationsTable.code, decodedPayload.code),
         ),
       });
 
@@ -61,8 +61,8 @@ export const GET = async (req: NextRequest) => {
     }
 
     await db
-      .delete(emailVerificationTable)
-      .where(eq(emailVerificationTable.userId, decodedPayload.userId));
+      .delete(emailVerificationsTable)
+      .where(eq(emailVerificationsTable.userId, decodedPayload.userId));
 
     await db
       .update(usersTable)

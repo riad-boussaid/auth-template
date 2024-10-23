@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight, Loader } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 
 import {
   Form,
@@ -32,13 +32,13 @@ import { ResetPasswordAuthSchema } from "../validators";
 export const PasswordResetForm = () => {
   const { mutate, isPending } = usePasswordReset();
 
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email")?.toString();
+  // const searchParams = useSearchParams();
+  // const email = searchParams.get("email")?.toString();
 
   const form = useForm<z.infer<typeof ResetPasswordAuthSchema>>({
     resolver: zodResolver(ResetPasswordAuthSchema),
     defaultValues: {
-      email,
+      // email,
       newPassword: "",
       confirmNewPassword: "",
     },

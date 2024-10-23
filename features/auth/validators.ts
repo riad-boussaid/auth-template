@@ -29,7 +29,7 @@ export const SignInSchema = z.object({
 
 export const ResetPasswordAuthSchema = z
   .object({
-    email: z.string().email(),
+    // email: z.string().email(),
     newPassword: z.string().min(8),
     confirmNewPassword: z.string().min(8),
   })
