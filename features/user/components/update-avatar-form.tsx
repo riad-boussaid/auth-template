@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import { deleteAvatarAction, updateAvatarAction } from "@/actions/user-action";
 
-export const ChangeProfilePicture = ({
+export const UpdateAvatarForm = ({
   imageUrl,
 }: {
   imageUrl: string | null;

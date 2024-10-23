@@ -30,7 +30,7 @@ import { Social } from "@/features/auth/components/social";
 
 import { SignInSchema } from "@/features/auth/validators";
 
-import { useLogin } from "@/features/auth/mutations/use-login";
+import { useLogin } from "@/features/auth/api/use-login";
 
 export const SigninForm = () => {
   const router = useRouter();
@@ -60,7 +60,7 @@ export const SigninForm = () => {
         </div>
       </CardHeader>
 
-      <CardContent >
+      <CardContent>
         <div>
           <Social />
         </div>

@@ -26,14 +26,9 @@ import { Button } from "@/components/ui/button";
 
 import { useSession } from "@/components/providers/session-provider";
 
-import { useUpdateUsername } from "../mutations/use-update-username";
+import { useUpdateUsername } from "@/features/user/api/use-update-username";
 
-// import { useToast } from "@/hooks/use-toast";
-// import { updateUsernameAction } from "@/actions/user-action";
-// import { User } from "@/lib/db/schema";
-// import { cn } from "@/lib/utils";
-
-export const UsernameForm = () => {
+export const UpdateUsernameForm = () => {
   // const { toast } = useToast();
   const { user } = useSession();
 
@@ -60,12 +55,6 @@ export const UsernameForm = () => {
     if (isEditing) {
       await mutateAsync({ json: values });
       setIsEditing(false);
-      // updateUsernameAction(values.username)
-      //   .then((data) => {
-      //     if (data?.success)
-      //       toast({ variant: "default", description: data.success });
-      //   })
-      //   .catch(() => toast({ variant: "destructive", description: "error" }));
     }
   };
 

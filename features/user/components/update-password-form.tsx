@@ -26,9 +26,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import { ResetPasswordSchema } from "@/features/user/validators";
-import { useResetPassword } from "../mutations/use-update-password";
+import { useResetPassword } from "@/features/user/api/use-update-password";
 
-export const PasswordForm = () => {
+export const UpdatePasswordForm = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const toggleEditMode = () => {

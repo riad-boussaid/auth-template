@@ -171,7 +171,7 @@ const app = new Hono()
     }
   })
   .post(
-    "/forgot-password",
+    "/passwordReset",
     zValidator("json", ForgotPasswordSchema),
     async (c) => {
       try {
@@ -194,7 +194,7 @@ const app = new Hono()
     },
   )
   .post(
-    "/resetPassword",
+    "/passwordReset/:token",
     zValidator("json", ResetPasswordAuthSchema),
     async (c) => {
       try {

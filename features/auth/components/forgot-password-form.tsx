@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 
 import { ForgotPasswordSchema } from "@/features/auth/validators";
 
-import { useForgotPassword } from "@/features/auth/mutations/use-forgot-password";
+import { useForgotPassword } from "@/features/auth/api/use-forgot-password";
 
 export const ForgotPasswordForm = () => {
   const { mutate, isPending } = useForgotPassword();

@@ -6,10 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 // import { getErrorMessages } from "@/lib/error-message";
 
-type ResponseType = InferResponseType<
-  (typeof client.api.auth.register)["$post"]
->;
-type RequestType = InferRequestType<(typeof client.api.auth.register)["$post"]>;
+type ResponseType = InferResponseType<typeof client.api.auth.register.$post>;
+type RequestType = InferRequestType<typeof client.api.auth.register.$post>;
 
 export const useRegister = () => {
   const router = useRouter();
@@ -18,7 +16,7 @@ export const useRegister = () => {
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ json }) => {
-      const response = await client.api.auth.register["$post"]({ json });
+      const response = await client.api.auth.register.$post({ json });
 
       if (!response.ok) {
         throw new Error("Failed to register");

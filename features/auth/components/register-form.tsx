@@ -28,7 +28,7 @@ import { Social } from "@/features/auth/components/social";
 
 import { SignUpSchema } from "@/features/auth/validators";
 
-import { useRegister } from "@/features/auth/mutations/use-register";
+import { useRegister } from "@/features/auth/api/use-register";
 
 export const RegisterForm = () => {
   // const router = useRouter();

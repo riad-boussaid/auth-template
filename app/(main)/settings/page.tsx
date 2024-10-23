@@ -6,10 +6,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { getCurrentSession } from "@/lib/auth/session";
 
-import { UsernameForm } from "@/features/user/components/username-form";
-import { PasswordForm } from "@/features/user/components/password-form";
-import { ChangeProfilePicture } from "@/features/user/components/profile-picture-form";
-import { DeleteAccount } from "@/features/user/components/delete-account-form";
+import { UpdateUsernameForm } from "@/features/user/components/update-username-form";
+import { UpdatePasswordForm } from "@/features/user/components/update-password-form";
+import { UpdateAvatarForm } from "@/features/user/components/update-avatar-form";
+import { DeleteUserForm } from "@/features/user/components/delete-user-form";
 
 export default async function SettingsPage({
   searchParams,
@@ -77,15 +77,15 @@ export default async function SettingsPage({
 
           {tab === "account" && (
             <>
-              <UsernameForm />
-              <ChangeProfilePicture imageUrl={user.avatar} />
-              <DeleteAccount />
+              <UpdateUsernameForm />
+              <UpdateAvatarForm imageUrl={user.avatar} />
+              <DeleteUserForm />
             </>
           )}
 
           {tab === "security" && (
             <>
-              <PasswordForm />
+              <UpdatePasswordForm />
             </>
           )}
 

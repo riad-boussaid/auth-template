@@ -18,7 +18,7 @@ import { Button } from "./ui/button";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
-import { useLogout } from "@/features/auth/mutations/use-logout";
+import { useLogout } from "@/features/auth/api/use-logout";
 
 export const UserButton = ({ user }: { user: User | null }) => {
   const router = useRouter();

@@ -17,9 +17,9 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 
 // import { useToast } from "@/hooks/use-toast";
 
-import { useDeleteAcoount } from "@/features/user/mutations/use-delete-account";
+import { useDeleteAcoount } from "@/features/user/api/use-delete-account";
 
-export const DeleteAccount = () => {
+export const DeleteUserForm = () => {
   // const { toast } = useToast();
   const [open, setOpen] = useState(false);
 

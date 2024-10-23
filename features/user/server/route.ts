@@ -27,7 +27,7 @@ const app = new Hono()
     }
   })
   .post(
-    "/updateUserName",
+    "/updateUsername",
     zValidator("json", z.object({ username: z.string() })),
     async (c) => {
       try {
@@ -67,7 +67,7 @@ const app = new Hono()
     },
   )
   .post(
-    "/resetPassword",
+    "/updatePassword",
     zValidator("json", ResetPasswordSchema),
     async (c) => {
       try {

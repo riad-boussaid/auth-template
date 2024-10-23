@@ -1,29 +1,27 @@
-import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { client } from "@/lib/rpc";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { InferResponseType, InferRequestType } from "hono";
 import { useRouter } from "next/navigation";
 
-import { useToast } from "@/hooks/use-toast";
-import { client } from "@/lib/rpc";
-
-// const $post = client.api.user.resetPassword.$post;
-
 type ResponseType = InferResponseType<
-  (typeof client.api.user.resetPassword)["$post"]
+  typeof client.api.user.updateUsername.$post
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.user.resetPassword)["$post"]
+  typeof client.api.user.updateUsername.$post
 >;
 
-export const useResetPassword = () => {
-  const { toast } = useToast();
+export const useUpdateUsername = () => {
   const router = useRouter();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   return useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ json }) => {
-      const response = await client.api.user.resetPassword["$post"]({ json });
+      const response = await client.api.user.updateUsername.$post({ json });
 
       if (!response.ok) {
-        throw new Error("Failed to reset password");
+        throw new Error("Failed to update");
       }
 
       return await response.json();
@@ -33,6 +31,8 @@ export const useResetPassword = () => {
         toast({ variant: "destructive", description: data.message });
       } else {
         toast({ variant: "success", description: data.message });
+        queryClient.invalidateQueries({ queryKey: ["current"] });
+
         router.refresh();
       }
     },

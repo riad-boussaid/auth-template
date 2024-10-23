@@ -25,12 +25,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import { useResetPassword } from "../mutations/use-reset-password";
+import { usePasswordReset } from "@/features/auth/api/use-password-reset";
 
 import { ResetPasswordAuthSchema } from "../validators";
 
-export const ResetPasswordForm = () => {
-  const { mutate, isPending } = useResetPassword();
+export const PasswordResetForm = () => {
+  const { mutate, isPending } = usePasswordReset();
 
   const searchParams = useSearchParams();
   const email = searchParams.get("email")?.toString();
