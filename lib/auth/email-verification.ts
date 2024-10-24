@@ -1,5 +1,5 @@
 import { encodeBase32 } from "@oslojs/encoding";
-import { cookies } from "next/headers";
+import { cookies, type UnsafeUnwrappedCookies } from "next/headers";
 import { getCurrentSession } from "./session";
 import { db } from "../db";
 import { EmailVerification, emailVerificationsTable } from "../db/schema";
@@ -89,7 +89,7 @@ export function sendVerificationEmail(email: string, code: string): void {
 export function setEmailVerificationRequestCookie(
   request: EmailVerification,
 ): void {
-  cookies().set("email_verification", request.id, {
+  (cookies() as unknown as UnsafeUnwrappedCookies).set("email_verification", request.id, {
     httpOnly: true,
     path: "/",
     secure: process.env.NODE_ENV === "production",
@@ -99,7 +99,7 @@ export function setEmailVerificationRequestCookie(
 }
 
 export function deleteEmailVerificationRequestCookie(): void {
-  cookies().set("email_verification", "", {
+  (cookies() as unknown as UnsafeUnwrappedCookies).set("email_verification", "", {
     httpOnly: true,
     path: "/",
     secure: process.env.NODE_ENV === "production",
@@ -113,7 +113,7 @@ export async function getUserEmailVerificationRequestFromRequest(): Promise<Emai
   if (user === null) {
     return null;
   }
-  const id = cookies().get("email_verification")?.value ?? null;
+  const id = (await cookies()).get("email_verification")?.value ?? null;
   if (id === null) {
     return null;
   }

@@ -18,7 +18,7 @@ export const createGoogleAuthorizationURL = async () => {
       },
     );
 
-    cookies().set("state", state, {
+    (await cookies()).set("state", state, {
       path: "/",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -26,7 +26,7 @@ export const createGoogleAuthorizationURL = async () => {
       sameSite: "lax",
     });
 
-    cookies().set("codeVerifier", codeVerifier, {
+    (await cookies()).set("codeVerifier", codeVerifier, {
       path: "/",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

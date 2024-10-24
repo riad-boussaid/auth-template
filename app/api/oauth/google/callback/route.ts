@@ -32,8 +32,8 @@ export const GET = async (req: NextRequest) => {
 
     const code = searchParams.get("code");
     const state = searchParams.get("state");
-    const savedState = cookies().get("state")?.value ?? null;
-    const codeVerifier = cookies().get("codeVerifier")?.value ?? null;
+    const savedState = (await cookies()).get("state")?.value ?? null;
+    const codeVerifier = (await cookies()).get("codeVerifier")?.value ?? null;
 
     if (!code || !state) {
       return Response.json(

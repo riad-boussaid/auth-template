@@ -342,7 +342,7 @@ const app = new Hono()
         console.log(`To ${session.email}: Your reset code is ${session.code}`);
 
         // setPasswordResetSessionTokenCookie(sessionToken, session.expiresAt);
-        cookies().set("password_reset_session", sessionToken, {
+        (await cookies()).set("password_reset_session", sessionToken, {
           expires: session.expiresAt,
           sameSite: "lax",
           httpOnly: true,
@@ -448,7 +448,7 @@ const app = new Hono()
         const session = await createSession(sessionToken, user.id);
 
         // setSessionTokenCookie(sessionToken, session.expiresAt);
-        cookies().set("session", sessionToken, {
+        (await cookies()).set("session", sessionToken, {
           httpOnly: true,
           path: "/",
           secure: process.env.NODE_ENV === "production",

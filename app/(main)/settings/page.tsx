@@ -11,11 +11,12 @@ import { UpdatePasswordForm } from "@/features/user/components/update-password-f
 import { UpdateAvatarForm } from "@/features/user/components/update-avatar-form";
 import { DeleteUserForm } from "@/features/user/components/delete-user-form";
 
-export default async function SettingsPage({
-  searchParams,
-}: {
-  searchParams?: { tab: string };
-}) {
+export default async function SettingsPage(
+  props: {
+    searchParams?: Promise<{ tab: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const { session, user } = await getCurrentSession();
 
   if (session === null) {
