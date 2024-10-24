@@ -1,4 +1,6 @@
+import { AppSidebar } from "@/components/app-sidebar";
 import { MainHeader } from "@/components/main-header";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function DashboardLayout({
   children,
@@ -6,11 +8,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <MainHeader />
-      <div className="min-h-[calc(100dvh-80px)] bg-gray-50 py-8 dark:bg-gray-950">
+    <SidebarProvider>
+      <AppSidebar />
+      <main className="w-full">
+        <MainHeader />
+        {/* <SidebarTrigger /> */}
         {children}
-      </div>
-    </div>
+      </main>
+    </SidebarProvider>
   );
 }

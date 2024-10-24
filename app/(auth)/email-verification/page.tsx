@@ -3,15 +3,19 @@ import { redirect } from "next/navigation";
 import { EmailVerificationForm } from "@/features/auth/components/email-verification-form";
 
 import { getCurrentSession } from "@/lib/auth/session";
+import { getUserEmailVerificationRequestFromRequest } from "@/lib/auth/email-verification";
 
-export default async function VerifyEmailPage({
-  searchParams,
-}: {
-  searchParams?: { email: string };
-}) {
-  const { session } = await getCurrentSession();
+export default async function VerifyEmailPage() {
+  const { user } = await getCurrentSession();
+  if (user === null) {
+    return redirect("/sign-in");
+  }
 
-  if (session) redirect("/");
+  const verificationRequest =
+    await getUserEmailVerificationRequestFromRequest();
+  if (verificationRequest === null && user.emailVerified) {
+    return redirect("/");
+  }
 
-  return <EmailVerificationForm email={searchParams?.email || ""} />;
+  return <EmailVerificationForm />;
 }

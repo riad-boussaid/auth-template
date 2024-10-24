@@ -3,17 +3,16 @@ import {
   encodeBase32UpperCaseNoPadding,
   encodeHexLowerCase,
 } from "@oslojs/encoding";
+import { cookies } from "next/headers";
+import { eq } from "drizzle-orm";
+
 import { db } from "./db";
 import {
   type User,
   type PasswordResetSession,
   usersTable,
-  sessionsTable,
   passwordResetSessionsTable,
 } from "./db/schema";
-
-import { cookies } from "next/headers";
-import { eq } from "drizzle-orm";
 
 export function generateRandomOTP(): string {
   const bytes = new Uint8Array(5);
@@ -36,12 +35,14 @@ export async function createPasswordResetSession(
     code: generateRandomOTP(),
     emailVerified: false,
   };
-  await db.insert(sessionsTable).values(session);
+  await db.insert(passwordResetSessionsTable).values(session);
 
   return session;
 }
 
-export async function validatePasswordResetSessionToken(token: string) {
+export async function validatePasswordResetSessionToken(
+  token: string,
+): Promise<PasswordResetSessionValidationResult> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
 
   const [row] = await db
@@ -92,16 +93,33 @@ export async function validatePasswordResetSessionToken(token: string) {
   return { session, user };
 }
 
-export async function validatePasswordResetSessionRequest() {
+export async function validatePasswordResetSessionRequest(): Promise<PasswordResetSessionValidationResult> {
   const token = cookies().get("password_reset_session")?.value ?? null;
+
   if (token === null) {
     return { session: null, user: null };
   }
+
   const result = await validatePasswordResetSessionToken(token);
+
   if (result.session === null) {
     deletePasswordResetSessionTokenCookie();
   }
+
   return result;
+}
+
+export function setPasswordResetSessionTokenCookie(
+  token: string,
+  expiresAt: Date,
+): void {
+  cookies().set("password_reset_session", token, {
+    expires: expiresAt,
+    sameSite: "lax",
+    httpOnly: true,
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  });
 }
 
 export function deletePasswordResetSessionTokenCookie(): void {
@@ -113,3 +131,7 @@ export function deletePasswordResetSessionTokenCookie(): void {
     secure: process.env.NODE_ENV === "production",
   });
 }
+
+export type PasswordResetSessionValidationResult =
+  | { session: PasswordResetSession; user: User }
+  | { session: null; user: null };

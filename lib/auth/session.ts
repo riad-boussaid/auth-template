@@ -32,7 +32,6 @@ export async function createSession(
     id: sessionId,
     userId,
     expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-    
   };
   await db.insert(sessionsTable).values(session);
   return session;

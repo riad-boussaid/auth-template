@@ -61,8 +61,9 @@ export const emailVerificationsTable = pgTable("email_verifications", {
   userId: text("user_id")
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
   code: text("code").notNull(),
-  sentAt: timestamp("sent_at", {
+  expiresAt: timestamp("expires_at", {
     withTimezone: true,
     mode: "date",
   }).notNull(),
@@ -73,9 +74,9 @@ export const sessionsTable = pgTable("sessions", {
   userId: text("userId")
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
-  email: text("email").notNull(),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  code: text("code").notNull(),
+
+  // emailVerified: boolean("email_verified").notNull().default(false),
+  // code: text("code").notNull(),
   expiresAt: timestamp("expires_at", {
     withTimezone: true,
     mode: "date",
@@ -108,6 +109,7 @@ export const passwordResetSessionsTable = pgTable("password_reset_sessions", {
 
 export type User = InferSelectModel<typeof usersTable>;
 export type Session = InferSelectModel<typeof sessionsTable>;
+export type EmailVerification = InferSelectModel<typeof emailVerificationsTable>;
 export type PasswordResetSession = InferSelectModel<
   typeof passwordResetSessionsTable
 >;

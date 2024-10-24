@@ -1,13 +1,13 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { zValidator } from "@hono/zod-validator";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import * as argon2 from "@node-rs/argon2";
-import jwt from "hono/jwt";
+// import jwt from "hono/jwt";
 
 import { db } from "@/lib/db";
 import {
-  emailVerificationsTable,
+  // emailVerificationsTable,
   passwordResetSessionsTable,
   sessionsTable,
   usersTable,
@@ -31,10 +31,19 @@ import {
 import { getErrorMessages } from "@/lib/error-message";
 import {
   createPasswordResetSession,
+  deletePasswordResetSessionTokenCookie,
   validatePasswordResetSessionRequest,
 } from "@/lib/password-reset";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import {
+  createEmailVerificationRequest,
+  deleteEmailVerificationRequestCookie,
+  deleteUserEmailVerificationRequest,
+  getUserEmailVerificationRequestFromRequest,
+  sendVerificationEmail,
+  setEmailVerificationRequestCookie,
+} from "@/lib/auth/email-verification";
 
 const app = new Hono()
   .get("/current", (c) => {
@@ -46,9 +55,11 @@ const app = new Hono()
     try {
       const { username, email, password } = c.req.valid("json");
 
-      const existingUser = await db.query.usersTable.findFirst({
-        where: eq(usersTable.email, email),
-      });
+      const [existingUser] = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.email, email))
+        .limit(1);
 
       if (existingUser) {
         throw new Error("User Already exist");
@@ -56,8 +67,7 @@ const app = new Hono()
 
       const hashedPassword = await argon2.hash(password);
 
-      // try {
-      const [{ userId }] = await db
+      const [createdUser] = await db
         .insert(usersTable)
         .values({
           // id: userId,
@@ -65,33 +75,27 @@ const app = new Hono()
           email,
           hashedPassword,
         })
-        .returning({ userId: usersTable.id });
+        .returning({ userId: usersTable.id, email: usersTable.email });
 
-      // generate a random string 6 characters long
-      const code = Math.random().toString(36).substring(2, 8);
+      if (!createdUser.userId || !createdUser.email) {
+        throw new HTTPException(400, { message: "Something went wrong" });
+      }
 
-      await db.insert(emailVerificationsTable).values({
-        userId,
-        code,
-        sentAt: new Date(),
-      });
-
-      const token = await jwt.sign(
-        {
-          email,
-          userId,
-          code,
-          expiresIn: Math.floor(Date.now() / 1000) + 60 * 5, // Token expires in 5 minutes
-        },
-        process.env.JWT_SECRET!,
-        "HS256",
+      const emailVerificationRequest = await createEmailVerificationRequest(
+        createdUser.userId,
+        createdUser.email,
       );
 
-      const url = `${process.env.NEXT_PUBLIC_APP_URL}/api/verify-email?token=${token}`;
+      sendVerificationEmail(
+        emailVerificationRequest.email,
+        emailVerificationRequest.code,
+      );
 
-      // send an email at this step.
+      setEmailVerificationRequestCookie(emailVerificationRequest);
 
-      console.log(url);
+      const sessionToken = generateSessionToken();
+      const session = await createSession(sessionToken, createdUser.userId);
+      setSessionTokenCookie(sessionToken, session.expiresAt);
 
       // await sendEmail({
       //   html: `<a href="${url}">Verify your email</a>`,
@@ -104,7 +108,7 @@ const app = new Hono()
         message:
           "We've sent an verification email to your inbox. Please verify your email to continue.",
         data: {
-          userId,
+          userId: createdUser.userId,
         },
       });
     } catch (error) {
@@ -118,9 +122,11 @@ const app = new Hono()
     try {
       const { email, password } = c.req.valid("json");
 
-      const existingUser = await db.query.usersTable.findFirst({
-        where: eq(usersTable.email, email),
-      });
+      const [existingUser] = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.email, email))
+        .limit(1);
 
       if (!existingUser) {
         throw new Error("User not found");
@@ -139,16 +145,17 @@ const app = new Hono()
         throw new Error("Incorrect username or password");
       }
 
+      const sessionToken = generateSessionToken();
+      const session = await createSession(sessionToken, existingUser.id);
+      setSessionTokenCookie(sessionToken, session.expiresAt);
+
       if (existingUser.emailVerified === false) {
+        // return c.redirect("/email-verification");
         return c.json({
           success: false,
           message: "email_not_verified",
         });
       }
-
-      const sessionToken = generateSessionToken();
-      const session = await createSession(sessionToken, existingUser.id);
-      setSessionTokenCookie(sessionToken, session.expiresAt);
 
       return c.json({ success: true, message: "Logged in successfully" });
     } catch (error) {
@@ -173,6 +180,123 @@ const app = new Hono()
       return c.json({
         success: true,
         message: "Logout successfully",
+      });
+    } catch (error) {
+      return c.json({
+        success: false,
+        message: getErrorMessages(error),
+      });
+    }
+  })
+  .post(
+    "/emailVerification",
+    zValidator("form", z.object({ code: z.string().min(6) })),
+    async (c) => {
+      try {
+        const { session: s, user } = await getCurrentSession();
+
+        if (s === null) {
+          throw new HTTPException(400, { message: "Not authenticated" });
+        }
+
+        let verificationRequest =
+          await getUserEmailVerificationRequestFromRequest();
+
+        if (verificationRequest === null) {
+          throw new HTTPException(400, { message: "Not authenticated" });
+        }
+
+        const { code } = c.req.valid("form");
+
+        if (Date.now() >= verificationRequest.expiresAt.getTime()) {
+          verificationRequest = await createEmailVerificationRequest(
+            verificationRequest.userId,
+            verificationRequest.email,
+          );
+          
+          sendVerificationEmail(
+            verificationRequest.email,
+            verificationRequest.code,
+          );
+          throw new HTTPException(400, {
+            message:
+              "The verification code was expired. We sent another code to your inbox.",
+          });
+
+          // return c.json({
+          //   success: true,
+          //   message:
+          //     "The verification code was expired. We sent another code to your inbox.",
+          // });
+        }
+
+        if (verificationRequest.code !== code) {
+          throw new HTTPException(400, { message: "Incorrect code." });
+        }
+
+        deleteUserEmailVerificationRequest(user.id);
+        // invalidateUserPasswordResetSessions(user.id);
+        await db
+          .delete(passwordResetSessionsTable)
+          .where(eq(passwordResetSessionsTable.userId, user.id));
+
+        // updateUserEmailAndSetEmailAsVerified(user.id, verificationRequest.email);
+        await db
+          .update(usersTable)
+          .set({ email: verificationRequest.email, emailVerified: true })
+          .where(eq(usersTable.id, user.id));
+
+        deleteEmailVerificationRequestCookie();
+
+        return c.json({
+          success: true,
+          message: "Email verified successfully",
+        });
+      } catch (error) {
+        return c.json({ success: false, message: getErrorMessages(error) });
+      }
+    },
+  )
+  .post("/resendEmailVerification", async (c) => {
+    try {
+      const { session, user } = await getCurrentSession();
+      if (session === null) {
+        throw new HTTPException(400, { message: "Not authenticated" });
+      }
+
+      let verificationRequest =
+        await getUserEmailVerificationRequestFromRequest();
+
+      if (user === null || user.email === null) {
+        throw new HTTPException(400, { message: "No user or user email" });
+      }
+
+      if (verificationRequest === null) {
+        if (user.emailVerified) {
+          throw new HTTPException(400, { message: "Forbidden" });
+        }
+
+        verificationRequest = await createEmailVerificationRequest(
+          user.id,
+          user.email,
+        );
+      } else {
+        verificationRequest = await createEmailVerificationRequest(
+          user.id,
+          verificationRequest.email,
+        );
+      }
+
+      sendVerificationEmail(
+        verificationRequest.email,
+        verificationRequest.code,
+      );
+
+      setEmailVerificationRequestCookie(verificationRequest);
+
+      return c.json({
+        success: true,
+        message: "A new code was sent to your inbox.",
       });
     } catch (error) {
       return c.json({
@@ -239,6 +363,8 @@ const app = new Hono()
     async (c) => {
       const { session } = await validatePasswordResetSessionRequest();
 
+      console.log(session);
+
       if (session === null) {
         throw new HTTPException(400, { message: "Not authenticated" });
       }
@@ -248,11 +374,31 @@ const app = new Hono()
 
       const { code } = c.req.valid("form");
 
+      if (code !== session.code) {
+        throw new HTTPException(400, { message: "Incorrect code" });
+      }
+
       // setPasswordResetSessionAsEmailVerified(session.id);
       await db
         .update(passwordResetSessionsTable)
         .set({ emailVerified: true })
         .where(eq(passwordResetSessionsTable.id, session.id));
+
+      // setUserAsEmailVerifiedIfEmailMatches(userId: number, email: string)
+      const [result] = await db
+        .update(usersTable)
+        .set({ emailVerified: true })
+        .where(
+          and(
+            // eq(usersTable.id, session.userId),
+            eq(usersTable.email, session.email),
+          ),
+        )
+        .returning();
+
+      if (!result) {
+        throw new HTTPException(400, { message: "Please restart the process" });
+      }
 
       return c.json({ success: true, message: code });
     },
@@ -268,6 +414,7 @@ const app = new Hono()
         if (passwordResetSession === null) {
           throw new HTTPException(400, { message: "Not authenticated" });
         }
+
         if (!passwordResetSession.emailVerified) {
           throw new HTTPException(400, { message: "Forbidden" });
         }
@@ -309,18 +456,18 @@ const app = new Hono()
           expires: session.expiresAt,
         });
 
-        // deletePasswordResetSessionTokenCookie();
-        cookies().set("session", "", {
-          httpOnly: true,
-          path: "/",
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 0,
-        });
+        deletePasswordResetSessionTokenCookie();
+        // cookies().set("password_reset_session", "", {
+        //   httpOnly: true,
+        //   path: "/",
+        //   secure: process.env.NODE_ENV === "production",
+        //   sameSite: "lax",
+        //   maxAge: 0,
+        // });
 
         return c.json({
           success: true,
-          message: "Password Reseted Successfully",
+          message: "Password Reset Successfully",
         });
       } catch (error) {
         return c.json({ success: false, message: getErrorMessages(error) });

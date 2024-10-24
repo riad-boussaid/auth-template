@@ -13,7 +13,7 @@ import {
 export default async function Home() {
   return (
     <div className="container flex min-h-[calc(100dvh-80px)] items-center justify-center gap-x-8">
-      <Card className="w-[400px]">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl">Tech Stack</CardTitle>
         </CardHeader>

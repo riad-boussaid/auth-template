@@ -16,9 +16,11 @@ export default async function SettingsPage({
 }: {
   searchParams?: { tab: string };
 }) {
-  const { user } = await getCurrentSession();
+  const { session, user } = await getCurrentSession();
 
-  if (!user) redirect("/");
+  if (session === null) {
+    return redirect("/sign-in");
+  }
 
   const tab = searchParams?.tab;
 

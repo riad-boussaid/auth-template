@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { InferRequestType, InferResponseType } from "hono";
 
 import { client } from "@/lib/rpc";
@@ -12,7 +12,7 @@ type RequestType = InferRequestType<typeof client.api.auth.register.$post>;
 export const useRegister = () => {
   const router = useRouter();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ json }) => {
@@ -24,7 +24,7 @@ export const useRegister = () => {
 
       return await response.json();
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
       if (!data?.success) {
         toast({ variant: "destructive", description: data.message });
       } else {
@@ -33,8 +33,8 @@ export const useRegister = () => {
           description: data.message,
         });
 
-        queryClient.invalidateQueries({ queryKey: ["current"] });
-        router.push(`/verify-email?email=${variables.json.email}`);
+        // queryClient.invalidateQueries({ queryKey: ["current"] });
+        router.push(`/email-verification`);
       }
     },
     onError: (error) => {

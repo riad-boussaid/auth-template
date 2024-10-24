@@ -2,16 +2,38 @@
 
 import { useEffect } from "react";
 import { useCountdown } from "usehooks-ts";
+import { Loader } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
-import { resendVerificationEmail } from "@/actions/auth";
+// import { resendVerificationEmail } from "@/actions/auth";
 
-import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-export const EmailVerificationForm = ({ email }: { email: string }) => {
-  const { toast } = useToast();
+import { useEmailVerification } from "@/features/auth/api/use-email-verification";
+import { useResendEmailVerification } from "../api/use-resend-email-verification";
+
+export const EmailVerificationForm = () => {
+  // const { toast } = useToast();
 
   const [count, { startCountdown, stopCountdown, resetCountdown }] =
     useCountdown({
@@ -26,28 +48,68 @@ export const EmailVerificationForm = ({ email }: { email: string }) => {
     }
   }, [count, resetCountdown, stopCountdown]);
 
-  const onResendVerificationEmail = async () => {
-    const res = await resendVerificationEmail(email);
-    if (res.error) {
-      toast({ variant: "destructive", description: res.error });
-    }
-    if (res.success) {
-      toast({ variant: "success", description: res.success });
+  const codeSchema = z.object({
+    code: z.string().min(6),
+  });
 
-      startCountdown();
-    }
+  const form = useForm<z.infer<typeof codeSchema>>({
+    resolver: zodResolver(codeSchema),
+    defaultValues: { code: "" },
+  });
+
+  const { mutate, isPending } = useEmailVerification();
+  const { mutateAsync: mutateAsyncResend } = useResendEmailVerification();
+
+  const onSubmit = async (values: z.infer<typeof codeSchema>) => {
+    mutate({ form: values });
+  };
+
+  const onResendVerificationEmail = async () => {
+    await mutateAsyncResend({});
+    // const res = await resendVerificationEmail("email");
+    // if (res.error) {
+    //   toast({ variant: "destructive", description: res.error });
+    // }
+    // if (res.success) {
+    //   toast({ variant: "success", description: res.success });
+
+    startCountdown();
+    // }
   };
 
   return (
     <Card className="w-[400px]">
       <CardHeader>
-        <div className="flex w-full flex-col items-center justify-center gap-y-4">
-          <h1 className={"text-3xl font-semibold"}>Verify Email</h1>
-          <p className="text-sm text-muted-foreground">verify your email</p>
-        </div>
+        <CardTitle>Email Verification</CardTitle>
+        <CardDescription>Verify your email</CardDescription>
       </CardHeader>
 
       <CardContent>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col space-y-4"
+          >
+            <FormField
+              name="code"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Enter yoy code" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button disabled={isPending}>
+              {isPending && <Loader className="size-4 animate-spin" />}
+              Verify
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+      <CardFooter>
         <Button
           disabled={count > 0 && count < 60}
           onClick={onResendVerificationEmail}
@@ -56,7 +118,7 @@ export const EmailVerificationForm = ({ email }: { email: string }) => {
         >
           Resend verification email {count > 0 && count < 60 && `in ${count}s`}
         </Button>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 };

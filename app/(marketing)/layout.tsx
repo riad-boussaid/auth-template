@@ -8,7 +8,7 @@ export default function MarketingLayout({
   return (
     <div>
       <MainHeader />
-      <div className="bg-gray-50 dark:bg-gray-950">{children}</div>
+      <div className="bg-gray-50 dark:bg-background">{children}</div>
     </div>
   );
 }

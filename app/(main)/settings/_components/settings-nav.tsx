@@ -45,7 +45,7 @@ export const SettingsNav = () => {
               ? "default"
               : "ghost"
           }
-          className="justify-start rounded-lg"
+          className="justify-start rounded-full"
           asChild
         >
           <Link href={item.href} className={cn("font-semibold")}>
