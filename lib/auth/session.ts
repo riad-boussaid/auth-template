@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { cookies, type UnsafeUnwrappedCookies } from "next/headers";
+import { cookies } from "next/headers";
 import { eq } from "drizzle-orm";
 import {
   encodeBase32LowerCaseNoPadding,
@@ -41,21 +41,28 @@ export async function validateSessionToken(
   token: string,
 ): Promise<SessionValidationResult> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
+
   const result = await db
     .select({ user: usersTable, session: sessionsTable })
     .from(sessionsTable)
     .innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id))
     .where(eq(sessionsTable.id, sessionId));
+
   if (result.length < 1) {
     return { session: null, user: null };
   }
+
   const { user, session } = result[0];
+
   if (Date.now() >= session.expiresAt.getTime()) {
     await db.delete(sessionsTable).where(eq(sessionsTable.id, session.id));
+
     return { session: null, user: null };
   }
+
   if (Date.now() >= session.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
     session.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+
     await db
       .update(sessionsTable)
       .set({
@@ -63,6 +70,7 @@ export async function validateSessionToken(
       })
       .where(eq(sessionsTable.id, session.id));
   }
+
   return { session, user };
 }
 
@@ -74,8 +82,11 @@ export type SessionValidationResult =
   | { session: Session; user: User }
   | { session: null; user: null };
 
-export function setSessionTokenCookie(token: string, expiresAt: Date): void {
-  (cookies() as unknown as UnsafeUnwrappedCookies).set("session", token, {
+export async function setSessionTokenCookie(
+  token: string,
+  expiresAt: Date,
+): Promise<void> {
+  (await cookies()).set("session", token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -84,8 +95,8 @@ export function setSessionTokenCookie(token: string, expiresAt: Date): void {
   });
 }
 
-export function deleteSessionTokenCookie(): void {
-  (cookies() as unknown as UnsafeUnwrappedCookies).set("session", "", {
+export async function deleteSessionTokenCookie(): Promise<void> {
+  (await cookies()).set("session", "", {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -97,10 +108,13 @@ export function deleteSessionTokenCookie(): void {
 export const getCurrentSession = cache(
   async (): Promise<SessionValidationResult> => {
     const token = (await cookies()).get("session")?.value ?? null;
+
     if (token === null) {
       return { session: null, user: null };
     }
+
     const result = await validateSessionToken(token);
+
     return result;
   },
 );

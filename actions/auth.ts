@@ -10,7 +10,7 @@ export const createGoogleAuthorizationURL = async () => {
   try {
     const state = generateState();
     const codeVerifier = generateCodeVerifier();
-    const authorizationURL = await google.createAuthorizationURL(
+    const authorizationURL = google.createAuthorizationURL(
       state,
       codeVerifier,
       {
@@ -49,7 +49,7 @@ export const createFacebookAuthorizationURL = async () => {
   try {
     const state = generateState();
 
-    const authorizationURL = await facebook.createAuthorizationURL(state, {
+    const authorizationURL = facebook.createAuthorizationURL(state, {
       scopes: ["email", "public_profile"],
     });
 
@@ -63,4 +63,3 @@ export const createFacebookAuthorizationURL = async () => {
     };
   }
 };
-

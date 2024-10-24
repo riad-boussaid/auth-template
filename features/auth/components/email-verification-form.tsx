@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import { useCountdown } from "usehooks-ts";
 import { Loader } from "lucide-react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,15 +25,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-// import { resendVerificationEmail } from "@/actions/auth";
-
-// import { useToast } from "@/hooks/use-toast";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
 import { useEmailVerification } from "@/features/auth/api/use-email-verification";
-import { useResendEmailVerification } from "../api/use-resend-email-verification";
+import { useResendEmailVerification } from "@/features/auth/api/use-resend-email-verification";
 
 export const EmailVerificationForm = () => {
   // const { toast } = useToast();

@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { type GoogleTokens } from "arctic";
+import { type OAuth2Tokens } from "arctic";
 
 import { db } from "@/lib/db";
 import { accountsTable, usersTable } from "@/lib/db/schema";
@@ -64,7 +64,7 @@ export const GET = async (req: NextRequest) => {
       );
     }
 
-    let tokens: GoogleTokens;
+    let tokens: OAuth2Tokens;
 
     try {
       tokens = await google.validateAuthorizationCode(code, codeVerifier);
@@ -137,7 +137,6 @@ export const GET = async (req: NextRequest) => {
         }
 
         const createdOAuthAccountRes = await trx.insert(accountsTable).values({
-          id: googleData.id,
           provider: "google",
           providerUserId: googleData.id,
           userId: googleData.id,

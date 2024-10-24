@@ -21,13 +21,12 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import { usePasswordReset } from "@/features/auth/api/use-password-reset";
 
-import { ResetPasswordAuthSchema } from "../validators";
+import { ResetPasswordAuthSchema } from "@/features/auth/validators";
 
 export const PasswordResetForm = () => {
   const { mutate, isPending } = usePasswordReset();

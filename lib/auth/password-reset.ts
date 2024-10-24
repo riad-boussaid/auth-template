@@ -1,23 +1,25 @@
-import { sha256 } from "@oslojs/crypto/sha2";
+import { cookies } from "next/headers";
+import { eq } from "drizzle-orm";
 import {
   encodeBase32UpperCaseNoPadding,
   encodeHexLowerCase,
 } from "@oslojs/encoding";
-import { cookies, type UnsafeUnwrappedCookies } from "next/headers";
-import { eq } from "drizzle-orm";
+import { sha256 } from "@oslojs/crypto/sha2";
 
-import { db } from "./db";
+import { db } from "@/lib/db";
 import {
   type User,
   type PasswordResetSession,
   usersTable,
   passwordResetSessionsTable,
-} from "./db/schema";
+} from "@/lib/db/schema";
 
 export function generateRandomOTP(): string {
   const bytes = new Uint8Array(5);
   crypto.getRandomValues(bytes);
+
   const code = encodeBase32UpperCaseNoPadding(bytes);
+
   return code;
 }
 
@@ -83,6 +85,7 @@ export async function validatePasswordResetSessionToken(
     createdAt: row.users.createdAt,
     updatedAt: row.users.updatedAt,
   };
+
   if (Date.now() >= session.expiresAt.getTime()) {
     await db
       .delete(passwordResetSessionsTable)
@@ -103,17 +106,17 @@ export async function validatePasswordResetSessionRequest(): Promise<PasswordRes
   const result = await validatePasswordResetSessionToken(token);
 
   if (result.session === null) {
-    deletePasswordResetSessionTokenCookie();
+    await deletePasswordResetSessionTokenCookie();
   }
 
   return result;
 }
 
-export function setPasswordResetSessionTokenCookie(
+export async function setPasswordResetSessionTokenCookie(
   token: string,
   expiresAt: Date,
-): void {
-  (cookies() as unknown as UnsafeUnwrappedCookies).set("password_reset_session", token, {
+): Promise<void> {
+  (await cookies()).set("password_reset_session", token, {
     expires: expiresAt,
     sameSite: "lax",
     httpOnly: true,
@@ -122,8 +125,8 @@ export function setPasswordResetSessionTokenCookie(
   });
 }
 
-export function deletePasswordResetSessionTokenCookie(): void {
-  (cookies() as unknown as UnsafeUnwrappedCookies).set("password_reset_session", "", {
+export async function deletePasswordResetSessionTokenCookie(): Promise<void> {
+  (await cookies()).set("password_reset_session", "", {
     maxAge: 0,
     sameSite: "lax",
     httpOnly: true,

@@ -1,14 +1,16 @@
-import { getCurrentSession } from "@/lib/auth/session";
-import { db } from "@/lib/db";
-import { usersTable } from "@/lib/db/schema";
-import { getErrorMessages } from "@/lib/error-message";
-import { zValidator } from "@hono/zod-validator";
-import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { zValidator } from "@hono/zod-validator";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
-import * as argon2 from "@node-rs/argon2";
-import { ResetPasswordSchema } from "../validators";
+import { verify, hash } from "@node-rs/argon2";
+
+import { db } from "@/lib/db";
+import { usersTable } from "@/lib/db/schema";
+import { getCurrentSession } from "@/lib/auth/session";
+import { getErrorMessages } from "@/lib/error-message";
+
+import { ResetPasswordSchema } from "@/features/user/validators";
 
 const app = new Hono()
   .post("/delete", async (c) => {
@@ -90,7 +92,7 @@ const app = new Hono()
 
         const { password, newPassword } = c.req.valid("json");
 
-        const isValidPassword = await argon2.verify(
+        const isValidPassword = await verify(
           existingUser.hashedPassword,
           password,
         );
@@ -99,7 +101,7 @@ const app = new Hono()
           throw new HTTPException(400, { message: "Incorrect password" });
         }
 
-        const hashedNewPassword = await argon2.hash(newPassword);
+        const hashedNewPassword = await hash(newPassword);
 
         await db
           .update(usersTable)

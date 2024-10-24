@@ -1,5 +1,7 @@
 "use client";
 
+import { Loader } from "lucide-react";
+
 import {
   AlertDialog,
   AlertDialogHeader,
@@ -11,8 +13,8 @@ import {
   AlertDialogContent,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
-import { buttonVariants } from "./ui/button";
-import { Loader } from "lucide-react";
+
+import { buttonVariants } from "@/components/ui/button";
 
 export const ConfirmDialog = ({
   open,

@@ -7,8 +7,6 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import { Separator } from "./separator";
-
 import {
   Form,
   FormControl,
@@ -27,6 +25,7 @@ import {
 } from "@/components/ui/card";
 
 import { Social } from "@/features/auth/components/social";
+import { Separator } from "@/features/auth/components/separator";
 
 import { SignInSchema } from "@/features/auth/validators";
 

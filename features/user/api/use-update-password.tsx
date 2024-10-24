@@ -1,5 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
 import { InferResponseType, InferRequestType } from "hono";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { useToast } from "@/hooks/use-toast";
@@ -10,7 +10,9 @@ import { client } from "@/lib/rpc";
 type ResponseType = InferResponseType<
   typeof client.api.user.updatePassword.$post
 >;
-type RequestType = InferRequestType<typeof client.api.user.updatePassword.$post>;
+type RequestType = InferRequestType<
+  typeof client.api.user.updatePassword.$post
+>;
 
 export const useResetPassword = () => {
   const { toast } = useToast();

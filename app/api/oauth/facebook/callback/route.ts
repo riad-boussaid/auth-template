@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-import { type FacebookTokens } from "arctic";
+import { type OAuth2Tokens } from "arctic";
 
 import { db } from "@/lib/db";
 import { accountsTable, usersTable } from "@/lib/db/schema";
@@ -43,7 +43,7 @@ export const GET = async (req: NextRequest) => {
       );
     }
 
-    let tokens: FacebookTokens;
+    let tokens: OAuth2Tokens;
 
     try {
       tokens = await facebook.validateAuthorizationCode(code);
@@ -92,7 +92,6 @@ export const GET = async (req: NextRequest) => {
           });
 
           await trx.insert(accountsTable).values({
-            id: userId,
             provider: "facebook",
             providerUserId: facebookData.id,
             userId,

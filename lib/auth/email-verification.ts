@@ -1,10 +1,12 @@
 import { encodeBase32 } from "@oslojs/encoding";
-import { cookies, type UnsafeUnwrappedCookies } from "next/headers";
-import { getCurrentSession } from "./session";
-import { db } from "../db";
-import { EmailVerification, emailVerificationsTable } from "../db/schema";
+import { cookies } from "next/headers";
 import { and, eq } from "drizzle-orm";
-import { generateRandomOTP } from "../password-reset";
+
+import { db } from "@/lib/db";
+import { EmailVerification, emailVerificationsTable } from "@/lib/db/schema";
+
+import { generateRandomOTP } from "@/lib/auth/password-reset";
+import { getCurrentSession } from "@/lib/auth/session";
 
 export async function getUserEmailVerificationRequest(
   userId: string,
@@ -86,10 +88,10 @@ export function sendVerificationEmail(email: string, code: string): void {
   console.log(`To ${email}: Your verification code is ${code}`);
 }
 
-export function setEmailVerificationRequestCookie(
+export async function setEmailVerificationRequestCookie(
   request: EmailVerification,
-): void {
-  (cookies() as unknown as UnsafeUnwrappedCookies).set("email_verification", request.id, {
+): Promise<void> {
+  (await cookies()).set("email_verification", request.id, {
     httpOnly: true,
     path: "/",
     secure: process.env.NODE_ENV === "production",
@@ -98,8 +100,8 @@ export function setEmailVerificationRequestCookie(
   });
 }
 
-export function deleteEmailVerificationRequestCookie(): void {
-  (cookies() as unknown as UnsafeUnwrappedCookies).set("email_verification", "", {
+export async function deleteEmailVerificationRequestCookie(): Promise<void> {
+  (await cookies()).set("email_verification", "", {
     httpOnly: true,
     path: "/",
     secure: process.env.NODE_ENV === "production",
@@ -110,16 +112,21 @@ export function deleteEmailVerificationRequestCookie(): void {
 
 export async function getUserEmailVerificationRequestFromRequest(): Promise<EmailVerification | null> {
   const { user } = await getCurrentSession();
+
   if (user === null) {
     return null;
   }
   const id = (await cookies()).get("email_verification")?.value ?? null;
+
   if (id === null) {
     return null;
   }
+
   const request = await getUserEmailVerificationRequest(user.id, id);
+
   if (request === null) {
     deleteEmailVerificationRequestCookie();
   }
+
   return request;
 }

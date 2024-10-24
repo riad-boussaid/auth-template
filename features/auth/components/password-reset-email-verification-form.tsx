@@ -1,5 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Loader } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,10 +14,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { usePasswordResetEmailVerification } from "../api/use-password-reset-email-verification";
 import {
   Form,
   FormControl,
@@ -20,7 +21,8 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader } from "lucide-react";
+
+import { usePasswordResetEmailVerification } from "@/features/auth/api/use-password-reset-email-verification";
 
 export const PasswordResetEmailVerificationForm = () => {
   const codeSchema = z.object({

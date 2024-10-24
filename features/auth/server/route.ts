@@ -1,8 +1,10 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { and, eq } from "drizzle-orm";
-import * as argon2 from "@node-rs/argon2";
+import { cookies } from "next/headers";
+import { hash, verify } from "@node-rs/argon2";
 // import jwt from "hono/jwt";
 
 import { db } from "@/lib/db";
@@ -33,9 +35,8 @@ import {
   createPasswordResetSession,
   deletePasswordResetSessionTokenCookie,
   validatePasswordResetSessionRequest,
-} from "@/lib/password-reset";
-import { cookies } from "next/headers";
-import { z } from "zod";
+} from "@/lib/auth/password-reset";
+
 import {
   createEmailVerificationRequest,
   deleteEmailVerificationRequestCookie,
@@ -65,7 +66,7 @@ const app = new Hono()
         throw new Error("User Already exist");
       }
 
-      const hashedPassword = await argon2.hash(password);
+      const hashedPassword = await hash(password);
 
       const [createdUser] = await db
         .insert(usersTable)
@@ -136,7 +137,7 @@ const app = new Hono()
         throw new Error("User not found");
       }
 
-      const isValidPassword = await argon2.verify(
+      const isValidPassword = await verify(
         existingUser.hashedPassword,
         password,
       );
@@ -213,7 +214,7 @@ const app = new Hono()
             verificationRequest.userId,
             verificationRequest.email,
           );
-          
+
           sendVerificationEmail(
             verificationRequest.email,
             verificationRequest.code,
@@ -435,7 +436,7 @@ const app = new Hono()
 
         const { newPassword } = c.req.valid("json");
 
-        const hashedNewPassword = await argon2.hash(newPassword);
+        const hashedNewPassword = await hash(newPassword);
 
         await db
           .update(usersTable)
