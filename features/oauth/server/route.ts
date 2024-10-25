@@ -5,17 +5,17 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { ObjectParser } from "@pilcrowjs/object-parser";
 import {
-  ArcticFetchError,
+  // ArcticFetchError,
   decodeIdToken,
   generateCodeVerifier,
   generateState,
-  OAuth2RequestError,
+  // OAuth2RequestError,
   type OAuth2Tokens,
 } from "arctic";
 
 import { db } from "@/lib/db";
 import { accountsTable, usersTable } from "@/lib/db/schema";
-import { google } from "@/lib/auth/oauth";
+import { facebook, google } from "@/lib/auth/oauth";
 import { getErrorMessages } from "@/lib/error-message";
 import {
   createSession,
@@ -23,18 +23,8 @@ import {
   setSessionTokenCookie,
 } from "@/lib/auth/session";
 
-interface GoogleUser {
-  id: string;
-  email: string;
-  verified_email: boolean;
-  name: string;
-  given_name: string;
-  picture: string;
-  locale: string;
-}
-
 const app = new Hono()
-  .post("/createGoogleAuthorizationURL", async (c) => {
+  .get("/createGoogleAuthorizationURL", async (c) => {
     try {
       const state = generateState();
       const codeVerifier = generateCodeVerifier();
@@ -248,111 +238,28 @@ const app = new Hono()
         message: getErrorMessages(error),
       });
     }
+  })
+  .get("/createFacebookAuthorizationUrl", async (c) => {
+    try {
+      const state = generateState();
+
+      const authorizationURL = facebook.createAuthorizationURL(state, [
+        "email",
+        "public_profile",
+      ]);
+
+      return c.json({
+        success: true,
+        message: "Facebook authorization url created successfully",
+        data: authorizationURL.toString(),
+      });
+    } catch (error) {
+      return c.json({
+        success: false,
+        message: getErrorMessages(error),
+        data: "",
+      });
+    }
   });
 
 export default app;
-
-// export const GET = async (req: NextRequest) => {
-//   try {
-// await db.transaction(async (trx) => {
-//   const [existingUser] = await trx
-//     .select()
-//     .from(usersTable)
-//     .where(eq(usersTable.email, email))
-//     .limit(1);
-
-//   console.debug("User", existingUser);
-//   // let session = null;
-
-//   if (!existingUser) {
-//     console.log("Creating user", existingUser);
-
-//     const createdUserRes = await trx
-//       .insert(usersTable)
-//       .values({
-//         email,
-//         username,
-//         avatar: picture,
-//         emailVerified: true,
-//       })
-//       .returning({
-//         id: usersTable.id,
-//       });
-
-//     if (createdUserRes.length === 0) {
-//       trx.rollback();
-
-//       return Response.json(
-//         { error: "Failed to create user" },
-//         {
-//           status: 500,
-//         },
-//       );
-//     }
-
-//     const createdOAuthAccountRes = await trx.insert(accountsTable).values({
-//       provider: "google",
-//       providerUserId: googleId,
-//       userId: googleId,
-//       accessToken: tokens.accessToken(),
-//       refreshToken: tokens.refreshToken(),
-//       expiresAt: tokens.accessTokenExpiresAt(),
-//     });
-
-//     if (createdOAuthAccountRes.rowCount === 0) {
-//       trx.rollback();
-//       return Response.json(
-//         { error: "Failed to create OAuthAccountRes" },
-//         {
-//           status: 500,
-//         },
-//       );
-//     }
-//   } else {
-//     const updatedOAuthAccountRes = await trx
-//       .update(accountsTable)
-//       .set({
-//         accessToken: tokens.accessToken(),
-//         refreshToken: tokens.refreshToken(),
-//         expiresAt: tokens.accessTokenExpiresAt(),
-//       })
-//       .where(eq(accountsTable.id, googleId));
-
-//     if (updatedOAuthAccountRes.rowCount === 0) {
-//       trx.rollback();
-//       return Response.json(
-//         { error: "Failed to update OAuthAccountRes" },
-//         {
-//           status: 500,
-//         },
-//       );
-//     }
-//   }
-
-//   return NextResponse.redirect(
-//     new URL("/dashboard", process.env.NEXT_PUBLIC_APP_URL),
-//     {
-//       status: 302,
-//     },
-//   );
-// });
-
-//     const sessionToken = generateSessionToken();
-//     const session = await createSession(sessionToken, googleId);
-//     await setSessionTokenCookie(sessionToken, session.expiresAt);
-
-//     return NextResponse.redirect(
-//       new URL("/", process.env.NEXT_PUBLIC_APP_URL),
-//       {
-//         status: 302,
-//       },
-//     );
-//   } catch (error) {
-//     return Response.json(
-//       { error: getErrorMessages(error) },
-//       {
-//         status: 500,
-//       },
-//     );
-//   }
-// };

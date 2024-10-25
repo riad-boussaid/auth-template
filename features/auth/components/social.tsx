@@ -6,36 +6,30 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
-import { createFacebookAuthorizationURL } from "@/actions/auth";
-
 import { useCreateGoogleAuthorizationUrl } from "@/features/oauth/api/use-create-google-authorization-url";
+import { useCreateFacebookAuthorizationUrl } from "@/features/oauth/api/use-create-facebook-authorization-url";
 
 export const Social = () => {
-  const { mutate } = useCreateGoogleAuthorizationUrl();
+  const { mutate: mutateGoogle, isPending: isPendingGoogle } =
+    useCreateGoogleAuthorizationUrl();
+  const { mutate: mutateFacebook, isPending: isPendingFacebook } =
+    useCreateFacebookAuthorizationUrl();
 
   const onGoogleSignInClicked = async () => {
-    console.debug("google sign in clicked");
-
-    mutate({});
+    mutateGoogle({});
   };
 
   const onFacebookSignInClicked = async () => {
-    console.debug("facebook sign in clicked");
-
-    const res = await createFacebookAuthorizationURL();
-    if (res.error) {
-      toast.error(res.error);
-    } else if (res.success) {
-      window.location.href = res.data.toString();
-    }
+    mutateFacebook({});
   };
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Button
+        disabled={isPendingGoogle}
         size="lg"
-        className="w-full rounded-md"
         variant="outline"
+        className="w-full rounded-md"
         onClick={onGoogleSignInClicked}
       >
         Continue with
@@ -43,9 +37,10 @@ export const Social = () => {
       </Button>
 
       <Button
+        disabled={isPendingFacebook}
         size="lg"
-        className="w-full rounded-md"
         variant="outline"
+        className="w-full rounded-md"
         onClick={onFacebookSignInClicked}
       >
         Continue with

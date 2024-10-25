@@ -5,22 +5,22 @@ import { client } from "@/lib/rpc";
 import { useToast } from "@/hooks/use-toast";
 
 type ResponseType = InferResponseType<
-  typeof client.api.oauth.createGoogleAuthorizationURL.$get
+  typeof client.api.oauth.createFacebookAuthorizationUrl.$get
 >;
 type RequesteType = InferRequestType<
-  typeof client.api.oauth.createGoogleAuthorizationURL.$get
+  typeof client.api.oauth.createFacebookAuthorizationUrl.$get
 >;
 
-export const useCreateGoogleAuthorizationUrl = () => {
+export const useCreateFacebookAuthorizationUrl = () => {
   const { toast } = useToast();
 
   return useMutation<ResponseType, Error, RequesteType>({
     mutationFn: async () => {
       const response =
-        await client.api.oauth.createGoogleAuthorizationURL.$get();
+        await client.api.oauth.createFacebookAuthorizationUrl.$get();
 
       if (!response) {
-        throw new Error("Failed to create google authorization url");
+        throw new Error("Failed to create facebook authorization url");
       }
 
       return await response.json();

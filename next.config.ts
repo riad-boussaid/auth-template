@@ -13,6 +13,13 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "platform-lookaside.fbsbx.com",
+        port: "",
+        pathname: "/**/**",
+        search: "",
+      },
+      {
+        protocol: "https",
         hostname: "res.cloudinary.com",
       },
     ],
