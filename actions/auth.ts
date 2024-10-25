@@ -1,47 +1,9 @@
 "use server";
 
-import { generateCodeVerifier, generateState } from "arctic";
-import { cookies } from "next/headers";
+import { generateState } from "arctic";
 
-import { facebook, google } from "@/lib/auth/oauth";
+import { facebook } from "@/lib/auth/oauth";
 import { getErrorMessages } from "@/lib/error-message";
-
-export const createGoogleAuthorizationURL = async () => {
-  try {
-    const state = generateState();
-    const codeVerifier = generateCodeVerifier();
-    const authorizationURL = google.createAuthorizationURL(
-      state,
-      codeVerifier,
-      ["email", "profile"],
-    );
-
-    (await cookies()).set("google_oauth_state", state, {
-      path: "/",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 10, // 10 minutes
-      sameSite: "lax",
-    });
-
-    (await cookies()).set("google_code_verifier", codeVerifier, {
-      path: "/",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 10, // 10 minutes
-      sameSite: "lax",
-    });
-
-    return {
-      success: true,
-      data: authorizationURL.toString(),
-    };
-  } catch (error) {
-    return {
-      error: getErrorMessages(error),
-    };
-  }
-};
 
 export const createFacebookAuthorizationURL = async () => {
   try {

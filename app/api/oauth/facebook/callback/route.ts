@@ -57,7 +57,7 @@ export const GET = async (req: NextRequest) => {
     }
 
     const facebookResponse = await fetch(
-      `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${tokens.accessToken}`,
+      `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${tokens.accessToken()}`,
       {
         method: "GET",
       },
@@ -74,27 +74,21 @@ export const GET = async (req: NextRequest) => {
         });
 
         if (!existingUser) {
-          const userId = generateRandomString(
-            {
-              read(bytes: Uint8Array): void {
-                crypto.getRandomValues(bytes);
-              },
-            },
-            "abcdefghijklmnopqrstuvwxyz0123456789",
-            15,
-          );
-          await trx.insert(usersTable).values({
-            // id: userId,
-            email: facebookData.email,
-            username: facebookData.name,
-            avatar: facebookData.picture.data.url,
-            emailVerified: true,
-          });
+          const [insertedUser] = await trx
+            .insert(usersTable)
+            .values({
+              // id: userId,
+              email: facebookData.email,
+              username: facebookData.name,
+              avatar: facebookData.picture.data.url,
+              emailVerified: true,
+            })
+            .returning({ id: usersTable.id });
 
           await trx.insert(accountsTable).values({
             provider: "facebook",
             providerUserId: facebookData.id,
-            userId,
+            userId: insertedUser.id,
             accessToken: tokens.accessToken(),
             expiresAt: tokens.accessTokenExpiresAt(),
           });
@@ -103,7 +97,7 @@ export const GET = async (req: NextRequest) => {
             success: true,
             message: "User logged in successfully",
             data: {
-              id: userId,
+              id: insertedUser.id,
             },
           };
         } else {
@@ -145,7 +139,7 @@ export const GET = async (req: NextRequest) => {
       sessionToken,
       transactionResponse?.data?.id,
     );
-    setSessionTokenCookie(sessionToken, session.expiresAt);
+    await setSessionTokenCookie(sessionToken, session.expiresAt);
 
     return NextResponse.redirect(
       new URL("/", process.env.NEXT_PUBLIC_APP_URL),

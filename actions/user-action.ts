@@ -2,9 +2,9 @@
 
 import "server-only";
 
-import { v2 as cloudinary } from "cloudinary";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { v2 as cloudinary } from "cloudinary";
 
 import { getCurrentSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -16,8 +16,6 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
-
 
 export const updateRoleAction = async (
   userId: string | undefined,
@@ -51,7 +49,6 @@ export const updateRoleAction = async (
     return { error: getErrorMessages(error) };
   }
 };
-
 
 export const deleteAvatarAction = async () => {
   try {

@@ -205,13 +205,13 @@ const app = new Hono()
               })
               .where(eq(accountsTable.providerUserId, googleId));
 
-            if (updatedOAuthAccountRes.rowCount === 0) {
-              trx.rollback();
+            // if (updatedOAuthAccountRes.rowCount === 0) {
+            //   trx.rollback();
 
-              throw new HTTPException(500, {
-                message: "Failed to update OAuthAccountRes",
-              });
-            }
+            //   throw new HTTPException(500, {
+            //     message: "Failed to update OAuthAccountRes",
+            //   });
+            // }
           }
 
           return {
