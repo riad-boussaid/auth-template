@@ -4,6 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { verify, hash } from "@node-rs/argon2";
+import { v2 as cloudinary } from "cloudinary";
 
 import { db } from "@/lib/db";
 import { usersTable } from "@/lib/db/schema";
@@ -12,8 +13,14 @@ import { getErrorMessages } from "@/lib/error-message";
 
 import { ResetPasswordSchema } from "@/features/user/validators";
 
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 const app = new Hono()
-  .post("/delete", async (c) => {
+  .post("/deleteUser", async (c) => {
     try {
       const { user } = await getCurrentSession();
 
@@ -116,6 +123,69 @@ const app = new Hono()
         return c.json({ success: false, message: getErrorMessages(error) });
       }
     },
-  );
+  )
+  .post(
+    "/updateAvatar",
+    zValidator(
+      "form",
+      z.object({
+        avatar: z.string().min(1).url(),
+      }),
+    ),
+    async (c) => {
+      try {
+        const { user } = await getCurrentSession();
+
+        if (!user) {
+          throw new HTTPException(400, { message: "Unauthorized" });
+        }
+
+        const { avatar } = c.req.valid("form");
+
+        const result = await cloudinary.uploader.upload(avatar, {
+          use_filename: true,
+        });
+
+        await db
+          .update(usersTable)
+          .set({ avatar: result.secure_url })
+          .where(eq(usersTable.id, user.id));
+
+        return c.json({
+          success: true,
+          message: "User avatar updated successfully",
+        });
+      } catch (error) {
+        return c.json({
+          success: false,
+          message: getErrorMessages(error),
+        });
+      }
+    },
+  )
+  .post("/deleteAvatar", async (c) => {
+    try {
+      const { user } = await getCurrentSession();
+
+      if (!user) {
+        throw new HTTPException(400, { message: "Unauthorized" });
+      }
+
+      await db
+        .update(usersTable)
+        .set({ avatar: null })
+        .where(eq(usersTable.id, user.id));
+
+      return c.json({
+        success: true,
+        message: "User avatar removed successfully",
+      });
+    } catch (error) {
+      return c.json({
+        success: false,
+        message: getErrorMessages(error),
+      });
+    }
+  });
 
 export default app;

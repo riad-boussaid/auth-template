@@ -3,7 +3,6 @@
 import "server-only";
 
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { v2 as cloudinary } from "cloudinary";
 
 import { getCurrentSession } from "@/lib/auth/session";
@@ -42,61 +41,7 @@ export const updateRoleAction = async (
       .set({ role: role as (typeof roleEnums.enumValues)[number] })
       .where(eq(usersTable.id, userId));
 
-    revalidatePath("/dashboard");
-
     return { success: "User role updated successfully" };
-  } catch (error) {
-    return { error: getErrorMessages(error) };
-  }
-};
-
-export const deleteAvatarAction = async () => {
-  try {
-    const { user } = await getCurrentSession();
-
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    await db
-      .update(usersTable)
-      .set({ avatar: null })
-      .where(eq(usersTable.id, user.id));
-
-    revalidatePath("/settings");
-
-    return { success: "User avatar deleted successfully" };
-  } catch (error) {
-    return { error: getErrorMessages(error) };
-  }
-};
-
-export const updateAvatarAction = async (avatar: string) => {
-  try {
-    const { user } = await getCurrentSession();
-
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    const result = await cloudinary.uploader.upload(avatar, {
-      use_filename: true,
-    });
-
-    console.log(result);
-
-    // await cloudinary.api.resources.([billboardPublicId], {
-    //   resource_type: "image",
-    // });
-
-    await db
-      .update(usersTable)
-      .set({ avatar: result.secure_url })
-      .where(eq(usersTable.id, user.id));
-
-    revalidatePath("/settings");
-
-    return { success: "User avatar updated successfully" };
   } catch (error) {
     return { error: getErrorMessages(error) };
   }

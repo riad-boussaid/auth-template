@@ -35,7 +35,7 @@ export const DeleteUserForm = () => {
   };
 
   return (
-    <Card>
+    <Card className="border-destructive">
       <CardHeader>
         <CardTitle>Delete Account</CardTitle>
         <CardDescription>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSession } from "@/components/providers/session-provider";
 import { UserButton } from "@/components/user-button";
 import { SigninButton } from "@/components/signin-button";
+import { NotificationPopover } from "@/components/notification-popover";
 
 import { cn } from "@/lib/utils";
 
@@ -35,7 +36,8 @@ export const MainHeader = () => {
           </Link>
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-x-2">
+          {user && <NotificationPopover />}
           {!user ? <SigninButton /> : <UserButton user={user} />}
         </div>
       </div>

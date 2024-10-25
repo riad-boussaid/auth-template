@@ -11,11 +11,9 @@ import { UpdatePasswordForm } from "@/features/user/components/update-password-f
 import { UpdateAvatarForm } from "@/features/user/components/update-avatar-form";
 import { DeleteUserForm } from "@/features/user/components/delete-user-form";
 
-export default async function SettingsPage(
-  props: {
-    searchParams?: Promise<{ tab: string }>;
-  }
-) {
+export default async function SettingsPage(props: {
+  searchParams?: Promise<{ tab: string }>;
+}) {
   const searchParams = await props.searchParams;
   const { session, user } = await getCurrentSession();
 
@@ -81,7 +79,10 @@ export default async function SettingsPage(
           {tab === "account" && (
             <>
               <UpdateUsernameForm />
-              <UpdateAvatarForm imageUrl={user.avatar} />
+              <UpdateAvatarForm
+                imageUrl={user.avatar}
+                username={user.username}
+              />
               <DeleteUserForm />
             </>
           )}
