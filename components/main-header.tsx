@@ -7,6 +7,7 @@ import { useSession } from "@/components/providers/session-provider";
 import { UserButton } from "@/components/user-button";
 import { SigninButton } from "@/components/signin-button";
 import { NotificationPopover } from "@/components/notification-popover";
+import { Logo } from "@/components/logo";
 
 import { cn } from "@/lib/utils";
 
@@ -29,12 +30,8 @@ export const MainHeader = () => {
           : "border-none dark:border-none",
       )}
     >
-      <div className="container flex items-center justify-between gap-4">
-        <div className="size-full">
-          <Link href={"/"}>
-            <h3 className="text-2xl font-bold">next-lucia-template</h3>
-          </Link>
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <Logo />
 
         <div className="ml-auto flex items-center gap-x-2">
           {user && <NotificationPopover />}

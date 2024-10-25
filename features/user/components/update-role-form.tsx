@@ -12,11 +12,11 @@ import {
 
 import { useSession } from "@/components/providers/session-provider";
 import { useToast } from "@/hooks/use-toast";
-import { updateRoleAction } from "@/actions/user-action";
 
 import { roleEnums } from "@/lib/db/schema";
+import { useUpdateRole } from "../api/use-update-role";
 
-export const RoleForm = ({
+export const UpdateRoleForm = ({
   userId,
   role,
 }: {
@@ -26,15 +26,10 @@ export const RoleForm = ({
   const { toast } = useToast();
   const { user } = useSession();
 
+  const { mutate } = useUpdateRole();
+
   const onValueChange = (newRole: string) => {
-    updateRoleAction(userId, newRole).then((data) => {
-      if (data?.error) {
-        toast({ variant: "destructive", description: data.error });
-      }
-      if (data?.success) {
-        toast({ variant: "default", description: data.success });
-      }
-    });
+    mutate({ form: { userId, role: newRole } });
   };
 
   return (

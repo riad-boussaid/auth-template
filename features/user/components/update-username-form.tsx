@@ -29,13 +29,13 @@ import { useSession } from "@/components/providers/session-provider";
 import { useUpdateUsername } from "@/features/user/api/use-update-username";
 
 export const UpdateUsernameForm = () => {
-  // const { toast } = useToast();
   const { user } = useSession();
 
   const [isEditing, setIsEditing] = useState(false);
 
   const toggleEditMode = () => {
     setIsEditing((current) => !current);
+    form.reset();
   };
 
   const usernameSchema = z.object({

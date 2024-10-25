@@ -25,12 +25,9 @@ export default async function SettingsPage(props: {
 
   return (
     <main className="flex flex-col gap-4 md:gap-y-8">
-      <div className="container grid w-full gap-2">
-        <h1 className="text-3xl font-semibold">Settings</h1>
-      </div>
       <div
         className={cn(
-          "container grid w-full items-start gap-6",
+          "grid w-full items-start gap-6",
           tab && "md:grid-cols-[180px_1fr] lg:grid-cols-[250px_1fr]",
         )}
       >

@@ -36,23 +36,27 @@ export const SettingsNav = () => {
   ] as const;
 
   return (
-    <nav className="grid gap-2 text-sm text-muted-foreground">
-      {items.map((item) => (
-        <Button
-          key={item.id}
-          variant={
-            item.label.toLowerCase() === tab?.toLowerCase()
-              ? "default"
-              : "ghost"
-          }
-          className="justify-start rounded-full"
-          asChild
-        >
-          <Link href={item.href} className={cn("font-semibold")}>
-            {item.label}
-          </Link>
-        </Button>
-      ))}
-    </nav>
+    <div className="space-y-6">
+      <h1 className="text-xl font-semibold">Settings</h1>
+
+      <nav className="grid gap-2 text-sm text-muted-foreground">
+        {items.map((item) => (
+          <Button
+            key={item.id}
+            variant={
+              item.label.toLowerCase() === tab?.toLowerCase()
+                ? "default"
+                : "ghost"
+            }
+            className="justify-start rounded-full"
+            asChild
+          >
+            <Link href={item.href} className={cn("font-semibold")}>
+              {item.label}
+            </Link>
+          </Button>
+        ))}
+      </nav>
+    </div>
   );
 };

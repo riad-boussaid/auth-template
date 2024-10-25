@@ -3,13 +3,12 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { User } from "@/lib/db/schema";
-// import Image from "next/image";
-import { DashboardTableActions } from "./dashboard-table-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { RoleForm } from "./role-form";
+import { UsersTableActions } from "./users-table-actions";
+import { UpdateRoleForm } from "@/features/user/components/update-role-form";
 
-export const DashboardTablecolumns: ColumnDef<User>[] = [
+export const UsersTablecolumns: ColumnDef<User>[] = [
   {
     accessorKey: "avatar",
     header: "Profile",
@@ -46,7 +45,7 @@ export const DashboardTablecolumns: ColumnDef<User>[] = [
       const userId = row.original.id;
       const role = row.original.role;
 
-      return <RoleForm userId={userId} role={role} />;
+      return <UpdateRoleForm userId={userId} role={role} />;
     },
   },
   {
@@ -56,7 +55,7 @@ export const DashboardTablecolumns: ColumnDef<User>[] = [
 
       return (
         <div className="text-right">
-          <DashboardTableActions user={user} />
+          <UsersTableActions user={user} />
         </div>
       );
     },

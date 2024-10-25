@@ -7,7 +7,7 @@ import { verify, hash } from "@node-rs/argon2";
 import { v2 as cloudinary } from "cloudinary";
 
 import { db } from "@/lib/db";
-import { usersTable } from "@/lib/db/schema";
+import { roleEnums, usersTable } from "@/lib/db/schema";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getErrorMessages } from "@/lib/error-message";
 
@@ -186,6 +186,52 @@ const app = new Hono()
         message: getErrorMessages(error),
       });
     }
-  });
+  })
+  .post(
+    "/updateRole",
+    zValidator(
+      "form",
+      z.object({
+        userId: z.string().min(1),
+        role: z.string().min(1),
+      }),
+    ),
+    async (c) => {
+      try {
+        const { user } = await getCurrentSession();
+
+        if (!user || user.role !== "ADMIN") {
+          throw new HTTPException(400, { message: "Unauthorized" });
+        }
+
+        const { userId, role } = c.req.valid("form");
+
+        if (!userId) {
+          throw new HTTPException(400, { message: "Invalid" });
+        }
+
+        if (user.id === userId) {
+          throw new HTTPException(400, {
+            message: "You can't change role for current user",
+          });
+        }
+
+        await db
+          .update(usersTable)
+          .set({ role: role as (typeof roleEnums.enumValues)[number] })
+          .where(eq(usersTable.id, userId));
+
+        return c.json({
+          success: true,
+          message: "User role updated successfully",
+        });
+      } catch (error) {
+        return c.json({
+          success: false,
+          message: getErrorMessages(error),
+        });
+      }
+    },
+  );
 
 export default app;

@@ -10,7 +10,7 @@ import {
 import { User } from "@/lib/db/schema";
 import { MoreHorizontal } from "lucide-react";
 
-export const DashboardTableActions = ({ user }: { user: User }) => {
+export const UsersTableActions = ({ user }: { user: User }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

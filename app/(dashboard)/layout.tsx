@@ -10,7 +10,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="w-full">
+      <main className="container w-full">
         <MainHeader />
         {/* <SidebarTrigger /> */}
         {children}

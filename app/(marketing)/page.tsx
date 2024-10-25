@@ -12,13 +12,28 @@ import {
 
 export default async function Home() {
   return (
-    <div className="container flex min-h-[calc(100dvh-80px)] items-center justify-center gap-x-8">
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-2xl">Tech Stack</CardTitle>
+    <div className="flex h-full items-center">
+      <Card className="w-[400px]">
+        <CardHeader className="border-b">
+          <div className="flex justify-between gap-x-2">
+            <CardTitle className="text-2xl">Tech Stack</CardTitle>
+            <Link
+              href={"https://github.com/riad-boussaid/lucia-auth-template"}
+              target="_blank"
+            >
+              <Button
+                variant={"secondary"}
+                size={"default"}
+                className="rounded-full"
+              >
+                <FaGithub className="size-4" />
+                Github repo
+              </Button>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
-          <ul className="mt-4 space-y-1 *:text-xs">
+          <ul className="mt-4 space-y-1 *:text-sm">
             <li>- Next.js</li>
             <li>- Hono</li>
             <li>- Tanstack query</li>
@@ -28,19 +43,6 @@ export default async function Home() {
             <li>- Node Mailer</li>
           </ul>
         </CardContent>
-        <CardFooter className="justify-end border-t p-6">
-          <div>
-            <Link
-              href={"https://github.com/riad-boussaid/lucia-auth-template"}
-              target="_blank"
-            >
-              <Button variant={"default"} size={"sm"}>
-                <FaGithub className="size-4" />
-                Github repo
-              </Button>
-            </Link>
-          </div>
-        </CardFooter>
       </Card>
     </div>
   );

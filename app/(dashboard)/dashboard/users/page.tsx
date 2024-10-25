@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 
 import { DataTable } from "@/components/data-table";
-import { DashboardTablecolumns } from "./_components/dashboard-table-columns";
+
+import { UsersTablecolumns } from "./_components/users-table-columns";
 
 import { getCurrentSession } from "@/lib/auth/session";
 import { getUsers } from "@/lib/data/users";
@@ -21,11 +22,11 @@ export default async function UsersPage() {
   if (error) console.log(error);
 
   return (
-    <div className="container space-y-8 mt-8">
+    <div className="mt-8 space-y-8">
       <div className="grid w-full gap-2">
         <h1 className="text-2xl font-semibold">Users Table</h1>
       </div>
-      <DataTable columns={DashboardTablecolumns} data={users || []} />
+      <DataTable columns={UsersTablecolumns} data={users || []} />
     </div>
   );
 }

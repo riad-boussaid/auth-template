@@ -6,7 +6,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
+    <div className="container">
       <MainHeader />
       <div className="min-h-[calc(100dvh-80px)] bg-gray-50 py-8 dark:bg-background">
         {children}
