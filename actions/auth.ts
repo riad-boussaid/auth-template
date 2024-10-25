@@ -13,12 +13,10 @@ export const createGoogleAuthorizationURL = async () => {
     const authorizationURL = google.createAuthorizationURL(
       state,
       codeVerifier,
-      {
-        scopes: ["email", "profile"],
-      },
+      ["email", "profile"],
     );
 
-    (await cookies()).set("state", state, {
+    (await cookies()).set("google_oauth_state", state, {
       path: "/",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -26,7 +24,7 @@ export const createGoogleAuthorizationURL = async () => {
       sameSite: "lax",
     });
 
-    (await cookies()).set("codeVerifier", codeVerifier, {
+    (await cookies()).set("google_code_verifier", codeVerifier, {
       path: "/",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -49,9 +47,10 @@ export const createFacebookAuthorizationURL = async () => {
   try {
     const state = generateState();
 
-    const authorizationURL = facebook.createAuthorizationURL(state, {
-      scopes: ["email", "public_profile"],
-    });
+    const authorizationURL = facebook.createAuthorizationURL(state, [
+      "email",
+      "public_profile",
+    ]);
 
     return {
       success: true,

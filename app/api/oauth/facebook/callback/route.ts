@@ -84,7 +84,7 @@ export const GET = async (req: NextRequest) => {
             15,
           );
           await trx.insert(usersTable).values({
-            id: userId,
+            // id: userId,
             email: facebookData.email,
             username: facebookData.name,
             avatar: facebookData.picture.data.url,
@@ -95,8 +95,8 @@ export const GET = async (req: NextRequest) => {
             provider: "facebook",
             providerUserId: facebookData.id,
             userId,
-            accessToken: tokens.accessToken,
-            expiresAt: tokens.accessTokenExpiresAt,
+            accessToken: tokens.accessToken(),
+            expiresAt: tokens.accessTokenExpiresAt(),
           });
 
           return {
@@ -110,8 +110,8 @@ export const GET = async (req: NextRequest) => {
           await trx
             .update(accountsTable)
             .set({
-              accessToken: tokens.accessToken,
-              expiresAt: tokens.accessTokenExpiresAt,
+              accessToken: tokens.accessToken(),
+              expiresAt: tokens.accessTokenExpiresAt(),
             })
             .where(
               and(

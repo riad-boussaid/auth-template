@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { PasswordResetForm } from "@/features/auth/components/password-reset-form";
-import { validatePasswordResetSessionRequest } from "@/lib/password-reset";
+import { validatePasswordResetSessionRequest } from "@/lib/auth/password-reset";
 
 export default async function PasswordResetPage() {
   const { session } = await validatePasswordResetSessionRequest();

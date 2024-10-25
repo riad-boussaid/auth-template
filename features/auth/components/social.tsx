@@ -10,17 +10,22 @@ import {
   createGoogleAuthorizationURL,
   createFacebookAuthorizationURL,
 } from "@/actions/auth";
+import { useCreateGoogleAuthorizationUrl } from "@/features/oauth/api/use-create-google-authorization-url";
 
 export const Social = () => {
+  const { mutate } = useCreateGoogleAuthorizationUrl();
+
   const onGoogleSignInClicked = async () => {
     console.debug("google sign in clicked");
 
-    const res = await createGoogleAuthorizationURL();
-    if (res.error) {
-      toast.error(res.error);
-    } else if (res.success) {
-      window.location.href = res.data.toString();
-    }
+    mutate({});
+
+    // const res = await createGoogleAuthorizationURL();
+    // if (res.error) {
+    //   toast.error(res.error);
+    // } else if (res.success) {
+    //   window.location.href = res.data.toString();
+    // }
   };
 
   const onFacebookSignInClicked = async () => {
