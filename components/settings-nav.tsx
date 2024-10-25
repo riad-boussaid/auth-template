@@ -30,6 +30,11 @@ export const SettingsNav = () => {
     },
     {
       id: 4,
+      label: "Sessions",
+      href: `${pathname}?tab=sessions`,
+    },
+    {
+      id: 5,
       label: "Appearance",
       href: `${pathname}?tab=appearance`,
     },

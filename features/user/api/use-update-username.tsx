@@ -32,7 +32,6 @@ export const useUpdateUsername = () => {
         toast({ variant: "destructive", description: data.message });
       } else {
         toast({ variant: "success", description: data.message });
-        queryClient.invalidateQueries({ queryKey: ["current"] });
 
         router.refresh();
       }

@@ -30,7 +30,7 @@ export const MainHeader = () => {
           : "border-none dark:border-none",
       )}
     >
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex container items-center justify-between gap-4">
         <Logo />
 
         <div className="ml-auto flex items-center gap-x-2">

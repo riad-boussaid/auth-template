@@ -92,11 +92,11 @@ const app = new Hono()
         emailVerificationRequest.code,
       );
 
-      setEmailVerificationRequestCookie(emailVerificationRequest);
+      await setEmailVerificationRequestCookie(emailVerificationRequest);
 
       const sessionToken = generateSessionToken();
       const session = await createSession(sessionToken, createdUser.userId);
-      setSessionTokenCookie(sessionToken, session.expiresAt);
+      await setSessionTokenCookie(sessionToken, session.expiresAt);
 
       // await sendEmail({
       //   html: `<a href="${url}">Verify your email</a>`,
@@ -148,7 +148,7 @@ const app = new Hono()
 
       const sessionToken = generateSessionToken();
       const session = await createSession(sessionToken, existingUser.id);
-      setSessionTokenCookie(sessionToken, session.expiresAt);
+      await setSessionTokenCookie(sessionToken, session.expiresAt);
 
       if (existingUser.emailVerified === false) {
         // return c.redirect("/email-verification");
@@ -176,7 +176,7 @@ const app = new Hono()
 
       await invalidateSession(session.id);
 
-      deleteSessionTokenCookie();
+      await deleteSessionTokenCookie();
 
       return c.json({
         success: true,
@@ -219,6 +219,7 @@ const app = new Hono()
             verificationRequest.email,
             verificationRequest.code,
           );
+
           throw new HTTPException(400, {
             message:
               "The verification code was expired. We sent another code to your inbox.",
@@ -235,7 +236,7 @@ const app = new Hono()
           throw new HTTPException(400, { message: "Incorrect code." });
         }
 
-        deleteUserEmailVerificationRequest(user.id);
+        await deleteUserEmailVerificationRequest(user.id);
         // invalidateUserPasswordResetSessions(user.id);
         await db
           .delete(passwordResetSessionsTable)
@@ -247,7 +248,7 @@ const app = new Hono()
           .set({ email: verificationRequest.email, emailVerified: true })
           .where(eq(usersTable.id, user.id));
 
-        deleteEmailVerificationRequestCookie();
+        await deleteEmailVerificationRequestCookie();
 
         return c.json({
           success: true,
@@ -293,7 +294,7 @@ const app = new Hono()
         verificationRequest.code,
       );
 
-      setEmailVerificationRequestCookie(verificationRequest);
+      await setEmailVerificationRequestCookie(verificationRequest);
 
       return c.json({
         success: true,
@@ -457,7 +458,7 @@ const app = new Hono()
           expires: session.expiresAt,
         });
 
-        deletePasswordResetSessionTokenCookie();
+       await deletePasswordResetSessionTokenCookie();
         // cookies().set("password_reset_session", "", {
         //   httpOnly: true,
         //   path: "/",

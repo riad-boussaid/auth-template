@@ -27,15 +27,18 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "@/components/providers/session-provider";
 
 import { useUpdateUsername } from "@/features/user/api/use-update-username";
+import { useRouter } from "next/navigation";
 
 export const UpdateUsernameForm = () => {
   const { user } = useSession();
 
   const [isEditing, setIsEditing] = useState(false);
+  const router = useRouter();
 
   const toggleEditMode = () => {
     setIsEditing((current) => !current);
     form.reset();
+    router.refresh();
   };
 
   const usernameSchema = z.object({
@@ -52,10 +55,8 @@ export const UpdateUsernameForm = () => {
   const { mutateAsync, isPending } = useUpdateUsername();
 
   const onSubmit = async (values: z.infer<typeof usernameSchema>) => {
-    if (isEditing) {
-      await mutateAsync({ json: values });
-      setIsEditing(false);
-    }
+    await mutateAsync({ json: values });
+    toggleEditMode();
   };
 
   return (

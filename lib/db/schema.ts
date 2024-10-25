@@ -75,12 +75,12 @@ export const sessionsTable = pgTable("sessions", {
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
 
-  // emailVerified: boolean("email_verified").notNull().default(false),
-  // code: text("code").notNull(),
   expiresAt: timestamp("expires_at", {
     withTimezone: true,
     mode: "date",
   }).notNull(),
+
+  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
 });
 
 export const passwordResetSessionsTable = pgTable("password_reset_sessions", {
