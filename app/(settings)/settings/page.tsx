@@ -5,18 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { SettingsNav } from "@/components/settings-nav";
 import { ChangeTheme } from "@/components/change-theme";
+import { DataTable } from "@/components/data-table";
 
 import { cn } from "@/lib/utils";
 import { getCurrentSession } from "@/lib/auth/session";
+import { getUserSessions, getUserAccounts } from "@/lib/data/users";
 
 import { UpdateUsernameForm } from "@/features/user/components/update-username-form";
 import { UpdatePasswordForm } from "@/features/user/components/update-password-form";
 import { UpdateAvatarForm } from "@/features/user/components/update-avatar-form";
 import { DeleteUserForm } from "@/features/user/components/delete-user-form";
-import { SessionsForm } from "@/features/user/components/sessions-form";
-import { getUserSessions } from "@/lib/data/users";
-import { DataTable } from "@/components/data-table";
 import { UserSessionsTablecolumns } from "@/features/user/components/user-sessions-table-columns";
+import { ConnectedAccountsForm } from "@/features/user/components/connected-accounts-form";
 
 export default async function SettingsPage(props: {
   searchParams?: Promise<{ tab: string }>;
@@ -31,6 +31,7 @@ export default async function SettingsPage(props: {
   const tab = searchParams?.tab;
 
   const { data: userSessions } = await getUserSessions(user.id);
+  const { data: userAccounts } = await getUserAccounts(user.id);
 
   return (
     <main className="flex flex-col gap-4 md:gap-y-8">
@@ -87,6 +88,7 @@ export default async function SettingsPage(props: {
                 imageUrl={user.avatar}
                 username={user.username}
               />
+              <ConnectedAccountsForm accounts={userAccounts} />
               <DeleteUserForm />
             </>
           )}

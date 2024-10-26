@@ -94,7 +94,7 @@ export const SigninForm = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
+                    <Input type="password" placeholder="••••" {...field} />
                   </FormControl>
                   <FormMessage />
                   <Button

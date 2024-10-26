@@ -115,7 +115,7 @@ export const RegisterForm = () => {
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="********"
+                        placeholder="••••"
                         {...field}
                       />
                     </FormControl>
@@ -133,7 +133,7 @@ export const RegisterForm = () => {
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="********"
+                        placeholder="••••"
                         {...field}
                       />
                     </FormControl>

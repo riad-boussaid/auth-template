@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { Loader } from "lucide-react";
+import { Loader, Save, Ban, Edit } from "lucide-react";
 
 import {
   Form,
@@ -71,7 +71,7 @@ export const UpdatePasswordForm = () => {
                     <Input
                       type="password"
                       disabled={!isEditing}
-                      placeholder="********"
+                      placeholder="••••"
                       {...field}
                     />
                   </FormControl>
@@ -90,7 +90,7 @@ export const UpdatePasswordForm = () => {
                     <Input
                       type="password"
                       disabled={!isEditing}
-                      placeholder="********"
+                      placeholder="••••"
                       {...field}
                     />
                   </FormControl>
@@ -109,7 +109,7 @@ export const UpdatePasswordForm = () => {
                     <Input
                       type="password"
                       disabled={!isEditing}
-                      placeholder="********"
+                      placeholder="••••"
                       {...field}
                     />
                   </FormControl>
@@ -118,17 +118,28 @@ export const UpdatePasswordForm = () => {
               )}
             />
           </CardContent>
-          <CardFooter className="ml-auto justify-end gap-x-2 border-t px-6 py-4">
+          <CardFooter className="ml-auto justify-end gap-x-2 px-6">
             <Button
               type="button"
               variant={"outline"}
               onClick={() => toggleEditMode()}
             >
-              {!isEditing ? "Edit" : "Cancel"}
+              {!isEditing ? (
+                <>
+                  <Edit className="size-4" />
+                  Edit
+                </>
+              ) : (
+                <>
+                  <Ban className="size-4" />
+                  Cancel
+                </>
+              )}
             </Button>
 
             <Button type="submit" disabled={!isEditing || isPending}>
               {isPending && <Loader className="size-4 animate-spin" />}
+              <Save className="size-4" />
               Save
             </Button>
           </CardFooter>

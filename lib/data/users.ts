@@ -2,7 +2,14 @@ import "server-only";
 import { asc, desc, eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
-import { Session, sessionsTable, User, usersTable } from "@/lib/db/schema";
+import {
+  Account,
+  accountsTable,
+  Session,
+  sessionsTable,
+  User,
+  usersTable,
+} from "@/lib/db/schema";
 import { getErrorMessages } from "@/lib/error-message";
 
 export const getUsers = async () => {
@@ -24,6 +31,15 @@ export const getUserSessions = async (userId: string) => {
     .from(sessionsTable)
     .where(eq(sessionsTable.userId, userId))
     .orderBy(desc(sessionsTable.createdAt));
+
+  return { data };
+};
+
+export const getUserAccounts = async (userId: string) => {
+  const data = await db
+    .select({ provider: accountsTable.provider })
+    .from(accountsTable)
+    .where(eq(accountsTable.userId, userId));
 
   return { data };
 };

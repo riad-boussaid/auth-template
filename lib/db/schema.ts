@@ -110,6 +110,7 @@ export const passwordResetSessionsTable = pgTable("password_reset_sessions", {
 // );
 
 export type User = InferSelectModel<typeof usersTable>;
+export type Account = InferSelectModel<typeof accountsTable>;
 export type Session = InferSelectModel<typeof sessionsTable>;
 export type EmailVerification = InferSelectModel<
   typeof emailVerificationsTable
