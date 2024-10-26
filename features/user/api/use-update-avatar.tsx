@@ -1,17 +1,16 @@
 import { InferResponseType, InferRequestType } from "hono";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 
 import { client } from "@/lib/rpc";
 import { useToast } from "@/hooks/use-toast";
 
 type ResponseType = InferResponseType<
-  typeof client.api.user.updateAvatar.$post
+  typeof client.api.user.updateAvatar.$post,
+  200
 >;
 type RequestType = InferRequestType<typeof client.api.user.updateAvatar.$post>;
 
 export const useUpdateAvatar = () => {
-  const router = useRouter();
   const { toast } = useToast();
 
   return useMutation<ResponseType, Error, RequestType>({
@@ -29,8 +28,6 @@ export const useUpdateAvatar = () => {
         toast({ variant: "destructive", description: data.message });
       } else {
         toast({ variant: "success", description: data.message });
-
-        router.refresh();
       }
     },
     onError: (error) => {

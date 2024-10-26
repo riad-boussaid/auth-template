@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { RefreshCw, Trash } from "lucide-react";
+import { Loader, Trash, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,9 @@ import {
 } from "@/components/ui/card";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
+
+import { cn } from "@/lib/utils";
+
 import { useUpdateAvatar } from "../api/use-update-avatar";
 import { useDeleteAvatar } from "../api/use-delete-avatar";
 
@@ -26,21 +30,39 @@ export const UpdateAvatarForm = ({
 }) => {
   const [image, setImage] = useState<string | null>(imageUrl);
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   const inputElementRef = useRef<HTMLInputElement>(null);
 
-  const { mutate } = useUpdateAvatar();
-  const { mutateAsync } = useDeleteAvatar();
+  const { mutate: updateAvatar, isPending: isUpdating } = useUpdateAvatar();
+  const { mutate: deleteAvatar, isPending: isDeleting } = useDeleteAvatar();
 
   const onUpdate = async (avatar: string) => {
-    mutate({ form: { avatar } });
+    updateAvatar(
+      { form: { avatar } },
+      {
+        onSuccess() {
+          window.location.reload();
+        },
+        onError() {
+          window.location.reload();
+          // router.refresh();
+        },
+      },
+    );
   };
 
   const onDelete = async () => {
-    await mutateAsync({});
-
-    setImage(null);
-    setOpen(false);
+    deleteAvatar(
+      {},
+      {
+        onSuccess() {
+          setImage(null);
+          setOpen(false);
+          window.location.reload();
+        },
+      },
+    );
   };
 
   const handleChange = async () => {
@@ -70,54 +92,75 @@ export const UpdateAvatarForm = ({
         <CardTitle>Profile Picture</CardTitle>
         <CardDescription>change your profile picture</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="group relative size-fit">
-          <Avatar className="size-48">
-            <AvatarImage src={image || ""} />
-            <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50">
-              <p className="text-[75px] font-bold text-primary-foreground">
-                {username?.charAt(0).toUpperCase()}
-              </p>
-            </AvatarFallback>
-          </Avatar>
+      <CardContent className="flex items-center gap-x-3">
+        <Avatar className={cn("size-40", isUpdating && "animate-pulse")}>
+          {image && <AvatarImage src={image} />}
+          <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50">
+            <p className="text-[75px] font-bold text-primary-foreground">
+              {username?.charAt(0).toUpperCase()}
+            </p>
+          </AvatarFallback>
+        </Avatar>
 
-          <div className="absolute bottom-0 right-0 flex size-full items-center justify-center gap-x-1 rounded-full opacity-0 transition-all group-hover:bg-black/80 group-hover:opacity-100">
-            <input
-              hidden
-              ref={inputElementRef}
-              type="file"
-              accept="image/*"
-              onChange={handleChange}
-            />
+        <input
+          hidden
+          ref={inputElementRef}
+          type="file"
+          accept="[.jpg, .jpeg, .png, .ico, .svg]"
+          onChange={handleChange}
+        />
 
+        <ConfirmDialog
+          open={open}
+          title="Delete Profile Picture"
+          description="Are you sure you want to delete your profile picture?"
+          action="Delete"
+          disabled={isDeleting}
+          onCancel={() => setOpen(false)}
+          onConfirm={async () => await onDelete()}
+        />
+
+        <div>
+          <div className="flex items-center gap-x-2">
             <Button
+              disabled={isUpdating}
               variant={"secondary"}
-              className="size-14 rounded-full"
+              size={"sm"}
+              className="rounded-full"
               onClick={() => inputElementRef.current?.click()}
             >
-              <RefreshCw className="size-8 font-bold" />
+              {isUpdating ? (
+                <>
+                  <Loader className="size-4 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload className="size-4 font-bold" />
+                  Uplaod
+                </>
+              )}
             </Button>
-
-            <ConfirmDialog
-              open={open}
-              title="Delete Profile Picture"
-              description="Are you sure you want to delete your profile picture?"
-              action="Delete"
-              disabled={false}
-              onCancel={() => setOpen(false)}
-              onConfirm={async () => await onDelete()}
-            />
 
             {image !== null && (
               <Button
+                disabled={isDeleting || isUpdating}
                 variant={"destructive"}
-                className="size-14 rounded-full"
+                size={"sm"}
+                className="rounded-full"
                 onClick={() => setOpen(true)}
               >
-                <Trash className="size-8" />
+                <Trash className="size-4" />
+                Remove
               </Button>
             )}
           </div>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Accepted formats .jpg .jpeg .png .ico .svg
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Recommended size 1:1, up to 2MB
+          </p>
         </div>
       </CardContent>
     </Card>

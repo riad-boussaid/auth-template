@@ -1,9 +1,11 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Ban, Edit, Save } from "lucide-react";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   Form,
@@ -27,7 +29,6 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "@/components/providers/session-provider";
 
 import { useUpdateUsername } from "@/features/user/api/use-update-username";
-import { useRouter } from "next/navigation";
 
 export const UpdateUsernameForm = () => {
   const { user } = useSession();
@@ -77,6 +78,7 @@ export const UpdateUsernameForm = () => {
                   <FormLabel>Username</FormLabel>
                   <FormControl>
                     <Input
+                      className="rounded-full"
                       type="text"
                       autoComplete="name"
                       disabled={!isEditing}
@@ -89,15 +91,28 @@ export const UpdateUsernameForm = () => {
               )}
             />
           </CardContent>
-          <CardFooter className="justify-end gap-x-2 border-t px-6 py-4">
+          <CardFooter className="justify-end gap-x-2 px-6">
             <Button
               type="button"
               variant={"outline"}
               onClick={() => toggleEditMode()}
             >
-              {!isEditing ? "Edit" : "Cancel"}
+              {!isEditing ? (
+                <>
+                  <Edit className="size-4" />
+                  Edit
+                </>
+              ) : (
+                <>
+                  <Ban className="size-4" />
+                  Cancel
+                </>
+              )}
             </Button>
-            <Button disabled={!isEditing || isPending}>Save</Button>
+            <Button disabled={!isEditing || isPending}>
+              <Save className="size-4" />
+              Save
+            </Button>
           </CardFooter>
         </Card>
       </form>
