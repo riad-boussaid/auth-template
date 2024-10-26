@@ -24,13 +24,13 @@ export const MainHeader = () => {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 h-[80px] w-full bg-background py-4 transition-shadow",
+        "sticky top-0 z-30 h-[80px] w-full bg-white/50 py-4 backdrop-blur-lg transition-shadow",
         scrollPosition > 0
           ? "border-b dark:border-b"
           : "border-none dark:border-none",
       )}
     >
-      <div className="flex container items-center justify-between gap-4">
+      <div className="container flex items-center justify-between gap-4">
         <Logo />
 
         <div className="ml-auto flex items-center gap-x-2">
