@@ -106,7 +106,7 @@ export const UpdateAvatarForm = ({
           hidden
           ref={inputElementRef}
           type="file"
-          accept="[.jpg, .jpeg, .png, .ico, .svg]"
+          accept="image/jpeg, .png, .ico, .svg"
           onChange={handleChange}
         />
 
