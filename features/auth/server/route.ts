@@ -413,6 +413,8 @@ const app = new Hono()
         const { session: passwordResetSession, user } =
           await validatePasswordResetSessionRequest();
 
+        console.log(user);
+
         if (passwordResetSession === null) {
           throw new HTTPException(400, { message: "Not authenticated" });
         }
@@ -424,27 +426,23 @@ const app = new Hono()
         // invalidateUserPasswordResetSessions(passwordResetSession.userId);
         await db
           .delete(passwordResetSessionsTable)
-          .where(
-            eq(passwordResetSessionsTable.userId, passwordResetSession.userId),
-          );
+          .where(eq(passwordResetSessionsTable.userId, user.id));
 
         // invalidateUserSessions(passwordResetSession.userId);
-        await db
-          .delete(sessionsTable)
-          .where(eq(sessionsTable.userId, passwordResetSession.userId));
+        await db.delete(sessionsTable).where(eq(sessionsTable.userId, user.id));
 
         // await updateUserPassword(passwordResetSession.userId, password);
 
-        const { newPassword } = c.req.valid("json");
+        const { confirmNewPassword } = c.req.valid("json");
 
-        const hashedNewPassword = await hash(newPassword);
+        const hashedNewPassword = await hash(confirmNewPassword);
 
         await db
           .update(usersTable)
           .set({
             hashedPassword: hashedNewPassword,
           })
-          .where(eq(usersTable.id, passwordResetSession.userId));
+          .where(eq(usersTable.id, user.id));
 
         const sessionToken = generateSessionToken();
         const session = await createSession(sessionToken, user.id);
@@ -458,7 +456,7 @@ const app = new Hono()
           expires: session.expiresAt,
         });
 
-       await deletePasswordResetSessionTokenCookie();
+        await deletePasswordResetSessionTokenCookie();
         // cookies().set("password_reset_session", "", {
         //   httpOnly: true,
         //   path: "/",

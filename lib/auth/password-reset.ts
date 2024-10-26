@@ -16,6 +16,7 @@ import {
 
 export function generateRandomOTP(): string {
   const bytes = new Uint8Array(5);
+  
   crypto.getRandomValues(bytes);
 
   const code = encodeBase32UpperCaseNoPadding(bytes);
@@ -29,6 +30,7 @@ export async function createPasswordResetSession(
   email: string,
 ): Promise<PasswordResetSession> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
+
   const session: PasswordResetSession = {
     id: sessionId,
     userId,
@@ -37,6 +39,7 @@ export async function createPasswordResetSession(
     code: generateRandomOTP(),
     emailVerified: false,
   };
+
   await db.insert(passwordResetSessionsTable).values(session);
 
   return session;
