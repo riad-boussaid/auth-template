@@ -1,3 +1,5 @@
+import { MoreHorizontal } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User } from "@/lib/db/schema";
-import { MoreHorizontal } from "lucide-react";
 
 export const UsersTableActions = ({ user }: { user: User }) => {
   return (

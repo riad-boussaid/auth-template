@@ -1,5 +1,5 @@
 import "server-only";
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { Session, sessionsTable, User, usersTable } from "@/lib/db/schema";
@@ -19,17 +19,13 @@ export const getUsers = async () => {
 };
 
 export const getUserSessions = async (userId: string) => {
-  try {
-    const data: Session[] = await db
-      .select()
-      .from(sessionsTable)
-      .where(eq(sessionsTable.userId, userId))
-      .orderBy(asc(sessionsTable.expiresAt));
+  const data: Session[] = await db
+    .select()
+    .from(sessionsTable)
+    .where(eq(sessionsTable.userId, userId))
+    .orderBy(desc(sessionsTable.createdAt));
 
-    return { data };
-  } catch (error) {
-    return { error: getErrorMessages(error) };
-  }
+  return { data };
 };
 
 export const getUserById = async (userId: string) => {

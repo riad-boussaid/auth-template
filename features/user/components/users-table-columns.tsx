@@ -2,10 +2,11 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 
-import { User } from "@/lib/db/schema";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { UsersTableActions } from "./users-table-actions";
+import { User } from "@/lib/db/schema";
+
+import { UsersTableActions } from "@/features/user/components/users-table-actions";
 import { UpdateRoleForm } from "@/features/user/components/update-role-form";
 
 export const UsersTablecolumns: ColumnDef<User>[] = [

@@ -15,6 +15,8 @@ import { UpdateAvatarForm } from "@/features/user/components/update-avatar-form"
 import { DeleteUserForm } from "@/features/user/components/delete-user-form";
 import { SessionsForm } from "@/features/user/components/sessions-form";
 import { getUserSessions } from "@/lib/data/users";
+import { DataTable } from "@/components/data-table";
+import { UserSessionsTablecolumns } from "@/features/user/components/user-sessions-table-columns copy";
 
 export default async function SettingsPage(props: {
   searchParams?: Promise<{ tab: string }>;
@@ -97,7 +99,11 @@ export default async function SettingsPage(props: {
 
           {tab === "sessions" && (
             <>
-              <SessionsForm sessions={userSessions} />
+              {/* <SessionsForm sessions={userSessions} /> */}
+              <DataTable
+                columns={UserSessionsTablecolumns}
+                data={userSessions || []}
+              />
             </>
           )}
 

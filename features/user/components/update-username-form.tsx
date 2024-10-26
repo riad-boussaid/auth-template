@@ -38,7 +38,6 @@ export const UpdateUsernameForm = () => {
   const toggleEditMode = () => {
     setIsEditing((current) => !current);
     form.reset();
-    router.refresh();
   };
 
   const usernameSchema = z.object({
@@ -57,6 +56,8 @@ export const UpdateUsernameForm = () => {
   const onSubmit = async (values: z.infer<typeof usernameSchema>) => {
     await mutateAsync({ json: values });
     toggleEditMode();
+    // router.refresh();
+    window.location.reload();
   };
 
   return (

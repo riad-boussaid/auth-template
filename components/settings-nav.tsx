@@ -6,6 +6,7 @@ import React from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { CircleUser, Lock, Monitor, Palette } from "lucide-react";
 
 export const SettingsNav = () => {
   const searchParams = useSearchParams();
@@ -22,21 +23,25 @@ export const SettingsNav = () => {
       id: 2,
       label: "Account",
       href: `${pathname}?tab=account`,
+      icon: CircleUser,
     },
     {
       id: 3,
       label: "Security",
       href: `${pathname}?tab=security`,
+      icon: Lock,
     },
     {
       id: 4,
       label: "Sessions",
       href: `${pathname}?tab=sessions`,
+      icon: Monitor,
     },
     {
       id: 5,
       label: "Appearance",
       href: `${pathname}?tab=appearance`,
+      icon: Palette,
     },
   ] as const;
 
@@ -57,6 +62,7 @@ export const SettingsNav = () => {
             asChild
           >
             <Link href={item.href} className={cn("font-semibold")}>
+              <item.icon className="size-4" />
               {item.label}
             </Link>
           </Button>

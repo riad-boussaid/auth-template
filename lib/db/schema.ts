@@ -80,7 +80,9 @@ export const sessionsTable = pgTable("sessions", {
     mode: "date",
   }).notNull(),
 
-  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true, mode: "date" })
+    .defaultNow()
+    .notNull(),
 });
 
 export const passwordResetSessionsTable = pgTable("password_reset_sessions", {

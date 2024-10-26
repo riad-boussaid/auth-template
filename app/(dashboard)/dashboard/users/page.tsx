@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { DataTable } from "@/components/data-table";
 
-import { UsersTablecolumns } from "./_components/users-table-columns";
+import { UsersTablecolumns } from "@/features/user/components/users-table-columns";
 
 import { getCurrentSession } from "@/lib/auth/session";
 import { getUsers } from "@/lib/data/users";

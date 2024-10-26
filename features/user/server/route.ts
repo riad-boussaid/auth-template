@@ -7,7 +7,7 @@ import { verify, hash } from "@node-rs/argon2";
 import { v2 as cloudinary } from "cloudinary";
 
 import { db } from "@/lib/db";
-import { roleEnums, usersTable } from "@/lib/db/schema";
+import { roleEnums, sessionsTable, usersTable } from "@/lib/db/schema";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getErrorMessages } from "@/lib/error-message";
 
@@ -231,6 +231,26 @@ const app = new Hono()
           message: getErrorMessages(error),
         });
       }
+    },
+  )
+  .post(
+    "/deleteSession",
+    zValidator("form", z.object({ sessionId: z.string().min(1) })),
+    async (c) => {
+      const { user } = await getCurrentSession();
+
+      if (!user) {
+        throw new HTTPException(400, { message: "Unauthorized" });
+      }
+
+      const { sessionId } = c.req.valid("form");
+
+      await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
+
+      return c.json({
+        success: true,
+        message: "Session deleted successfully",
+      });
     },
   );
 

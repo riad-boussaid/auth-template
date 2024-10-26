@@ -5,7 +5,8 @@ import { client } from "@/lib/rpc";
 import { useToast } from "@/hooks/use-toast";
 
 type ResponseType = InferResponseType<
-  typeof client.api.oauth.createGoogleAuthorizationURL.$get
+  typeof client.api.oauth.createGoogleAuthorizationURL.$get,
+  200
 >;
 type RequesteType = InferRequestType<
   typeof client.api.oauth.createGoogleAuthorizationURL.$get
