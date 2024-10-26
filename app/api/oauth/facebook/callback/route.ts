@@ -101,18 +101,33 @@ export const GET = async (req: NextRequest) => {
             },
           };
         } else {
-          await trx
-            .update(accountsTable)
-            .set({
+          const accounts = await db
+            .select()
+            .from(accountsTable)
+            .where(eq(accountsTable.userId, existingUser.id));
+
+          if (accounts.some((e) => e.provider === "facebook")) {
+            await trx
+              .update(accountsTable)
+              .set({
+                accessToken: tokens.accessToken(),
+                expiresAt: tokens.accessTokenExpiresAt(),
+              })
+              .where(
+                and(
+                  eq(accountsTable.providerUserId, facebookData.id),
+                  eq(accountsTable.provider, "facebook"),
+                ),
+              );
+          } else {
+            await trx.insert(accountsTable).values({
+              provider: "facebook",
+              providerUserId: facebookData.id,
+              userId: existingUser.id,
               accessToken: tokens.accessToken(),
               expiresAt: tokens.accessTokenExpiresAt(),
-            })
-            .where(
-              and(
-                eq(accountsTable.providerUserId, facebookData.id),
-                eq(accountsTable.provider, "facebook"),
-              ),
-            );
+            });
+          }
         }
 
         return {

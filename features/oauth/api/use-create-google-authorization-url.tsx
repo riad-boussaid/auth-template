@@ -33,7 +33,6 @@ export const useCreateGoogleAuthorizationUrl = () => {
         toast({ variant: "destructive", description: data.message });
       } else {
         toast({ variant: "success", description: data.message });
-        window.location.href = data.data;
       }
     },
   });

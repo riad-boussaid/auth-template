@@ -25,10 +25,13 @@ export const ConnectedAccountsForm = ({
         <CardDescription>List of your Accounts</CardDescription>
       </CardHeader>
       <CardContent>
-        {accounts.map((account) => {
-          return (
-            <ul key={account.provider} className="flex items-center gap-x-2">
-              <li className="flex w-fit items-center gap-x-2 rounded-full border py-2 pl-4 pr-2">
+        <ul className="flex items-center gap-x-2">
+          {accounts.map((account) => {
+            return (
+              <li
+                key={account.provider}
+                className="flex w-fit items-center gap-x-2 rounded-full border py-2 pl-4 pr-2"
+              >
                 {account.provider === "google" && (
                   <FcGoogle className="size-4" />
                 )}
@@ -40,9 +43,9 @@ export const ConnectedAccountsForm = ({
                   <MoreHorizontal className="size-4" />
                 </Button>
               </li>
-            </ul>
-          );
-        })}
+            );
+          })}
+        </ul>
       </CardContent>
     </Card>
   );

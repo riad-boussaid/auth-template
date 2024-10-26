@@ -187,13 +187,31 @@ const app = new Hono()
               },
             };
           } else {
-            const updatedOAuthAccountRes = await trx
-              .update(accountsTable)
-              .set({
-                accessToken,
-                expiresAt: accessTokenExpiresAt,
-              })
-              .where(eq(accountsTable.providerUserId, googleId));
+            const accounts = await db
+              .select()
+              .from(accountsTable)
+              .where(eq(accountsTable.userId, existingUser.id));
+
+            if (accounts.some((e) => e.provider === "google")) {
+              const updatedOAuthAccountRes = await trx
+                .update(accountsTable)
+                .set({
+                  accessToken,
+                  expiresAt: accessTokenExpiresAt,
+                })
+                .where(eq(accountsTable.providerUserId, googleId));
+            } else {
+              const createdOAuthAccountRes = await trx
+                .insert(accountsTable)
+                .values({
+                  provider: "google",
+                  providerUserId: googleId,
+                  userId: existingUser.id,
+                  accessToken,
+                  // refreshToken,
+                  expiresAt: accessTokenExpiresAt,
+                });
+            }
 
             // if (updatedOAuthAccountRes.rowCount === 0) {
             //   trx.rollback();
