@@ -16,7 +16,7 @@ import { DeleteUserForm } from "@/features/user/components/delete-user-form";
 import { SessionsForm } from "@/features/user/components/sessions-form";
 import { getUserSessions } from "@/lib/data/users";
 import { DataTable } from "@/components/data-table";
-import { UserSessionsTablecolumns } from "@/features/user/components/user-sessions-table-columns copy";
+import { UserSessionsTablecolumns } from "@/features/user/components/user-sessions-table-columns";
 
 export default async function SettingsPage(props: {
   searchParams?: Promise<{ tab: string }>;

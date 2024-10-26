@@ -22,9 +22,9 @@ export default async function UsersPage() {
   if (error) console.log(error);
 
   return (
-    <div className="mt-8 space-y-8">
+    <div className="space-y-8">
       <div className="grid w-full gap-2">
-        <h1 className="text-2xl font-semibold">Users Table</h1>
+        <h1 className="text-xl font-semibold">Users Table</h1>
       </div>
       <DataTable columns={UsersTablecolumns} data={users || []} />
     </div>

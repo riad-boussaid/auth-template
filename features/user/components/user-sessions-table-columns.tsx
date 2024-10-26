@@ -61,7 +61,7 @@ export const UserSessionsTablecolumns: ColumnDef<Session>[] = [
       const session = row.original;
 
       return (
-        <div className="text-right">
+        <div className="text-right mr-2">
           <UserSessionsTableActions sessionId={session.id} />
         </div>
       );
