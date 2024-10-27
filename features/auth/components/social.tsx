@@ -27,7 +27,6 @@ export const Social = () => {
         },
       },
     );
-    
   };
 
   const onFacebookSignInClicked = async () => {
@@ -40,7 +39,7 @@ export const Social = () => {
         disabled={isPendingGoogle}
         size="lg"
         variant="outline"
-        className="w-full rounded-md"
+        className="w-full"
         onClick={onGoogleSignInClicked}
       >
         Continue with
@@ -51,7 +50,7 @@ export const Social = () => {
         disabled={isPendingFacebook}
         size="lg"
         variant="outline"
-        className="w-full rounded-md"
+        className="w-full"
         onClick={onFacebookSignInClicked}
       >
         Continue with

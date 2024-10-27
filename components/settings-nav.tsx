@@ -14,11 +14,6 @@ export const SettingsNav = () => {
   const pathname = usePathname();
 
   const items = [
-    // {
-    //   id: 1,
-    //   label: "General",
-    //   href: `${pathname}?tab=general`,
-    // },
     {
       id: 2,
       label: "Account",
