@@ -5,21 +5,19 @@ import { useRouter } from "next/navigation";
 import { client } from "@/lib/rpc";
 import { useToast } from "@/hooks/use-toast";
 
-type ResponseType = InferResponseType<
-  typeof client.api.user.deleteAccount.$post
->;
-type RequestType = InferRequestType<typeof client.api.user.deleteAccount.$post>;
+type ResponseType = InferResponseType<typeof client.api.user.deleteUser.$post>;
+type RequestType = InferRequestType<typeof client.api.user.deleteUser.$post>;
 
-export const useDeleteAccount = () => {
+export const useDeleteUser = () => {
   const { toast } = useToast();
   const router = useRouter();
 
   return useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async ({ form }) => {
-      const response = await client.api.user.deleteAccount.$post({ form });
+    mutationFn: async (json) => {
+      const response = await client.api.user.deleteUser.$post({ json });
 
       if (!response.ok) {
-        throw new Error("Failed to delete account");
+        throw new Error("Failed to delete user");
       }
 
       return await response.json();
@@ -31,8 +29,8 @@ export const useDeleteAccount = () => {
         toast({ variant: "destructive", description: data.message });
       } else {
         toast({ variant: "success", description: data.message });
-        // router.push("/");
-        // router.refresh();
+        router.push("/");
+        router.refresh();
       }
     },
     onError: (error) => {

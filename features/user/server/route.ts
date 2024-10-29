@@ -7,7 +7,12 @@ import { verify, hash } from "@node-rs/argon2";
 import { v2 as cloudinary } from "cloudinary";
 
 import { db } from "@/lib/db";
-import { roleEnums, sessionsTable, usersTable } from "@/lib/db/schema";
+import {
+  accountsTable,
+  roleEnums,
+  sessionsTable,
+  usersTable,
+} from "@/lib/db/schema";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getErrorMessages } from "@/lib/error-message";
 
@@ -251,6 +256,37 @@ const app = new Hono()
         success: true,
         message: "Session deleted successfully",
       });
+    },
+  )
+  .post(
+    "/deleteAccount",
+    zValidator(
+      "form",
+      z.object({
+        accountId: z.string().min(1),
+      }),
+    ),
+
+    async (c) => {
+      try {
+        const { accountId } = c.req.valid("form");
+
+        if (!accountId) {
+          throw new HTTPException(400, { message: "invalid account id" });
+        }
+
+        await db.delete(accountsTable).where(eq(accountsTable.id, accountId));
+
+        return c.json({
+          success: true,
+          message: `Account deleted successfully `,
+        });
+      } catch (error) {
+        return c.json({
+          success: false,
+          message: getErrorMessages(error),
+        });
+      }
     },
   );
 

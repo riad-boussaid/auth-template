@@ -37,7 +37,7 @@ export const getUserSessions = async (userId: string) => {
 
 export const getUserAccounts = async (userId: string) => {
   const data = await db
-    .select({ provider: accountsTable.provider })
+    .select({ id: accountsTable.id, provider: accountsTable.provider })
     .from(accountsTable)
     .where(eq(accountsTable.userId, userId));
 

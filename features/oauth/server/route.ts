@@ -382,7 +382,7 @@ const app = new Hono()
               .from(accountsTable)
               .where(eq(accountsTable.userId, existingUser.id));
 
-            if (accounts.some((e) => e.provider === "google")) {
+            if (accounts.some((e) => e.provider === "facebbok")) {
               await trx
                 .update(accountsTable)
                 .set({

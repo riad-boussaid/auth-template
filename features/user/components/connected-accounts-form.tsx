@@ -4,20 +4,41 @@ import {
   Card,
   CardContent,
   CardDescription,
-  //   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
-import { MoreHorizontal, MoreVertical } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useDeleteAccount } from "../api/use-delete-account";
+import { useRouter } from "next/navigation";
 
 export const ConnectedAccountsForm = ({
   accounts,
 }: {
-  accounts: { provider: string }[];
+  accounts: { id: string; provider: string }[];
 }) => {
+  const router = useRouter();
+  const { mutate: deleteAccount, isPending: isDeleting } = useDeleteAccount();
+
+  const onDelete = (accountId: string) => {
+    deleteAccount(
+      { form: { accountId } },
+      {
+        onSuccess: () => {
+          router.refresh();
+        },
+      },
+    );
+  };
+
   return (
     <Card className="">
       <CardHeader>
@@ -39,9 +60,19 @@ export const ConnectedAccountsForm = ({
                   <FaFacebook className="size-4" />
                 )}
                 <p className="text-sm">{account.provider}</p>
-                <Button size={"icon"} variant={"ghost"} className="size-7">
-                  <MoreHorizontal className="size-4" />
-                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size={"icon"} variant={"ghost"} className="size-7">
+                      <MoreHorizontal className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" side="bottom" className="">
+                    <DropdownMenuItem onClick={() => onDelete(account.id)}>
+                      Remove
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </li>
             );
           })}

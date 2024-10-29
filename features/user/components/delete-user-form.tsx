@@ -17,13 +17,13 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 
 // import { useToast } from "@/hooks/use-toast";
 
-import { useDeleteAcoount } from "@/features/user/api/use-delete-account";
+import { useDeleteUser } from "@/features/user/api/use-delete-user";
 
 export const DeleteUserForm = () => {
   // const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
-  const { mutate, isPending } = useDeleteAcoount();
+  const { mutate, isPending } = useDeleteUser();
   const { user } = useSession();
 
   if (!user) {
