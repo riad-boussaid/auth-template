@@ -7,7 +7,6 @@ import {
   pgTable,
   text,
   timestamp,
-  // uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -16,25 +15,23 @@ export const roleEnums = pgEnum("role", ["ADMIN", "USER"]);
 export const usersTable = pgTable(
   "users",
   {
-    id: text("id").primaryKey().$defaultFn(randomUUID),
+    id: text().primaryKey().$defaultFn(randomUUID),
 
     // firstName: varchar("first_name", { length: 255 }),
     // lastName: varchar("last_name", { length: 255 }),
 
-    username: varchar("username", { length: 255 }),
-    avatar: text("avatar"),
+    username: varchar({ length: 255 }),
+    avatar: text(),
 
-    email: varchar("email", { length: 255 }).unique(),
-    emailVerified: boolean("email_verified").default(false).notNull(),
+    email: varchar({ length: 255 }).unique(),
+    emailVerified: boolean().default(false).notNull(),
 
-    hashedPassword: varchar("hashed_password", { length: 255 }),
+    hashedPassword: varchar({ length: 255 }),
 
-    role: roleEnums("role").default("USER").notNull(),
+    role: roleEnums().default("USER").notNull(),
 
-    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt", { mode: "date" }).$onUpdate(
-      () => new Date(),
-    ),
+    createdAt: timestamp({ mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp({ mode: "date" }).$onUpdate(() => new Date()),
   },
   (table) => ({
     emailIdx: index("user_email_idx").on(table.email),
@@ -42,60 +39,61 @@ export const usersTable = pgTable(
 );
 
 export const accountsTable = pgTable("accounts", {
-  id: text("id").primaryKey().$defaultFn(randomUUID),
-  userId: text("user_id")
+  id: text().primaryKey().$defaultFn(randomUUID),
+  userId: text()
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
-  provider: text("provider").notNull(), // google, github
-  providerUserId: text("provider_user_id").notNull(),
-  accessToken: text("access_token").notNull(),
-  refreshToken: text("refresh_token"),
-  expiresAt: timestamp("expires_at", {
+  provider: text().notNull(), // google, github
+  providerUserId: text().notNull(),
+  accessToken: text().notNull(),
+  refreshToken: text(),
+  expiresAt: timestamp({
     withTimezone: true,
     mode: "date",
   }),
 });
 
 export const emailVerificationsTable = pgTable("email_verifications", {
-  id: text("id").primaryKey().$defaultFn(randomUUID),
-  userId: text("user_id")
+  id: text().primaryKey().$defaultFn(randomUUID),
+  userId: text()
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
-  email: text("email").notNull(),
-  code: text("code").notNull(),
-  expiresAt: timestamp("expires_at", {
+  email: text().notNull(),
+  code: text().notNull(),
+  expiresAt: timestamp({
     withTimezone: true,
     mode: "date",
   }).notNull(),
 });
 
 export const sessionsTable = pgTable("sessions", {
-  id: text("id").primaryKey(),
-  userId: text("userId")
+  id: text().primaryKey(),
+
+  userId: text()
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
 
-  ip: text("ip").notNull(),
+  ip: text().notNull(),
 
-  expiresAt: timestamp("expires_at", {
+  expiresAt: timestamp({
     withTimezone: true,
     mode: "date",
   }).notNull(),
 
-  createdAt: timestamp("createdAt", { withTimezone: true, mode: "date" })
+  createdAt: timestamp({ withTimezone: true, mode: "date" })
     .defaultNow()
     .notNull(),
 });
 
 export const passwordResetSessionsTable = pgTable("password_reset_sessions", {
-  id: text("id").primaryKey(),
-  userId: text("userId")
+  id: text().primaryKey(),
+  userId: text()
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
-  email: text("email").notNull(),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  code: text("code").notNull(),
-  expiresAt: timestamp("expires_at", {
+  email: text().notNull(),
+  emailVerified: boolean().notNull().default(false),
+  code: text().notNull(),
+  expiresAt: timestamp({
     withTimezone: true,
     mode: "date",
   }).notNull(),
