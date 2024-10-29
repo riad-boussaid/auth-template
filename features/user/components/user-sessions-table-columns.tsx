@@ -4,10 +4,12 @@ import { Monitor } from "lucide-react";
 import { formatRelative } from "date-fns";
 import { ColumnDef } from "@tanstack/react-table";
 
+import { useSession } from "@/components/providers/session-provider";
+
 import { Session } from "@/lib/db/schema";
 
 import { UserSessionsTableActions } from "@/features/user/components/user-sessions-table-actions";
-import { useSession } from "@/components/providers/session-provider";
+
 import { cn } from "@/lib/utils";
 
 export const UserSessionsTablecolumns: ColumnDef<Session>[] = [

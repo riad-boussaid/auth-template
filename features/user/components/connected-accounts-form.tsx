@@ -1,5 +1,10 @@
 "use client";
 
+import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa";
+import { MoreHorizontal } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 import {
   Card,
   CardContent,
@@ -8,17 +13,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FcGoogle } from "react-icons/fc";
-import { FaFacebook } from "react-icons/fa";
-import { MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import { useDeleteAccount } from "../api/use-delete-account";
-import { useRouter } from "next/navigation";
 
 export const ConnectedAccountsForm = ({
   accounts,

@@ -11,9 +11,11 @@ import {
 } from "@/components/ui/select";
 
 import { useSession } from "@/components/providers/session-provider";
+
 import { useToast } from "@/hooks/use-toast";
 
 import { roleEnums } from "@/lib/db/schema";
+
 import { useUpdateRole } from "../api/use-update-role";
 
 export const UpdateRoleForm = ({

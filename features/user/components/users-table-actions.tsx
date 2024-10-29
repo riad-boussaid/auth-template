@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import { User } from "@/lib/db/schema";
 
 export const UsersTableActions = ({ user }: { user: User }) => {

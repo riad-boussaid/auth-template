@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { Button } from "@/components/ui/button";
+
 import { useDeleteSession } from "../api/use-delete-session";
-import { useRouter } from "next/navigation";
 
 export const UserSessionsTableActions = ({
   sessionId,

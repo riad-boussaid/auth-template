@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useCountdown } from "usehooks-ts";
 import { Loader } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -28,11 +27,13 @@ import { Input } from "@/components/ui/input";
 import { useEmailVerification } from "@/features/auth/api/use-email-verification";
 import { useResendEmailVerification } from "@/features/auth/api/use-resend-email-verification";
 
+import { useCountdown } from "@/hooks/use-countdown";
+
 export const EmailVerificationForm = () => {
   // const { toast } = useToast();
-
+  
   const [count, { startCountdown, stopCountdown, resetCountdown }] =
-    useCountdown({
+  useCountdown({
       countStart: 60,
       intervalMs: 1000,
     });

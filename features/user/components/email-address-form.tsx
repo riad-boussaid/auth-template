@@ -1,6 +1,7 @@
 "use client";
 
-import { useSession } from "@/components/providers/session-provider";
+import { MoreHorizontal, PlusCircle } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,8 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
+
+import { useSession } from "@/components/providers/session-provider";
 
 export const EmailAddressForm = () => {
   const { user } = useSession();

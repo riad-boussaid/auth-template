@@ -2,19 +2,19 @@
 
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
-import { toast } from "sonner";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
 import { useCreateGoogleAuthorizationUrl } from "@/features/oauth/api/use-create-google-authorization-url";
 import { useCreateFacebookAuthorizationUrl } from "@/features/oauth/api/use-create-facebook-authorization-url";
-import { Router } from "lucide-react";
 
 export const Social = () => {
   const router = useRouter();
+  
   const { mutateAsync: mutateGoogle, isPending: isPendingGoogle } =
     useCreateGoogleAuthorizationUrl();
+
   const { mutate: mutateFacebook, isPending: isPendingFacebook } =
     useCreateFacebookAuthorizationUrl();
 
