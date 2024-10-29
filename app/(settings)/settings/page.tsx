@@ -1,3 +1,4 @@
+// import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -27,6 +28,11 @@ export default async function SettingsPage(props: {
   if (session === null) {
     return redirect("/sign-in");
   }
+
+  // const headersList = await headers();
+  // const userIP = (headersList.get("x-forwarded-for") ?? "127.0.0.1").split(
+  //   ",",
+  // )[0];
 
   const searchParams = await props.searchParams;
   const tab = searchParams?.tab;

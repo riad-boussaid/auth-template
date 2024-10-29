@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { getConnInfo } from "hono/vercel";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
@@ -94,8 +95,14 @@ const app = new Hono()
 
       await setEmailVerificationRequestCookie(emailVerificationRequest);
 
+      const info = getConnInfo(c); // info is `ConnInfo`
+
       const sessionToken = generateSessionToken();
-      const session = await createSession(sessionToken, createdUser.userId);
+      const session = await createSession(
+        sessionToken,
+        createdUser.userId,
+        (info.remote.address ?? "127.0.0.1").split(",")[0],
+      );
       await setSessionTokenCookie(sessionToken, session.expiresAt);
 
       // await sendEmail({
@@ -146,8 +153,15 @@ const app = new Hono()
         throw new Error("Incorrect username or password");
       }
 
+      const info = getConnInfo(c); // info is `ConnInfo`
+      console.log({ info });
+
       const sessionToken = generateSessionToken();
-      const session = await createSession(sessionToken, existingUser.id);
+      const session = await createSession(
+        sessionToken,
+        existingUser.id,
+        (info.remote.address ?? "127.0.0.1").split(",")[0],
+      );
       await setSessionTokenCookie(sessionToken, session.expiresAt);
 
       if (existingUser.emailVerified === false) {
@@ -444,8 +458,14 @@ const app = new Hono()
           })
           .where(eq(usersTable.id, user.id));
 
+        const info = getConnInfo(c);
+
         const sessionToken = generateSessionToken();
-        const session = await createSession(sessionToken, user.id);
+        const session = await createSession(
+          sessionToken,
+          user.id,
+          (info.remote.address ?? "127.0.0.1").split(",")[0],
+        );
 
         // setSessionTokenCookie(sessionToken, session.expiresAt);
         (await cookies()).set("session", sessionToken, {

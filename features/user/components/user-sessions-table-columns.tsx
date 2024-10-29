@@ -17,14 +17,14 @@ export const UserSessionsTablecolumns: ColumnDef<Session>[] = [
       const { session: currentSession } = useSession();
 
       return (
-        <div className="flex items-center gap-x-1">
-          {/* <span className="size-2 rounded-full bg-green-500" /> */}
+        <div className="flex flex-col items-center gap-y-1">
           <Monitor
             className={cn(
-              "m-4 size-8",
+              "size-8",
               currentSession?.id === row.original.id && "text-green-600",
             )}
           />
+          <p className="text-xs text-muted-foreground">{row.original.ip}</p>
         </div>
       );
     },
@@ -61,7 +61,7 @@ export const UserSessionsTablecolumns: ColumnDef<Session>[] = [
       const session = row.original;
 
       return (
-        <div className="text-right mr-2">
+        <div className="mr-2 text-right">
           <UserSessionsTableActions sessionId={session.id} />
         </div>
       );

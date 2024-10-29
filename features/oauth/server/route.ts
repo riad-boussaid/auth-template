@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { getConnInfo } from "hono/vercel";
 import { env } from "hono/adapter";
 import { HTTPException } from "hono/http-exception";
 import { eq } from "drizzle-orm";
@@ -242,10 +243,13 @@ const app = new Hono()
         throw new HTTPException(500, { message: transactionResponse.message });
       }
 
+      const info = getConnInfo(c);
+
       const sessionToken = generateSessionToken();
       const session = await createSession(
         sessionToken,
         transactionResponse.data.id,
+        (info.remote.address ?? "127.0.0.1").split(",")[0],
       );
       await setSessionTokenCookie(sessionToken, session.expiresAt);
 
