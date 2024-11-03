@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "@/components/providers/session-provider";
 
 import { useUpdateUsername } from "@/features/user/api/use-update-username";
+import { updateUsernameSchema } from "@/features/user/validators";
 
 export const UpdateUsernameForm = () => {
   const { user } = useSession();
@@ -41,12 +42,8 @@ export const UpdateUsernameForm = () => {
     form.reset();
   };
 
-  const usernameSchema = z.object({
-    username: z.string().min(1),
-  });
-
-  const form = useForm<z.infer<typeof usernameSchema>>({
-    resolver: zodResolver(usernameSchema),
+  const form = useForm<z.infer<typeof updateUsernameSchema>>({
+    resolver: zodResolver(updateUsernameSchema),
     defaultValues: {
       username: user?.username || "",
     },
@@ -54,7 +51,7 @@ export const UpdateUsernameForm = () => {
 
   const { mutateAsync, isPending } = useUpdateUsername();
 
-  const onSubmit = async (values: z.infer<typeof usernameSchema>) => {
+  const onSubmit = async (values: z.infer<typeof updateUsernameSchema>) => {
     await mutateAsync({ form: values });
     toggleEditMode();
     // router.refresh();

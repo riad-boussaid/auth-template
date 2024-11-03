@@ -24,6 +24,8 @@ import {
   setSessionTokenCookie,
 } from "@/lib/auth/session";
 
+import { type ErrorResponse, type SuccessResponse } from "@/types";
+
 const app = new Hono()
   .get("/createGoogleAuthorizationURL", async (c) => {
     try {
@@ -51,16 +53,18 @@ const app = new Hono()
         sameSite: "lax",
       });
 
-      return c.json({
-        success: true,
-        message: "Google Authorization url created successfully ",
-        data: authorizationURL.toString(),
-      });
+      return c.json<SuccessResponse<{ authorizationUrl: string }>>(
+        {
+          success: true,
+          message: "Google Authorization url created successfully ",
+          data: { authorizationUrl: authorizationURL.toString() },
+        },
+        200,
+      );
     } catch (error) {
-      return c.json({
+      return c.json<ErrorResponse>({
         success: false,
-        message: getErrorMessages(error),
-        data: "",
+        error: getErrorMessages(error),
       });
     }
   })
@@ -232,9 +236,9 @@ const app = new Hono()
 
       return c.redirect(new URL("/", NEXT_PUBLIC_APP_URL).href, 302);
     } catch (error) {
-      return c.json({
+      return c.json<ErrorResponse>({
         success: false,
-        message: getErrorMessages(error),
+        error: getErrorMessages(error),
       });
     }
   })
@@ -247,16 +251,15 @@ const app = new Hono()
         "public_profile",
       ]);
 
-      return c.json({
+      return c.json<SuccessResponse<{ authorizationUrl: string }>>({
         success: true,
         message: "Facebook authorization url created successfully",
-        data: authorizationURL.toString(),
+        data: { authorizationUrl: authorizationURL.toString() },
       });
     } catch (error) {
-      return c.json({
+      return c.json<ErrorResponse>({
         success: false,
-        message: getErrorMessages(error),
-        data: "",
+        error: getErrorMessages(error),
       });
     }
   })
@@ -427,9 +430,9 @@ const app = new Hono()
 
       return c.redirect(new URL("/", NEXT_PUBLIC_APP_URL).href, 302);
     } catch (error) {
-      return c.json({
+      return c.json<ErrorResponse>({
         success: false,
-        message: getErrorMessages(error),
+        error: getErrorMessages(error),
       });
     }
   });

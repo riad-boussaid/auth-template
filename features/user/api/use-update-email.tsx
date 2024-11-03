@@ -5,24 +5,20 @@ import { useRouter } from "next/navigation";
 import { client } from "@/lib/rpc";
 import { useToast } from "@/hooks/use-toast";
 
-type ResponseType = InferResponseType<
-  typeof client.api.user.updateUsername.$post
->;
-type RequestType = InferRequestType<
-  typeof client.api.user.updateUsername.$post
->;
+type ResponseType = InferResponseType<typeof client.api.user.updateEmail.$post>;
+type RequestType = InferRequestType<typeof client.api.user.updateEmail.$post>;
 
-export const useUpdateUsername = () => {
+export const useUpdateEmail = () => {
   const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   return useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ form }) => {
-      const response = await client.api.user.updateUsername.$post({ form });
+      const response = await client.api.user.updateEmail.$post({ form });
 
       if (!response.ok) {
-        throw new Error("Failed to update");
+        throw new Error("Failed to update email");
       }
 
       return await response.json();
@@ -31,9 +27,10 @@ export const useUpdateUsername = () => {
       if (!data.success) {
         toast({ variant: "destructive", description: data.error });
       } else {
-        toast({ variant: "success", description: data.message });
+        // toast({ variant: "success", description: data.message });
 
-        router.refresh();
+        router.push("/email-verification");
+        // router.refresh();
       }
     },
     onError: (error) => {

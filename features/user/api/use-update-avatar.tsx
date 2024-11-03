@@ -5,8 +5,7 @@ import { client } from "@/lib/rpc";
 import { useToast } from "@/hooks/use-toast";
 
 type ResponseType = InferResponseType<
-  typeof client.api.user.updateAvatar.$post,
-  200
+  typeof client.api.user.updateAvatar.$post
 >;
 type RequestType = InferRequestType<typeof client.api.user.updateAvatar.$post>;
 
@@ -25,7 +24,7 @@ export const useUpdateAvatar = () => {
     },
     onSuccess: (data) => {
       if (!data.success) {
-        toast({ variant: "destructive", description: data.message });
+        toast({ variant: "destructive", description: data.error });
       } else {
         toast({ variant: "success", description: data.message });
       }

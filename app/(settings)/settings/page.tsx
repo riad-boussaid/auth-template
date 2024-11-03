@@ -18,7 +18,7 @@ import { UpdateAvatarForm } from "@/features/user/components/update-avatar-form"
 import { DeleteUserForm } from "@/features/user/components/delete-user-form";
 import { UserSessionsTablecolumns } from "@/features/user/components/user-sessions-table-columns";
 import { ConnectedAccountsForm } from "@/features/user/components/connected-accounts-form";
-import { EmailAddressForm } from "@/features/user/components/email-address-form";
+import { UpdateEmailAddressForm } from "@/features/user/components/update-email-address-form";
 
 export default async function SettingsPage(props: {
   searchParams?: Promise<{ tab: string }>;
@@ -95,7 +95,7 @@ export default async function SettingsPage(props: {
                 imageUrl={user.avatar}
                 username={user.username}
               />
-              <EmailAddressForm />
+              <UpdateEmailAddressForm />
               <ConnectedAccountsForm accounts={userAccounts} />
               <DeleteUserForm />
             </>

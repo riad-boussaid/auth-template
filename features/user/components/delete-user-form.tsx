@@ -14,12 +14,9 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "@/components/providers/session-provider";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
-// import { useToast } from "@/hooks/use-toast";
-
 import { useDeleteUser } from "@/features/user/api/use-delete-user";
 
 export const DeleteUserForm = () => {
-  // const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
   const { mutate, isPending } = useDeleteUser();

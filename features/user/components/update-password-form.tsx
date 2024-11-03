@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import { ResetPasswordSchema } from "@/features/user/validators";
+import { resetPasswordSchema } from "@/features/user/validators";
 import { useResetPassword } from "@/features/user/api/use-update-password";
 
 export const UpdatePasswordForm = () => {
@@ -36,8 +36,8 @@ export const UpdatePasswordForm = () => {
     form.reset();
   };
 
-  const form = useForm<z.infer<typeof ResetPasswordSchema>>({
-    resolver: zodResolver(ResetPasswordSchema),
+  const form = useForm<z.infer<typeof resetPasswordSchema>>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       password: "",
       newPassword: "",
@@ -47,7 +47,7 @@ export const UpdatePasswordForm = () => {
 
   const { mutateAsync, isPending } = useResetPassword();
 
-  const onSubmit = async (values: z.infer<typeof ResetPasswordSchema>) => {
+  const onSubmit = async (values: z.infer<typeof resetPasswordSchema>) => {
     await mutateAsync({ form: values });
     toggleEditMode();
   };

@@ -10,9 +10,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { Session } from "@/lib/db/schema";
-
 import { useSession } from "@/components/providers/session-provider";
+
+import { Session } from "@/lib/db/schema";
 
 export const SessionsForm = ({ sessions }: { sessions?: Session[] }) => {
   const { session: currentSession } = useSession();

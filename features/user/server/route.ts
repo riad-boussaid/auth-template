@@ -15,9 +15,25 @@ import {
 } from "@/lib/db/schema";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getErrorMessages } from "@/lib/error-message";
-
-import { ResetPasswordSchema } from "@/features/user/validators";
 import { sessionMiddleware } from "@/lib/session-middleware";
+
+import {
+  accountIdSchema,
+  avatarSchema,
+  resetPasswordSchema,
+  sessionIdSchema,
+  updateEmailSchema,
+  updateRoleSchema,
+  updateUsernameSchema,
+} from "@/features/user/validators";
+
+import { type ErrorResponse, type SuccessResponse } from "@/types";
+import { getPublicId } from "@/lib/utils";
+import {
+  createEmailVerificationRequest,
+  sendVerificationEmail,
+  setEmailVerificationRequestCookie,
+} from "@/lib/auth/email-verification";
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -32,15 +48,24 @@ const app = new Hono()
 
       await db.delete(usersTable).where(eq(usersTable.id, user.id));
 
-      return c.json({ success: true, message: "User deleted successfully" });
+      return c.json<SuccessResponse>(
+        {
+          success: true,
+          message: "User deleted successfully",
+        },
+        200,
+      );
     } catch (error) {
-      return c.json({ success: false, message: getErrorMessages(error) });
+      return c.json<ErrorResponse>({
+        success: false,
+        error: getErrorMessages(error),
+      });
     }
   })
   .post(
     "/updateUsername",
-    zValidator("form", z.object({ username: z.string() })),
     sessionMiddleware,
+    zValidator("form", updateUsernameSchema),
     async (c) => {
       try {
         const user = c.get("user");
@@ -62,22 +87,76 @@ const app = new Hono()
           .set({ username })
           .where(eq(usersTable.id, user.id));
 
-        return c.json({
-          success: true,
-          message: "Username updated successfully",
-        });
+        return c.json<SuccessResponse>(
+          {
+            success: true,
+            message: "Username updated successfully",
+          },
+          200,
+        );
       } catch (error) {
-        return c.json({
+        return c.json<ErrorResponse>({
           success: false,
-          message: getErrorMessages(error),
+          error: getErrorMessages(error),
+        });
+      }
+    },
+  )
+  .post(
+    "/updateEmail",
+    sessionMiddleware,
+    zValidator("form", updateEmailSchema),
+    async (c) => {
+      try {
+        const user = c.get("user");
+
+        const { email } = c.req.valid("form");
+
+        const [currentUser] = await db
+          .select()
+          .from(usersTable)
+          .where(eq(usersTable.email, email))
+          .limit(1);
+
+        if (currentUser?.email) {
+          throw new HTTPException(400, {
+            message: "This email is already used",
+          });
+        }
+
+        const verificationRequest = await createEmailVerificationRequest(
+          user.id,
+          email,
+        );
+
+        sendVerificationEmail(
+          verificationRequest.email,
+          verificationRequest.code,
+        );
+
+        await setEmailVerificationRequestCookie(verificationRequest);
+
+        // return c.redirect("/verify-email");
+
+        return c.json<SuccessResponse>(
+          {
+            success: true,
+            message: "Email sent successfully",
+          },
+          200,
+        );
+      } catch (error) {
+        return c.json<ErrorResponse>({
+          success: false,
+          error: getErrorMessages(error),
         });
       }
     },
   )
   .post(
     "/updatePassword",
-    zValidator("form", ResetPasswordSchema),
     sessionMiddleware,
+    zValidator("form", resetPasswordSchema),
     async (c) => {
       try {
         const user = c.get("user");
@@ -112,24 +191,25 @@ const app = new Hono()
           .set({ hashedPassword: hashedNewPassword })
           .where(eq(usersTable.id, user.id));
 
-        return c.json({
-          success: true,
-          message: "Password updated successfully",
-        });
+        return c.json<SuccessResponse>(
+          {
+            success: true,
+            message: "Password updated successfully",
+          },
+          200,
+        );
       } catch (error) {
-        return c.json({ success: false, message: getErrorMessages(error) });
+        return c.json<ErrorResponse>({
+          success: false,
+          error: getErrorMessages(error),
+        });
       }
     },
   )
   .post(
     "/updateAvatar",
     sessionMiddleware,
-    zValidator(
-      "form",
-      z.object({
-        avatar: z.string().min(1).url(),
-      }),
-    ),
+    zValidator("form", avatarSchema),
     async (c) => {
       try {
         const user = c.get("user");
@@ -145,14 +225,17 @@ const app = new Hono()
           .set({ avatar: result.secure_url })
           .where(eq(usersTable.id, user.id));
 
-        return c.json({
-          success: true,
-          message: "User avatar updated successfully",
-        });
+        return c.json<SuccessResponse>(
+          {
+            success: true,
+            message: "User avatar updated successfully",
+          },
+          200,
+        );
       } catch (error) {
-        return c.json({
+        return c.json<ErrorResponse>({
           success: false,
-          message: getErrorMessages(error),
+          error: getErrorMessages(error),
         });
       }
     },
@@ -161,91 +244,99 @@ const app = new Hono()
     try {
       const user = c.get("user");
 
+      const [existingUser] = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.id, user.id))
+        .limit(1);
+
+      if (existingUser.avatar) {
+        const publicId = getPublicId(existingUser.avatar) as string;
+
+        cloudinary.api
+          .delete_resources([publicId])
+          .then((result) => console.log(result));
+      }
+
       await db
         .update(usersTable)
         .set({ avatar: null })
         .where(eq(usersTable.id, user.id));
 
-      return c.json({
-        success: true,
-        message: "User avatar removed successfully",
-      });
+      return c.json<SuccessResponse>(
+        {
+          success: true,
+          message: "User avatar removed successfully",
+        },
+        200,
+      );
     } catch (error) {
-      return c.json({
+      return c.json<ErrorResponse>({
         success: false,
-        message: getErrorMessages(error),
+        error: getErrorMessages(error),
+      });
+    }
+  })
+  .post("/updateRole", zValidator("form", updateRoleSchema), async (c) => {
+    try {
+      const { user } = await getCurrentSession();
+
+      if (!user || user.role !== "ADMIN") {
+        throw new HTTPException(400, { message: "Unauthorized" });
+      }
+
+      const { userId, role } = c.req.valid("form");
+
+      if (!userId) {
+        throw new HTTPException(400, { message: "Invalid" });
+      }
+
+      if (user.id === userId) {
+        throw new HTTPException(400, {
+          message: "You can't change role for current user",
+        });
+      }
+
+      await db
+        .update(usersTable)
+        .set({ role: role as (typeof roleEnums.enumValues)[number] })
+        .where(eq(usersTable.id, userId));
+
+      return c.json<SuccessResponse>(
+        {
+          success: true,
+          message: "User role updated successfully",
+        },
+        200,
+      );
+    } catch (error) {
+      return c.json<ErrorResponse>({
+        success: false,
+        error: getErrorMessages(error),
       });
     }
   })
   .post(
-    "/updateRole",
-    zValidator(
-      "form",
-      z.object({
-        userId: z.string().min(1),
-        role: z.string().min(1),
-      }),
-    ),
-    async (c) => {
-      try {
-        const { user } = await getCurrentSession();
-
-        if (!user || user.role !== "ADMIN") {
-          throw new HTTPException(400, { message: "Unauthorized" });
-        }
-
-        const { userId, role } = c.req.valid("form");
-
-        if (!userId) {
-          throw new HTTPException(400, { message: "Invalid" });
-        }
-
-        if (user.id === userId) {
-          throw new HTTPException(400, {
-            message: "You can't change role for current user",
-          });
-        }
-
-        await db
-          .update(usersTable)
-          .set({ role: role as (typeof roleEnums.enumValues)[number] })
-          .where(eq(usersTable.id, userId));
-
-        return c.json({
-          success: true,
-          message: "User role updated successfully",
-        });
-      } catch (error) {
-        return c.json({
-          success: false,
-          message: getErrorMessages(error),
-        });
-      }
-    },
-  )
-  .post(
     "/deleteSession",
     sessionMiddleware,
-    zValidator("form", z.object({ sessionId: z.string().min(1) })),
+    zValidator("form", sessionIdSchema),
     async (c) => {
       const { sessionId } = c.req.valid("form");
 
       await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
 
-      return c.json({
-        success: true,
-        message: "Session deleted successfully",
-      });
+      return c.json<SuccessResponse>(
+        {
+          success: true,
+          message: "Session deleted successfully",
+        },
+        200,
+      );
     },
   )
   .post(
     "/deleteAccount",
-    zValidator(
-      "form",
-      z.object({
-        accountId: z.string().min(1),
-      }),
-    ),
+    zValidator("form", accountIdSchema),
 
     async (c) => {
       try {
@@ -257,14 +348,17 @@ const app = new Hono()
 
         await db.delete(accountsTable).where(eq(accountsTable.id, accountId));
 
-        return c.json({
-          success: true,
-          message: `Account deleted successfully `,
-        });
+        return c.json<SuccessResponse>(
+          {
+            success: true,
+            message: `Account deleted successfully `,
+          },
+          200,
+        );
       } catch (error) {
-        return c.json({
+        return c.json<ErrorResponse>({
           success: false,
-          message: getErrorMessages(error),
+          error: getErrorMessages(error),
         });
       }
     },

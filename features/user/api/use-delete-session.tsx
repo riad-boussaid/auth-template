@@ -6,8 +6,7 @@ import { client } from "@/lib/rpc";
 import { useToast } from "@/hooks/use-toast";
 
 type ResponseType = InferResponseType<
-  typeof client.api.user.deleteSession.$post,
-  200
+  typeof client.api.user.deleteSession.$post
 >;
 type RequesteType = InferRequestType<
   typeof client.api.user.deleteSession.$post

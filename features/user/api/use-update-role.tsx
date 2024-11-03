@@ -24,7 +24,7 @@ export const useUpdateRole = () => {
     },
     onSuccess: (data) => {
       if (!data.success) {
-        toast({ variant: "destructive", description: data.message });
+        toast({ variant: "destructive", description: data.error });
       } else {
         toast({ variant: "success", description: data.message });
 

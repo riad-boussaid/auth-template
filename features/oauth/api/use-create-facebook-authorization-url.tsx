@@ -29,10 +29,10 @@ export const useCreateFacebookAuthorizationUrl = () => {
       console.log(data);
 
       if (!data.success) {
-        toast({ variant: "destructive", description: data.message });
+        toast({ variant: "destructive", description: data.error });
       } else {
         // toast({ variant: "success", description: data.message });
-        window.location.href = data.data;
+        window.location.href = data.data.authorizationUrl;
       }
     },
   });

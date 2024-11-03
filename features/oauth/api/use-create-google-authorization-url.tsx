@@ -5,8 +5,7 @@ import { client } from "@/lib/rpc";
 import { useToast } from "@/hooks/use-toast";
 
 type ResponseType = InferResponseType<
-  typeof client.api.oauth.createGoogleAuthorizationURL.$get,
-  200
+  typeof client.api.oauth.createGoogleAuthorizationURL.$get
 >;
 type RequesteType = InferRequestType<
   typeof client.api.oauth.createGoogleAuthorizationURL.$get
@@ -30,10 +29,10 @@ export const useCreateGoogleAuthorizationUrl = () => {
       console.log(data);
 
       if (!data.success) {
-        toast({ variant: "destructive", description: data.message });
+        toast({ variant: "destructive", description: data.error });
       } else {
         // toast({ variant: "success", description: data.message });
-        window.location.href = data.data
+        window.location.href = data.data.authorizationUrl;
       }
     },
   });
