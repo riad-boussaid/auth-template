@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { InferRequestType, InferResponseType } from "hono";
 
 import { client } from "@/lib/rpc";
@@ -11,6 +11,7 @@ type RequestType = InferRequestType<typeof client.api.auth.logout.$post>;
 export const useLogout = () => {
   const { toast } = useToast();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   return useMutation<ResponseType, Error, RequestType>({
     mutationFn: async () => {
@@ -27,9 +28,11 @@ export const useLogout = () => {
 
       if (data.success) {
         toast({ variant: "success", description: data.message });
-        window.location.href = "/";
+        queryClient.invalidateQueries({ queryKey: ["current"] });
+        router.refresh();
+        // window.location.href = "/";
       } else {
-        toast({ variant: "destructive", description: data.message });
+        toast({ variant: "destructive", description: data.error });
       }
     },
     onError: (error) => {

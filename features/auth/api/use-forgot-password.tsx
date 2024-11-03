@@ -32,13 +32,14 @@ export const useForgotPassword = () => {
       console.log(data);
 
       if (!data.success) {
-        toast({ variant: "destructive", description: data.message });
+        toast({ variant: "destructive", description: data.error });
       } else {
         router.push("/password-reset/email-verification");
       }
     },
     onError: (error) => {
       console.log(error);
+      toast({ variant: "destructive", description: error.message });
     },
   });
 };

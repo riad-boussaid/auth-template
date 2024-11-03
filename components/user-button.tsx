@@ -51,7 +51,7 @@ export const UserButton = ({ user }: { user: User | null }) => {
         sideOffset={10}
         className="w-[300px] rounded-xl p-0"
       >
-        <div className="flex items-start gap-x-4 border-b p-4">
+        <div className="flex items-start gap-x-4 p-4">
           <Avatar className="">
             <AvatarImage src={user?.avatar || ""} />
             <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50">
@@ -98,7 +98,7 @@ export const UserButton = ({ user }: { user: User | null }) => {
 
         <Button
           onClick={() => setOpen(true)}
-          className="bg h-12 w-full justify-start gap-x-4 rounded-none border-t bg-background px-8 py-4 text-sm text-foreground outline-none hover:bg-destructive hover:text-destructive-foreground"
+          className="bg h-12 w-full justify-start gap-x-4 rounded-none bg-background px-8 py-4 text-sm text-foreground outline-none hover:bg-destructive hover:text-destructive-foreground"
         >
           <LogOut className="size-4" />
           Logout

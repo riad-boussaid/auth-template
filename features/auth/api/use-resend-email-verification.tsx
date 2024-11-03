@@ -6,10 +6,10 @@ import { client } from "@/lib/rpc";
 import { useToast } from "@/hooks/use-toast";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.auth.resendEmailVerification)["$post"]
+  typeof client.api.auth.resendEmailVerification.$post
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.auth.resendEmailVerification)["$post"]
+  typeof client.api.auth.resendEmailVerification.$post
 >;
 
 export const useResendEmailVerification = () => {
@@ -18,9 +18,7 @@ export const useResendEmailVerification = () => {
 
   return useMutation<ResponseType, Error, RequestType>({
     mutationFn: async () => {
-      const response = await client.api.auth.resendEmailVerification["$post"](
-        {},
-      );
+      const response = await client.api.auth.resendEmailVerification.$post({});
 
       if (!response.ok) {
         throw new Error("Failed");
@@ -32,7 +30,7 @@ export const useResendEmailVerification = () => {
       console.log(data);
 
       if (!data.success) {
-        toast({ variant: "destructive", description: data.message });
+        toast({ variant: "destructive", description: data.error });
       } else {
         toast({ variant: "success", description: data.message });
 

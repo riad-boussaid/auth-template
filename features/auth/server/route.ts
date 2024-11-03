@@ -43,12 +43,18 @@ import {
 } from "@/lib/auth/email-verification";
 
 import { sessionMiddleware } from "@/lib/session-middleware";
+import { ErrorResponse, SuccessResponse } from "@/types";
 
 const app = new Hono()
-  .get("/current", (c) => {
-    // const user = c.get("user");
+  .get("/current", sessionMiddleware, (c) => {
+    const user = c.get("user");
+    const session = c.get("session");
 
-    return c.json({ data: "user" });
+    return c.json<SuccessResponse<{ userId: string }>>({
+      success: true,
+      message: "success",
+      data: { userId: session.id },
+    });
   })
   .post("/register", zValidator("form", SignUpSchema), async (c) => {
     try {
@@ -61,7 +67,7 @@ const app = new Hono()
         .limit(1);
 
       if (existingUser) {
-        throw new Error("User Already exist");
+        throw new HTTPException(400, { message: "User Already exist" });
       }
 
       const hashedPassword = await hash(password);
@@ -107,18 +113,21 @@ const app = new Hono()
       //   to: email,
       // });
 
-      return c.json({
-        success: true,
-        message:
-          "We've sent an verification email to your inbox. Please verify your email to continue.",
-        data: {
-          userId: createdUser.userId,
+      return c.json<SuccessResponse<{ userId: string }>>(
+        {
+          success: true,
+          message:
+            "We've sent an verification email to your inbox. Please verify your email to continue.",
+          data: {
+            userId: createdUser.userId,
+          },
         },
-      });
+        200,
+      );
     } catch (error) {
-      return c.json({
+      return c.json<ErrorResponse>({
         success: false,
-        message: getErrorMessages(error),
+        error: getErrorMessages(error),
       });
     }
   })
@@ -132,12 +141,8 @@ const app = new Hono()
         .where(eq(usersTable.email, email))
         .limit(1);
 
-      if (!existingUser) {
-        throw new Error("User not found");
-      }
-
-      if (!existingUser.hashedPassword) {
-        throw new Error("User not found");
+      if (!existingUser || !existingUser.hashedPassword) {
+        throw new HTTPException(404, { message: "User not found" });
       }
 
       const isValidPassword = await verify(
@@ -146,11 +151,12 @@ const app = new Hono()
       );
 
       if (!isValidPassword) {
-        throw new Error("Incorrect username or password");
+        throw new HTTPException(400, {
+          message: "Incorrect username or password",
+        });
       }
 
       const info = getConnInfo(c); // info is `ConnInfo`
-      console.log({ info });
 
       const sessionToken = generateSessionToken();
       const session = await createSession(
@@ -162,17 +168,23 @@ const app = new Hono()
 
       if (existingUser.emailVerified === false) {
         // return c.redirect("/email-verification");
-        return c.json({
+        return c.json<ErrorResponse>({
           success: false,
-          message: "email_not_verified",
+          error: "email_not_verified",
         });
       }
 
-      return c.json({ success: true, message: "Logged in successfully" });
+      return c.json<SuccessResponse>(
+        {
+          success: true,
+          message: "Logged in successfully",
+        },
+        200,
+      );
     } catch (error) {
-      return c.json({
+      return c.json<ErrorResponse>({
         success: false,
-        message: getErrorMessages(error),
+        error: getErrorMessages(error),
       });
     }
   })
@@ -188,14 +200,17 @@ const app = new Hono()
 
       // return c.redirect(new URL("/", NEXT_PUBLIC_APP_URL).href, 302);
 
-      return c.json({
-        success: true,
-        message: "Logout Successfully",
-      });
+      return c.json<SuccessResponse>(
+        {
+          success: true,
+          message: "Logout Successfully",
+        },
+        200,
+      );
     } catch (error) {
-      return c.json({
+      return c.json<ErrorResponse>({
         success: false,
-        message: getErrorMessages(error),
+        error: getErrorMessages(error),
       });
     }
   })
@@ -249,12 +264,18 @@ const app = new Hono()
 
         await deleteEmailVerificationRequestCookie();
 
-        return c.json({
-          success: true,
-          message: "Email verified successfully",
-        });
+        return c.json<SuccessResponse>(
+          {
+            success: true,
+            message: "Email verified successfully",
+          },
+          200,
+        );
       } catch (error) {
-        return c.json({ success: false, message: getErrorMessages(error) });
+        return c.json<ErrorResponse>({
+          success: false,
+          error: getErrorMessages(error),
+        });
       }
     },
   )
@@ -292,14 +313,17 @@ const app = new Hono()
 
       await setEmailVerificationRequestCookie(verificationRequest);
 
-      return c.json({
-        success: true,
-        message: "A new code was sent to your inbox.",
-      });
+      return c.json<SuccessResponse>(
+        {
+          success: true,
+          message: "A new code was sent to your inbox.",
+        },
+        200,
+      );
     } catch (error) {
-      return c.json({
+      return c.json<ErrorResponse>({
         success: false,
-        message: getErrorMessages(error),
+        error: getErrorMessages(error),
       });
     }
   })
@@ -341,9 +365,19 @@ const app = new Hono()
         );
 
         // return c.redirect("/password-reset/email-verification");
-        return c.json({ success: true, message: existingUser.email });
+        return c.json<SuccessResponse<{ email: string }>>(
+          {
+            success: true,
+            message: "Email sent successfully",
+            data: { email: existingUser.email },
+          },
+          200,
+        );
       } catch (error) {
-        return c.json({ success: false, message: getErrorMessages(error) });
+        return c.json<ErrorResponse>({
+          success: false,
+          error: getErrorMessages(error),
+        });
       }
     },
   )
@@ -356,7 +390,7 @@ const app = new Hono()
       if (session === null) {
         throw new HTTPException(400, { message: "Not authenticated" });
       }
-      
+
       if (session.emailVerified) {
         throw new HTTPException(400, { message: "Forbidden" });
       }
@@ -385,7 +419,14 @@ const app = new Hono()
         throw new HTTPException(400, { message: "Please restart the process" });
       }
 
-      return c.json({ success: true, message: code });
+      return c.json<SuccessResponse<{ code: string }>>(
+        {
+          success: true,
+          message: "code sent successfully",
+          data: { code },
+        },
+        200,
+      );
     },
   )
   .post(
@@ -435,12 +476,18 @@ const app = new Hono()
 
         await deletePasswordResetSessionTokenCookie();
 
-        return c.json({
-          success: true,
-          message: "Password Reset Successfully",
-        });
+        return c.json<SuccessResponse>(
+          {
+            success: true,
+            message: "Password Reset Successfully",
+          },
+          200,
+        );
       } catch (error) {
-        return c.json({ success: false, message: getErrorMessages(error) });
+        return c.json<ErrorResponse>({
+          success: false,
+          error: getErrorMessages(error),
+        });
       }
     },
   );

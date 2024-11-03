@@ -26,7 +26,7 @@ export default async function Home() {
                 className="rounded-full"
               >
                 <FaGithub className="size-4" />
-                Github repo
+                repository
               </Button>
             </Link>
           </div>

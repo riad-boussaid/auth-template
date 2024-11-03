@@ -26,7 +26,7 @@ export const useRegister = () => {
     },
     onSuccess: (data) => {
       if (!data?.success) {
-        toast({ variant: "destructive", description: data.message });
+        toast({ variant: "destructive", description: data.error });
       } else {
         toast({
           variant: "success",
