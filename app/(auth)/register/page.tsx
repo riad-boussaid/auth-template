@@ -10,6 +10,12 @@ export default async function RegisterPage() {
     if (!user.emailVerified) {
       return redirect("/email-verification");
     }
+    if (!user.totpKey) {
+			return redirect("/2fa/setup");
+		}
+		if (!session.twoFactorVerified) {
+			return redirect("/2fa");
+		}
 
     return redirect("/");
   }

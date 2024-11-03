@@ -31,12 +31,16 @@ export const useLogin = () => {
         if (data.error === "email_not_verified") {
           router.push(`/email-verification`);
         }
+
+        if (data.error === "2fa_not_registerd") {
+          router.push(`/2fa/setup`);
+        }
       } else {
         toast({ variant: "success", description: data.message });
 
         queryClient.invalidateQueries({ queryKey: ["current"] });
 
-        router.push("/");
+        router.push("/2fa");
         router.refresh();
       }
     },

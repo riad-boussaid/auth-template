@@ -20,6 +20,7 @@ import {
   generateSessionToken,
   getCurrentSession,
   invalidateSession,
+  SessionFlags,
   setSessionTokenCookie,
 } from "@/lib/auth/session";
 import { getErrorMessages } from "@/lib/error-message";
@@ -44,6 +45,8 @@ import {
 
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { ErrorResponse, SuccessResponse } from "@/types";
+import { generateRandomRecoveryCode } from "@/lib/utils";
+import { encryptString } from "@/lib/encryption";
 
 const app = new Hono()
   .get("/current", sessionMiddleware, (c) => {
@@ -72,12 +75,17 @@ const app = new Hono()
 
       const hashedPassword = await hash(password);
 
+      const recoveryCode = generateRandomRecoveryCode();
+      // const encryptedRecoveryCode = encryptString(recoveryCode);
+
       const [createdUser] = await db
         .insert(usersTable)
         .values({
           username,
           email,
           hashedPassword,
+          // recoveryCode: encryptedRecoveryCode.toString(),
+          recoveryCode,
         })
         .returning({ userId: usersTable.id, email: usersTable.email });
 
@@ -98,11 +106,15 @@ const app = new Hono()
       await setEmailVerificationRequestCookie(emailVerificationRequest);
 
       const info = getConnInfo(c); // info is `ConnInfo`
+      const sessionFlags: SessionFlags = {
+        twoFactorVerified: false,
+      };
 
       const sessionToken = generateSessionToken();
       const session = await createSession(
         sessionToken,
         createdUser.userId,
+        sessionFlags,
         (info.remote.address ?? "127.0.0.1").split(",")[0],
       );
       await setSessionTokenCookie(sessionToken, session.expiresAt);
@@ -157,11 +169,14 @@ const app = new Hono()
       }
 
       const info = getConnInfo(c); // info is `ConnInfo`
-
+      const sessionFlags: SessionFlags = {
+        twoFactorVerified: false,
+      };
       const sessionToken = generateSessionToken();
       const session = await createSession(
         sessionToken,
         existingUser.id,
+        sessionFlags,
         (info.remote.address ?? "127.0.0.1").split(",")[0],
       );
       await setSessionTokenCookie(sessionToken, session.expiresAt);
@@ -171,6 +186,13 @@ const app = new Hono()
         return c.json<ErrorResponse>({
           success: false,
           error: "email_not_verified",
+        });
+      }
+
+      if (!existingUser.totpKey) {
+        return c.json<ErrorResponse>({
+          success: false,
+          error: "2fa_not_registerd",
         });
       }
 

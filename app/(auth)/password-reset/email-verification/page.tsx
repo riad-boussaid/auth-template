@@ -9,6 +9,9 @@ export default async function PasswordResetEmailVerification() {
     return redirect("/forgot-password");
   }
   if (session.emailVerified) {
+    if (!session.twoFactorVerified) {
+			return redirect("/password-reset/2fa");
+		}
     return redirect("/password-reset");
   }
   return <PasswordResetEmailVerificationForm />;

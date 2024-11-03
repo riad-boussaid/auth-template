@@ -22,9 +22,14 @@ export function generateSessionToken(): string {
   return token;
 }
 
+export interface SessionFlags {
+  twoFactorVerified: boolean;
+}
+
 export async function createSession(
   token: string,
   userId: string,
+  flags: SessionFlags,
   ip: string,
 ): Promise<Session> {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
@@ -35,6 +40,7 @@ export async function createSession(
     ip,
     expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
     createdAt: new Date(Date.now()),
+    twoFactorVerified: flags.twoFactorVerified,
   };
 
   await db.insert(sessionsTable).values(session);

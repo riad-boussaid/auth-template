@@ -16,20 +16,16 @@ export const usersTable = pgTable(
   "users",
   {
     id: text().primaryKey().$defaultFn(randomUUID),
-
     // firstName: varchar("first_name", { length: 255 }),
     // lastName: varchar("last_name", { length: 255 }),
-
     username: varchar({ length: 255 }),
     avatar: text(),
-
     email: varchar({ length: 255 }).unique(),
     emailVerified: boolean().default(false).notNull(),
-
     hashedPassword: varchar({ length: 256 }),
-
     role: roleEnums().default("USER").notNull(),
-
+    totpKey: text(),
+    recoveryCode: text().notNull(),
     createdAt: timestamp({ mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp({ mode: "date" }).$onUpdate(() => new Date()),
   },
@@ -68,18 +64,15 @@ export const emailVerificationsTable = pgTable("email_verifications", {
 
 export const sessionsTable = pgTable("sessions", {
   id: text().primaryKey(),
-
   userId: text()
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
-
   ip: text().notNull(),
-
   expiresAt: timestamp({
     withTimezone: true,
     mode: "date",
   }).notNull(),
-
+  twoFactorVerified: boolean().notNull().default(false),
   createdAt: timestamp({ withTimezone: true, mode: "date" })
     .defaultNow()
     .notNull(),
@@ -93,6 +86,7 @@ export const passwordResetSessionsTable = pgTable("password_reset_sessions", {
   email: text().notNull(),
   emailVerified: boolean().notNull().default(false),
   code: text().notNull(),
+  twoFactorVerified: boolean().notNull().default(false),
   expiresAt: timestamp({
     withTimezone: true,
     mode: "date",

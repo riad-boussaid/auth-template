@@ -19,6 +19,24 @@ import { DeleteUserForm } from "@/features/user/components/delete-user-form";
 import { UserSessionsTablecolumns } from "@/features/user/components/user-sessions-table-columns";
 import { ConnectedAccountsForm } from "@/features/user/components/connected-accounts-form";
 import { UpdateEmailAddressForm } from "@/features/user/components/update-email-address-form";
+import { db } from "@/lib/db";
+import { usersTable } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { decryptToString } from "@/lib/encryption";
+
+export async function getUserRecoverCode(userId: string): Promise<string> {
+  const [result] = await db
+    .select({ recoveryCode: usersTable.recoveryCode })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId));
+
+  if (result === null) {
+    throw new Error("Invalid user ID");
+  }
+
+  // return decryptToString(recoveryCode);
+  return result.recoveryCode;
+}
 
 export default async function SettingsPage(props: {
   searchParams?: Promise<{ tab: string }>;
@@ -28,11 +46,13 @@ export default async function SettingsPage(props: {
   if (session === null) {
     return redirect("/sign-in");
   }
-
-  // const headersList = await headers();
-  // const userIP = (headersList.get("x-forwarded-for") ?? "127.0.0.1").split(
-  //   ",",
-  // )[0];
+  if (user.totpKey && !session.twoFactorVerified) {
+    return redirect("/2fa");
+  }
+  let recoveryCode: string | null = null;
+  if (user.totpKey) {
+    recoveryCode = await getUserRecoverCode(user.id);
+  }
 
   const searchParams = await props.searchParams;
   const tab = searchParams?.tab;
