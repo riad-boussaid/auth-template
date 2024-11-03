@@ -4,17 +4,10 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { and, eq } from "drizzle-orm";
-import { cookies } from "next/headers";
 import { hash, verify } from "@node-rs/argon2";
-// import jwt from "hono/jwt";
 
 import { db } from "@/lib/db";
-import {
-  // emailVerificationsTable,
-  passwordResetSessionsTable,
-  sessionsTable,
-  usersTable,
-} from "@/lib/db/schema";
+import { sessionsTable, usersTable } from "@/lib/db/schema";
 import {
   ForgotPasswordSchema,
   ResetPasswordAuthSchema,
@@ -29,12 +22,14 @@ import {
   invalidateSession,
   setSessionTokenCookie,
 } from "@/lib/auth/session";
-// import { generateRandomString } from "@oslojs/crypto/random";
-// import { sendEmail } from "@/lib/email";
 import { getErrorMessages } from "@/lib/error-message";
 import {
   createPasswordResetSession,
   deletePasswordResetSessionTokenCookie,
+  invalidateUserPasswordResetSessions,
+  sendPasswordResetEmail,
+  setPasswordResetSessionAsEmailVerified,
+  setPasswordResetSessionTokenCookie,
   validatePasswordResetSessionRequest,
 } from "@/lib/auth/password-reset";
 
@@ -47,15 +42,17 @@ import {
   setEmailVerificationRequestCookie,
 } from "@/lib/auth/email-verification";
 
+import { sessionMiddleware } from "@/lib/session-middleware";
+
 const app = new Hono()
   .get("/current", (c) => {
     // const user = c.get("user");
 
     return c.json({ data: "user" });
   })
-  .post("/register", zValidator("json", SignUpSchema), async (c) => {
+  .post("/register", zValidator("form", SignUpSchema), async (c) => {
     try {
-      const { username, email, password } = c.req.valid("json");
+      const { username, email, password } = c.req.valid("form");
 
       const [existingUser] = await db
         .select()
@@ -72,7 +69,6 @@ const app = new Hono()
       const [createdUser] = await db
         .insert(usersTable)
         .values({
-          // id: userId,
           username,
           email,
           hashedPassword,
@@ -126,9 +122,9 @@ const app = new Hono()
       });
     }
   })
-  .post("/login", zValidator("json", SignInSchema), async (c) => {
+  .post("/login", zValidator("form", SignInSchema), async (c) => {
     try {
-      const { email, password } = c.req.valid("json");
+      const { email, password } = c.req.valid("form");
 
       const [existingUser] = await db
         .select()
@@ -180,21 +176,21 @@ const app = new Hono()
       });
     }
   })
-  .post("/logout", async (c) => {
+  .post("/logout", sessionMiddleware, async (c) => {
     try {
-      const { session } = await getCurrentSession();
-
-      if (!session) {
-        throw new HTTPException(401, { message: "Unauthorized" });
-      }
+      const session = c.get("session");
 
       await invalidateSession(session.id);
 
       await deleteSessionTokenCookie();
 
+      // const { NEXT_PUBLIC_APP_URL } = env<{ NEXT_PUBLIC_APP_URL: string }>(c);
+
+      // return c.redirect(new URL("/", NEXT_PUBLIC_APP_URL).href, 302);
+
       return c.json({
         success: true,
-        message: "Logout successfully",
+        message: "Logout Successfully",
       });
     } catch (error) {
       return c.json({
@@ -205,14 +201,11 @@ const app = new Hono()
   })
   .post(
     "/emailVerification",
+    sessionMiddleware,
     zValidator("form", z.object({ code: z.string().min(6) })),
     async (c) => {
       try {
-        const { session: s, user } = await getCurrentSession();
-
-        if (s === null) {
-          throw new HTTPException(400, { message: "Not authenticated" });
-        }
+        const user = c.get("user");
 
         let verificationRequest =
           await getUserEmailVerificationRequestFromRequest();
@@ -238,12 +231,6 @@ const app = new Hono()
             message:
               "The verification code was expired. We sent another code to your inbox.",
           });
-
-          // return c.json({
-          //   success: true,
-          //   message:
-          //     "The verification code was expired. We sent another code to your inbox.",
-          // });
         }
 
         if (verificationRequest.code !== code) {
@@ -251,10 +238,8 @@ const app = new Hono()
         }
 
         await deleteUserEmailVerificationRequest(user.id);
-        // invalidateUserPasswordResetSessions(user.id);
-        await db
-          .delete(passwordResetSessionsTable)
-          .where(eq(passwordResetSessionsTable.userId, user.id));
+
+        await invalidateUserPasswordResetSessions(user.id);
 
         // updateUserEmailAndSetEmailAsVerified(user.id, verificationRequest.email);
         await db
@@ -273,12 +258,9 @@ const app = new Hono()
       }
     },
   )
-  .post("/resendEmailVerification", async (c) => {
+  .post("/resendEmailVerification", sessionMiddleware, async (c) => {
     try {
-      const { session, user } = await getCurrentSession();
-      if (session === null) {
-        throw new HTTPException(400, { message: "Not authenticated" });
-      }
+      const user = c.get("user");
 
       let verificationRequest =
         await getUserEmailVerificationRequestFromRequest();
@@ -323,10 +305,10 @@ const app = new Hono()
   })
   .post(
     "/forgotPassword",
-    zValidator("json", ForgotPasswordSchema),
+    zValidator("form", ForgotPasswordSchema),
     async (c) => {
       try {
-        const { email } = c.req.valid("json");
+        const { email } = c.req.valid("form");
 
         if (!email) {
           throw new HTTPException(400, { message: "Email not found" });
@@ -342,10 +324,7 @@ const app = new Hono()
           throw new HTTPException(400, { message: "User not found" });
         }
 
-        // invalidateUserPasswordResetSessions(user.id);
-        await db
-          .delete(passwordResetSessionsTable)
-          .where(eq(passwordResetSessionsTable.userId, existingUser.id));
+        await invalidateUserPasswordResetSessions(existingUser.id);
 
         const sessionToken = generateSessionToken();
         const session = await createPasswordResetSession(
@@ -354,17 +333,12 @@ const app = new Hono()
           existingUser.email,
         );
 
-        // sendPasswordResetEmail(session.email, session.code);
-        console.log(`To ${session.email}: Your reset code is ${session.code}`);
+        sendPasswordResetEmail(session.email, session.code);
 
-        // setPasswordResetSessionTokenCookie(sessionToken, session.expiresAt);
-        (await cookies()).set("password_reset_session", sessionToken, {
-          expires: session.expiresAt,
-          sameSite: "lax",
-          httpOnly: true,
-          path: "/",
-          secure: process.env.NODE_ENV === "production",
-        });
+        await setPasswordResetSessionTokenCookie(
+          sessionToken,
+          session.expiresAt,
+        );
 
         // return c.redirect("/password-reset/email-verification");
         return c.json({ success: true, message: existingUser.email });
@@ -379,11 +353,10 @@ const app = new Hono()
     async (c) => {
       const { session } = await validatePasswordResetSessionRequest();
 
-      console.log(session);
-
       if (session === null) {
         throw new HTTPException(400, { message: "Not authenticated" });
       }
+      
       if (session.emailVerified) {
         throw new HTTPException(400, { message: "Forbidden" });
       }
@@ -394,11 +367,7 @@ const app = new Hono()
         throw new HTTPException(400, { message: "Incorrect code" });
       }
 
-      // setPasswordResetSessionAsEmailVerified(session.id);
-      await db
-        .update(passwordResetSessionsTable)
-        .set({ emailVerified: true })
-        .where(eq(passwordResetSessionsTable.id, session.id));
+      await setPasswordResetSessionAsEmailVerified(session.id);
 
       // setUserAsEmailVerifiedIfEmailMatches(userId: number, email: string)
       const [result] = await db
@@ -421,13 +390,11 @@ const app = new Hono()
   )
   .post(
     "/passwordReset",
-    zValidator("json", ResetPasswordAuthSchema),
+    zValidator("form", ResetPasswordAuthSchema),
     async (c) => {
       try {
         const { session: passwordResetSession, user } =
           await validatePasswordResetSessionRequest();
-
-        console.log(user);
 
         if (passwordResetSession === null) {
           throw new HTTPException(400, { message: "Not authenticated" });
@@ -437,17 +404,14 @@ const app = new Hono()
           throw new HTTPException(400, { message: "Forbidden" });
         }
 
-        // invalidateUserPasswordResetSessions(passwordResetSession.userId);
-        await db
-          .delete(passwordResetSessionsTable)
-          .where(eq(passwordResetSessionsTable.userId, user.id));
+        await invalidateUserPasswordResetSessions(user.id);
 
-        // invalidateUserSessions(passwordResetSession.userId);
+        // invalidateUserSessions(user.id;
         await db.delete(sessionsTable).where(eq(sessionsTable.userId, user.id));
 
         // await updateUserPassword(passwordResetSession.userId, password);
 
-        const { confirmNewPassword } = c.req.valid("json");
+        const { confirmNewPassword } = c.req.valid("form");
 
         const hashedNewPassword = await hash(confirmNewPassword);
 
@@ -467,23 +431,9 @@ const app = new Hono()
           (info.remote.address ?? "127.0.0.1").split(",")[0],
         );
 
-        // setSessionTokenCookie(sessionToken, session.expiresAt);
-        (await cookies()).set("session", sessionToken, {
-          httpOnly: true,
-          path: "/",
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          expires: session.expiresAt,
-        });
+        await setSessionTokenCookie(sessionToken, session.expiresAt);
 
         await deletePasswordResetSessionTokenCookie();
-        // cookies().set("password_reset_session", "", {
-        //   httpOnly: true,
-        //   path: "/",
-        //   secure: process.env.NODE_ENV === "production",
-        //   sameSite: "lax",
-        //   maxAge: 0,
-        // });
 
         return c.json({
           success: true,

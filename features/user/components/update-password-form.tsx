@@ -48,7 +48,7 @@ export const UpdatePasswordForm = () => {
   const { mutateAsync, isPending } = useResetPassword();
 
   const onSubmit = async (values: z.infer<typeof ResetPasswordSchema>) => {
-    await mutateAsync({ json: values });
+    await mutateAsync({ form: values });
     toggleEditMode();
   };
 

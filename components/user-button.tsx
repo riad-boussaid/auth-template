@@ -95,7 +95,7 @@ export const UserButton = ({ user }: { user: User | null }) => {
           onConfirm={() => logout()}
           onCancel={() => setOpen(false)}
         />
-        
+
         <Button
           onClick={() => setOpen(true)}
           className="bg h-12 w-full justify-start gap-x-4 rounded-none border-t bg-background px-8 py-4 text-sm text-foreground outline-none hover:bg-destructive hover:text-destructive-foreground"

@@ -19,8 +19,8 @@ export const useResetPassword = () => {
   const router = useRouter();
 
   return useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async ({ json }) => {
-      const response = await client.api.user.updatePassword.$post({ json });
+    mutationFn: async ({ form }) => {
+      const response = await client.api.user.updatePassword.$post({ form });
 
       if (!response.ok) {
         throw new Error("Failed to reset password");

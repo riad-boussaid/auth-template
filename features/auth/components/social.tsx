@@ -2,7 +2,6 @@
 
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
@@ -10,23 +9,14 @@ import { useCreateGoogleAuthorizationUrl } from "@/features/oauth/api/use-create
 import { useCreateFacebookAuthorizationUrl } from "@/features/oauth/api/use-create-facebook-authorization-url";
 
 export const Social = () => {
-  const router = useRouter();
-  
-  const { mutateAsync: mutateGoogle, isPending: isPendingGoogle } =
+  const { mutate: mutateGoogle, isPending: isPendingGoogle } =
     useCreateGoogleAuthorizationUrl();
 
   const { mutate: mutateFacebook, isPending: isPendingFacebook } =
     useCreateFacebookAuthorizationUrl();
 
   const onGoogleSignInClicked = async () => {
-    await mutateGoogle(
-      {},
-      {
-        onSuccess(data) {
-          router.push(`${data.data}`);
-        },
-      },
-    );
+    mutateGoogle({});
   };
 
   const onFacebookSignInClicked = async () => {

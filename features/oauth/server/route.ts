@@ -98,24 +98,6 @@ const app = new Hono()
         throw new HTTPException(400, {
           message: getErrorMessages(error),
         });
-        // if (error instanceof OAuth2RequestError) {
-        //   // Invalid authorization code, credentials, or redirect URI
-        //   const code = error.code;
-        //   // ...
-
-        //   throw new HTTPException(400, {
-        //     message: "Invalid authorization code, credentials, or redirect URI",
-        //   });
-        // }
-        // if (error instanceof ArcticFetchError) {
-        //   // Failed to call `fetch()`
-        //   const cause = error.cause;
-        //   // ...
-        //   throw new HTTPException(400, {
-        //     message: "Failed to call `fetch()`",
-        //   });
-        // }
-        // // Parse error
       }
 
       const accessToken = tokens.accessToken();
@@ -131,7 +113,6 @@ const app = new Hono()
 
       const { NEXT_PUBLIC_APP_URL } = env<{ NEXT_PUBLIC_APP_URL: string }>(c);
 
-      // let createdUserRes: { id: string }[];
       const transactionResponse = await db.transaction(async (trx) => {
         try {
           const [existingUser] = await trx
@@ -168,7 +149,6 @@ const app = new Hono()
                 providerUserId: googleId,
                 userId: createdUserRes.id,
                 accessToken,
-                // refreshToken,
                 expiresAt: accessTokenExpiresAt,
               });
 
@@ -194,7 +174,7 @@ const app = new Hono()
               .where(eq(accountsTable.userId, existingUser.id));
 
             if (accounts.some((e) => e.provider === "google")) {
-              const updatedOAuthAccountRes = await trx
+              await trx
                 .update(accountsTable)
                 .set({
                   accessToken,
@@ -202,16 +182,13 @@ const app = new Hono()
                 })
                 .where(eq(accountsTable.providerUserId, googleId));
             } else {
-              const createdOAuthAccountRes = await trx
-                .insert(accountsTable)
-                .values({
-                  provider: "google",
-                  providerUserId: googleId,
-                  userId: existingUser.id,
-                  accessToken,
-                  // refreshToken,
-                  expiresAt: accessTokenExpiresAt,
-                });
+              await trx.insert(accountsTable).values({
+                provider: "google",
+                providerUserId: googleId,
+                userId: existingUser.id,
+                accessToken,
+                expiresAt: accessTokenExpiresAt,
+              });
             }
 
             // if (updatedOAuthAccountRes.rowCount === 0) {
@@ -307,12 +284,16 @@ const app = new Hono()
       const accessTokenExpiresAt = tokens.accessTokenExpiresAt();
 
       const facebookDataUrl = new URL("https://graph.facebook.com/me");
+
       facebookDataUrl.searchParams.set("access_token", accessToken);
+
       facebookDataUrl.searchParams.set(
         "fields",
         ["id", "name", "picture", "email"].join(","),
       );
+
       const response = await fetch(facebookDataUrl);
+
       const user = await response.json();
 
       const facebookId = user.id;

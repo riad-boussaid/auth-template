@@ -47,7 +47,7 @@ export const SigninForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof SignInSchema>) {
-    mutate({ json: values });
+    mutate({ form: values });
   }
 
   return (

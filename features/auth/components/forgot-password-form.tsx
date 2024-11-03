@@ -38,7 +38,7 @@ export const ForgotPasswordForm = () => {
   });
 
   const onSubmit = (values: z.infer<typeof ForgotPasswordSchema>) => {
-    mutate({ json: values });
+    mutate({ form: values });
   };
 
   return (

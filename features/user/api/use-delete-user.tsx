@@ -13,8 +13,8 @@ export const useDeleteUser = () => {
   const router = useRouter();
 
   return useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async (json) => {
-      const response = await client.api.user.deleteUser.$post({ json });
+    mutationFn: async () => {
+      const response = await client.api.user.deleteUser.$post();
 
       if (!response.ok) {
         throw new Error("Failed to delete user");

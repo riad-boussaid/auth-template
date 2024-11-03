@@ -6,20 +6,18 @@ import { client } from "@/lib/rpc";
 import { useToast } from "@/hooks/use-toast";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.auth.passwordReset)["$post"]
+  typeof client.api.auth.passwordReset.$post
 >;
-type RequestType = InferRequestType<
-  (typeof client.api.auth.passwordReset)["$post"]
->;
+type RequestType = InferRequestType<typeof client.api.auth.passwordReset.$post>;
 
 export const usePasswordReset = () => {
   const router = useRouter();
   const { toast } = useToast();
 
   return useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async ({ json }) => {
-      const response = await client.api.auth.passwordReset["$post"]({
-        json,
+    mutationFn: async ({ form }) => {
+      const response = await client.api.auth.passwordReset.$post({
+        form,
       });
 
       if (!response.ok) {
@@ -37,7 +35,7 @@ export const usePasswordReset = () => {
         toast({ variant: "success", description: data.message });
 
         router.push("/");
-        router.refresh();
+        // router.refresh();
       }
     },
     onError: (error) => {

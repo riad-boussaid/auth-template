@@ -44,7 +44,7 @@ export const PasswordResetForm = () => {
   });
 
   const onSubmit = (values: z.infer<typeof ResetPasswordAuthSchema>) => {
-    mutate({ json: values });
+    mutate({ form: values });
   };
 
   return (

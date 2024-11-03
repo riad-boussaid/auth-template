@@ -31,9 +31,9 @@ import { useCountdown } from "@/hooks/use-countdown";
 
 export const EmailVerificationForm = () => {
   // const { toast } = useToast();
-  
+
   const [count, { startCountdown, stopCountdown, resetCountdown }] =
-  useCountdown({
+    useCountdown({
       countStart: 60,
       intervalMs: 1000,
     });
@@ -63,15 +63,8 @@ export const EmailVerificationForm = () => {
 
   const onResendVerificationEmail = async () => {
     await mutateAsyncResend({});
-    // const res = await resendVerificationEmail("email");
-    // if (res.error) {
-    //   toast({ variant: "destructive", description: res.error });
-    // }
-    // if (res.success) {
-    //   toast({ variant: "success", description: res.success });
 
     startCountdown();
-    // }
   };
 
   return (

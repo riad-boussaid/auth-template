@@ -18,8 +18,8 @@ export const useUpdateUsername = () => {
   const queryClient = useQueryClient();
 
   return useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async ({ json }) => {
-      const response = await client.api.user.updateUsername.$post({ json });
+    mutationFn: async ({ form }) => {
+      const response = await client.api.user.updateUsername.$post({ form });
 
       if (!response.ok) {
         throw new Error("Failed to update");

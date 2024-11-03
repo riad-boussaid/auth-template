@@ -1,15 +1,29 @@
-// import "server-only";
+import "server-only";
+import { createMiddleware } from "hono/factory";
+// import { HTTPException } from "hono/http-exception";
 
-// import { getCookie } from "hono/cookie";
-// import { createMiddleware } from "hono/factory";
+import { getCurrentSession } from "@/lib/auth/session";
+import { type Session, type User } from "@/lib/db/schema";
 
-// import { AUTH_COOKIE } from "@/features/auth/constants";
+type AdditionalContext = {
+  Variables: {
+    session: Session;
+    user: User;
+  };
+};
 
-// export const sessionMiddleware = createMiddleware(async (c, next) => {
-//   // const client = new Client()
-//   const session = getCookie(c, AUTH_COOKIE);
+export const sessionMiddleware = createMiddleware<AdditionalContext>(
+  async (c, next) => {
+    const { session, user } = await getCurrentSession();
 
-//   if (!session) {
-//     return c.json({ error: "Unauthorizes" }, 401);
-//   }
-// });
+    if (!session || !user) {
+      //   throw new HTTPException(401, { message: "Unauthorized" });
+      return c.json({ success: false, message: "Unauthorized" }, 401);
+    }
+
+    c.set("session", session);
+    c.set("user", user);
+
+    await next();
+  },
+);

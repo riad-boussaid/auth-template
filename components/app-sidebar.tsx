@@ -5,9 +5,9 @@ import { ChartArea, User } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
+  // SidebarGroup,
+  // SidebarGroupContent,
+  // SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,

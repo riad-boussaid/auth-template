@@ -17,6 +17,7 @@ import { getCurrentSession } from "@/lib/auth/session";
 import { getErrorMessages } from "@/lib/error-message";
 
 import { ResetPasswordSchema } from "@/features/user/validators";
+import { sessionMiddleware } from "@/lib/session-middleware";
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -25,13 +26,9 @@ cloudinary.config({
 });
 
 const app = new Hono()
-  .post("/deleteUser", async (c) => {
+  .post("/deleteUser", sessionMiddleware, async (c) => {
     try {
-      const { user } = await getCurrentSession();
-
-      if (!user) {
-        throw new HTTPException(401, { message: "Unauthorized" });
-      }
+      const user = c.get("user");
 
       await db.delete(usersTable).where(eq(usersTable.id, user.id));
 
@@ -42,16 +39,13 @@ const app = new Hono()
   })
   .post(
     "/updateUsername",
-    zValidator("json", z.object({ username: z.string() })),
+    zValidator("form", z.object({ username: z.string() })),
+    sessionMiddleware,
     async (c) => {
       try {
-        const { user } = await getCurrentSession();
+        const user = c.get("user");
 
-        if (!user) {
-          throw new HTTPException(401, { message: "Unauthorized" });
-        }
-
-        const { username } = c.req.valid("json");
+        const { username } = c.req.valid("form");
 
         const [currentUser] = await db
           .select()
@@ -82,13 +76,11 @@ const app = new Hono()
   )
   .post(
     "/updatePassword",
-    zValidator("json", ResetPasswordSchema),
+    zValidator("form", ResetPasswordSchema),
+    sessionMiddleware,
     async (c) => {
       try {
-        const { user } = await getCurrentSession();
-        if (!user) {
-          throw new HTTPException(401, { message: "Unauthorized" });
-        }
+        const user = c.get("user");
 
         const [existingUser] = await db
           .select()
@@ -102,7 +94,7 @@ const app = new Hono()
           });
         }
 
-        const { password, newPassword } = c.req.valid("json");
+        const { password, newPassword } = c.req.valid("form");
 
         const isValidPassword = await verify(
           existingUser.hashedPassword,
@@ -131,6 +123,7 @@ const app = new Hono()
   )
   .post(
     "/updateAvatar",
+    sessionMiddleware,
     zValidator(
       "form",
       z.object({
@@ -139,11 +132,7 @@ const app = new Hono()
     ),
     async (c) => {
       try {
-        const { user } = await getCurrentSession();
-
-        if (!user) {
-          throw new HTTPException(400, { message: "Unauthorized" });
-        }
+        const user = c.get("user");
 
         const { avatar } = c.req.valid("form");
 
@@ -168,13 +157,9 @@ const app = new Hono()
       }
     },
   )
-  .post("/deleteAvatar", async (c) => {
+  .post("/deleteAvatar", sessionMiddleware, async (c) => {
     try {
-      const { user } = await getCurrentSession();
-
-      if (!user) {
-        throw new HTTPException(400, { message: "Unauthorized" });
-      }
+      const user = c.get("user");
 
       await db
         .update(usersTable)
@@ -240,14 +225,9 @@ const app = new Hono()
   )
   .post(
     "/deleteSession",
+    sessionMiddleware,
     zValidator("form", z.object({ sessionId: z.string().min(1) })),
     async (c) => {
-      const { user } = await getCurrentSession();
-
-      if (!user) {
-        throw new HTTPException(400, { message: "Unauthorized" });
-      }
-
       const { sessionId } = c.req.valid("form");
 
       await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));

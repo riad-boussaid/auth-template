@@ -16,7 +16,7 @@ import {
 
 export function generateRandomOTP(): string {
   const bytes = new Uint8Array(5);
-  
+
   crypto.getRandomValues(bytes);
 
   const code = encodeBase32UpperCaseNoPadding(bytes);
@@ -136,6 +136,23 @@ export async function deletePasswordResetSessionTokenCookie(): Promise<void> {
     path: "/",
     secure: process.env.NODE_ENV === "production",
   });
+}
+
+export function sendPasswordResetEmail(email: string, code: string) {
+  console.log(`To ${email}: Your reset code is ${code}`);
+}
+
+export async function invalidateUserPasswordResetSessions(userId: string) {
+  await db
+    .delete(passwordResetSessionsTable)
+    .where(eq(passwordResetSessionsTable.userId, userId));
+}
+
+export async function setPasswordResetSessionAsEmailVerified(sessionId: string) {
+  await db
+        .update(passwordResetSessionsTable)
+        .set({ emailVerified: true })
+        .where(eq(passwordResetSessionsTable.id, sessionId));
 }
 
 export type PasswordResetSessionValidationResult =

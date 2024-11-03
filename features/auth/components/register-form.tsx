@@ -46,7 +46,7 @@ export const RegisterForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof SignUpSchema>) {
-    mutate({ json: values });
+    mutate({ form: values });
   }
 
   return (

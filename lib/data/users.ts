@@ -3,7 +3,6 @@ import { asc, desc, eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import {
-  Account,
   accountsTable,
   Session,
   sessionsTable,

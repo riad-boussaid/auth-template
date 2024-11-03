@@ -55,7 +55,7 @@ export const UpdateUsernameForm = () => {
   const { mutateAsync, isPending } = useUpdateUsername();
 
   const onSubmit = async (values: z.infer<typeof usernameSchema>) => {
-    await mutateAsync({ json: values });
+    await mutateAsync({ form: values });
     toggleEditMode();
     // router.refresh();
     window.location.reload();

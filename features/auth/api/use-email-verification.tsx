@@ -37,7 +37,7 @@ export const useEmailVerification = () => {
         toast({ variant: "success", description: data.message });
 
         router.push("/");
-        router.refresh();
+        // router.refresh();
       }
     },
     onError: (error) => {

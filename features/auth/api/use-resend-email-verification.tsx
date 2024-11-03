@@ -13,7 +13,7 @@ type RequestType = InferRequestType<
 >;
 
 export const useResendEmailVerification = () => {
-//   const router = useRouter();
+  //   const router = useRouter();
   const { toast } = useToast();
 
   return useMutation<ResponseType, Error, RequestType>({

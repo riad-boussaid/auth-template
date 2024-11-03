@@ -12,8 +12,6 @@ import {
 
 import { useSession } from "@/components/providers/session-provider";
 
-import { useToast } from "@/hooks/use-toast";
-
 import { roleEnums } from "@/lib/db/schema";
 
 import { useUpdateRole } from "../api/use-update-role";
@@ -25,7 +23,6 @@ export const UpdateRoleForm = ({
   userId: string;
   role: (typeof roleEnums.enumValues)[number];
 }) => {
-  const { toast } = useToast();
   const { user } = useSession();
 
   const { mutate } = useUpdateRole();
