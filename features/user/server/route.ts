@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
 import { verify, hash } from "@node-rs/argon2";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -13,9 +12,8 @@ import {
   sessionsTable,
   usersTable,
 } from "@/lib/db/schema";
-import { getCurrentSession } from "@/lib/auth/session";
 import { getErrorMessages } from "@/lib/error-message";
-import { sessionMiddleware } from "@/lib/session-middleware";
+import { sessionMiddleware } from "@/lib/auth//session-middleware";
 
 import {
   accountIdSchema,

@@ -4,29 +4,23 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { and, eq } from "drizzle-orm";
+import { verifyTOTP } from "@oslojs/otp";
+import { decodeBase64 } from "@oslojs/encoding";
 import { hash, verify } from "@node-rs/argon2";
 
 import { db } from "@/lib/db";
 import { sessionsTable, usersTable } from "@/lib/db/schema";
-import {
-  ForgotPasswordSchema,
-  ResetPasswordAuthSchema,
-  SignInSchema,
-  SignUpSchema,
-  twoFactorSchema,
-  twoFactorSetupSchema,
-} from "@/features/auth/validators";
+import { getErrorMessages } from "@/lib/error-message";
+import { sessionMiddleware } from "@/lib/auth/session-middleware";
 import {
   createSession,
   deleteSessionTokenCookie,
   generateSessionToken,
-  getCurrentSession,
   invalidateSession,
   SessionFlags,
   setSessionAs2FAVerified,
   setSessionTokenCookie,
 } from "@/lib/auth/session";
-import { getErrorMessages } from "@/lib/error-message";
 import {
   createPasswordResetSession,
   deletePasswordResetSessionTokenCookie,
@@ -36,7 +30,6 @@ import {
   setPasswordResetSessionTokenCookie,
   validatePasswordResetSessionRequest,
 } from "@/lib/auth/password-reset";
-
 import {
   createEmailVerificationRequest,
   deleteEmailVerificationRequestCookie,
@@ -45,14 +38,19 @@ import {
   sendVerificationEmail,
   setEmailVerificationRequestCookie,
 } from "@/lib/auth/email-verification";
-
-import { sessionMiddleware } from "@/lib/session-middleware";
-import { ErrorResponse, SuccessResponse } from "@/types";
 import { generateRandomRecoveryCode } from "@/lib/utils";
-import { encrypt, encryptString } from "@/lib/encryption";
-import { verifyTOTP } from "@oslojs/otp";
-import { decodeBase64, encodeBase64 } from "@oslojs/encoding";
-import { getUserTOTPKey } from "@/lib/data/users";
+import { getUserTOTPKey } from "@/lib/auth/user";
+
+import {
+  ForgotPasswordSchema,
+  ResetPasswordAuthSchema,
+  SignInSchema,
+  SignUpSchema,
+  twoFactorSchema,
+  twoFactorSetupSchema,
+} from "@/features/auth/validators";
+
+import { type ErrorResponse, type SuccessResponse } from "@/types";
 
 const app = new Hono()
   .get("/current", sessionMiddleware, (c) => {
@@ -112,6 +110,7 @@ const app = new Hono()
       await setEmailVerificationRequestCookie(c, emailVerificationRequest);
 
       const info = getConnInfo(c); // info is `ConnInfo`
+
       const sessionFlags: SessionFlags = {
         twoFactorVerified: false,
       };
@@ -171,16 +170,20 @@ const app = new Hono()
       }
 
       const info = getConnInfo(c); // info is `ConnInfo`
+
       const sessionFlags: SessionFlags = {
         twoFactorVerified: false,
       };
+
       const sessionToken = generateSessionToken();
+
       const session = await createSession(
         sessionToken,
         existingUser.id,
         sessionFlags,
         (info.remote.address ?? "127.0.0.1").split(",")[0],
       );
+
       await setSessionTokenCookie(c, sessionToken, session.expiresAt);
 
       if (existingUser.emailVerified === false) {
@@ -247,7 +250,7 @@ const app = new Hono()
         const user = c.get("user");
 
         let verificationRequest =
-          await getUserEmailVerificationRequestFromRequest(c);
+          await getUserEmailVerificationRequestFromRequest();
 
         if (verificationRequest === null) {
           throw new HTTPException(400, { message: "Not authenticated" });
@@ -286,7 +289,7 @@ const app = new Hono()
           .set({ email: verificationRequest.email, emailVerified: true })
           .where(eq(usersTable.id, user.id));
 
-        await deleteEmailVerificationRequestCookie(c);
+        await deleteEmailVerificationRequestCookie();
 
         return c.json<SuccessResponse>(
           {
@@ -308,7 +311,7 @@ const app = new Hono()
       const user = c.get("user");
 
       let verificationRequest =
-        await getUserEmailVerificationRequestFromRequest(c);
+        await getUserEmailVerificationRequestFromRequest();
 
       if (user === null || user.email === null) {
         throw new HTTPException(400, { message: "No user or user email" });

@@ -8,6 +8,7 @@ import { EmailVerification, emailVerificationsTable } from "@/lib/db/schema";
 
 import { generateRandomOTP } from "@/lib/auth/password-reset";
 import { getCurrentSession } from "@/lib/auth/session";
+import { cookies } from "next/headers";
 
 export async function getUserEmailVerificationRequest(
   userId: string,
@@ -121,26 +122,26 @@ export async function setEmailVerificationRequestCookie(
 }
 
 export async function deleteEmailVerificationRequestCookie(
-  c: Context,
+  // c: Context,
 ): Promise<void> {
-  // (await cookies()).set("email_verification", "", {
-  //   httpOnly: true,
-  //   path: "/",
-  //   secure: process.env.NODE_ENV === "production",
-  //   sameSite: "lax",
-  //   maxAge: 0,
-  // });
-  deleteCookie(c, "email_verification", {
+  (await cookies()).set("email_verification", "", {
     httpOnly: true,
     path: "/",
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 0,
   });
+  // deleteCookie(c, "email_verification", {
+  //   httpOnly: true,
+  //   path: "/",
+  //   secure: process.env.NODE_ENV === "production",
+  //   sameSite: "lax",
+  //   maxAge: 0,
+  // });
 }
 
 export async function getUserEmailVerificationRequestFromRequest(
-  c: Context,
+  // c: Context,
 ): Promise<EmailVerification | null> {
   const { user } = await getCurrentSession();
 
@@ -148,8 +149,8 @@ export async function getUserEmailVerificationRequestFromRequest(
     return null;
   }
 
-  // const id = (await cookies()).get("email_verification")?.value ?? null;
-  const id = getCookie(c, "email_verification") ?? null;
+  const id = (await cookies()).get("email_verification")?.value ?? null;
+  // const id = getCookie(c, "email_verification") ?? null;
 
   if (id === null) {
     return null;
@@ -158,7 +159,7 @@ export async function getUserEmailVerificationRequestFromRequest(
   const request = await getUserEmailVerificationRequest(user.id, id);
 
   if (request === null) {
-    await deleteEmailVerificationRequestCookie(c);
+    await deleteEmailVerificationRequestCookie();
   }
 
   return request;

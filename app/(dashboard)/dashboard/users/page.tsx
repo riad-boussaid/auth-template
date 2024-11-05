@@ -5,7 +5,7 @@ import { DataTable } from "@/components/data-table";
 import { UsersTablecolumns } from "@/features/user/components/users-table-columns";
 
 import { getCurrentSession } from "@/lib/auth/session";
-import { getUsers } from "@/lib/data/users";
+import { getUsers } from "@/lib/auth/user";
 
 export default async function UsersPage() {
   const { session, user } = await getCurrentSession();

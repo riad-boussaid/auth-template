@@ -1,6 +1,6 @@
 import { RecoveryCodesForm } from "@/features/auth/components/recovery-codes-form";
 import { getCurrentSession } from "@/lib/auth/session";
-import { getUserRecoveryCode } from "@/lib/data/users";
+import { getUserRecoveryCode } from "@/lib/auth/user";
 import { redirect } from "next/navigation";
 
 export default async function RecoveryCodePage() {

@@ -13,7 +13,7 @@ import {
   getUserSessions,
   getUserAccounts,
   getUserRecoveryCode,
-} from "@/lib/data/users";
+} from "@/lib/auth/user";
 
 import { UpdateUsernameForm } from "@/features/user/components/update-username-form";
 import { UpdatePasswordForm } from "@/features/user/components/update-password-form";

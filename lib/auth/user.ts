@@ -10,7 +10,8 @@ import {
   usersTable,
 } from "@/lib/db/schema";
 import { getErrorMessages } from "@/lib/error-message";
-import { decrypt, decryptToString } from "../encryption";
+
+import { decrypt, decryptToString } from "@/lib/auth/encryption";
 
 export const getUsers = async () => {
   try {
