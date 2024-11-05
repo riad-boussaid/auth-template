@@ -21,20 +21,20 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
-
-const twoFactorAuthenticationCodeSchema = z.object({
-  code: z.string().min(6),
-});
+import { twoFactorSchema } from "../validators";
+import { useTwoFactorVerification } from "../api/use-two-factor-verification";
 
 export const TwoFactorVerificationForm = () => {
-  const form = useForm<z.infer<typeof twoFactorAuthenticationCodeSchema>>({
-    resolver: zodResolver(twoFactorAuthenticationCodeSchema),
+  const form = useForm<z.infer<typeof twoFactorSchema>>({
+    resolver: zodResolver(twoFactorSchema),
     defaultValues: { code: "" },
   });
 
-  const isPending = false;
+  const { mutate, isPending } = useTwoFactorVerification();
 
-  const onSubmit = () => {};
+  const onSubmit = (values: z.infer<typeof twoFactorSchema>) => {
+    mutate({ form: values });
+  };
 
   return (
     <Card className="w-[400px]">

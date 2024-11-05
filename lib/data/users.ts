@@ -10,6 +10,7 @@ import {
   usersTable,
 } from "@/lib/db/schema";
 import { getErrorMessages } from "@/lib/error-message";
+import { decrypt, decryptToString } from "../encryption";
 
 export const getUsers = async () => {
   try {
@@ -54,4 +55,32 @@ export const getUserById = async (userId: string) => {
   } catch (error) {
     return { error: getErrorMessages(error) };
   }
+};
+
+export const getUserRecoveryCode = async (userId: string) => {
+  const [result] = await db
+    .select({ recoveryCode: usersTable.recoveryCode })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId));
+
+  if (result === null) {
+    throw new Error("Invalid userId");
+  }
+
+  // return decryptToString(result.totpKey)
+  return result.recoveryCode;
+};
+
+export const getUserTOTPKey = async (userId: string) => {
+  const [result] = await db
+    .select({ totpKey: usersTable.totpKey })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId));
+
+  if (result === null) {
+    throw new Error("Invalid userId");
+  }
+
+  // return decrypt(result.totpKey);
+  return result.totpKey;
 };

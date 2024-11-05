@@ -38,6 +38,7 @@ export async function createPasswordResetSession(
     expiresAt: new Date(Date.now() + 1000 * 60 * 10),
     code: generateRandomOTP(),
     emailVerified: false,
+    
   };
 
   await db.insert(passwordResetSessionsTable).values(session);

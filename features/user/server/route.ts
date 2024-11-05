@@ -28,6 +28,7 @@ import {
 } from "@/features/user/validators";
 
 import { type ErrorResponse, type SuccessResponse } from "@/types";
+
 import { getPublicId } from "@/lib/utils";
 import {
   createEmailVerificationRequest,
@@ -134,7 +135,7 @@ const app = new Hono()
           verificationRequest.code,
         );
 
-        await setEmailVerificationRequestCookie(verificationRequest);
+        await setEmailVerificationRequestCookie(c, verificationRequest);
 
         // return c.redirect("/verify-email");
 
@@ -277,45 +278,51 @@ const app = new Hono()
       });
     }
   })
-  .post("/updateRole", zValidator("form", updateRoleSchema), async (c) => {
-    try {
-      const { user } = await getCurrentSession();
+  .post(
+    "/updateRole",
+    sessionMiddleware,
+    zValidator("form", updateRoleSchema),
+    async (c) => {
+      try {
+        // const { user } = await getCurrentSession();
+        const user = c.get("user");
 
-      if (!user || user.role !== "ADMIN") {
-        throw new HTTPException(400, { message: "Unauthorized" });
-      }
+        if (!user || user.role !== "ADMIN") {
+          throw new HTTPException(400, { message: "Unauthorized" });
+        }
 
-      const { userId, role } = c.req.valid("form");
+        const { userId, role } = c.req.valid("form");
 
-      if (!userId) {
-        throw new HTTPException(400, { message: "Invalid" });
-      }
+        if (!userId) {
+          throw new HTTPException(400, { message: "Invalid" });
+        }
 
-      if (user.id === userId) {
-        throw new HTTPException(400, {
-          message: "You can't change role for current user",
+        if (user.id === userId) {
+          throw new HTTPException(400, {
+            message: "You can't change role for current user",
+          });
+        }
+
+        await db
+          .update(usersTable)
+          .set({ role: role as (typeof roleEnums.enumValues)[number] })
+          .where(eq(usersTable.id, userId));
+
+        return c.json<SuccessResponse>(
+          {
+            success: true,
+            message: "User role updated successfully",
+          },
+          200,
+        );
+      } catch (error) {
+        return c.json<ErrorResponse>({
+          success: false,
+          error: getErrorMessages(error),
         });
       }
-
-      await db
-        .update(usersTable)
-        .set({ role: role as (typeof roleEnums.enumValues)[number] })
-        .where(eq(usersTable.id, userId));
-
-      return c.json<SuccessResponse>(
-        {
-          success: true,
-          message: "User role updated successfully",
-        },
-        200,
-      );
-    } catch (error) {
-      return c.json<ErrorResponse>({
-        success: false,
-        error: getErrorMessages(error),
-      });
-    }
-  })
+    },
+  )
   .post(
     "/deleteSession",
     sessionMiddleware,

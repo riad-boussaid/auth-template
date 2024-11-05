@@ -1,4 +1,3 @@
-// import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -10,7 +9,11 @@ import { DataTable } from "@/components/data-table";
 
 import { cn } from "@/lib/utils";
 import { getCurrentSession } from "@/lib/auth/session";
-import { getUserSessions, getUserAccounts } from "@/lib/data/users";
+import {
+  getUserSessions,
+  getUserAccounts,
+  getUserRecoveryCode,
+} from "@/lib/data/users";
 
 import { UpdateUsernameForm } from "@/features/user/components/update-username-form";
 import { UpdatePasswordForm } from "@/features/user/components/update-password-form";
@@ -19,24 +22,7 @@ import { DeleteUserForm } from "@/features/user/components/delete-user-form";
 import { UserSessionsTablecolumns } from "@/features/user/components/user-sessions-table-columns";
 import { ConnectedAccountsForm } from "@/features/user/components/connected-accounts-form";
 import { UpdateEmailAddressForm } from "@/features/user/components/update-email-address-form";
-import { db } from "@/lib/db";
-import { usersTable } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { decryptToString } from "@/lib/encryption";
-
-export async function getUserRecoverCode(userId: string): Promise<string> {
-  const [result] = await db
-    .select({ recoveryCode: usersTable.recoveryCode })
-    .from(usersTable)
-    .where(eq(usersTable.id, userId));
-
-  if (result === null) {
-    throw new Error("Invalid user ID");
-  }
-
-  // return decryptToString(recoveryCode);
-  return result.recoveryCode;
-}
+import { UpdateTwoFactorVerification } from "@/features/user/components/update-two-factor-verification";
 
 export default async function SettingsPage(props: {
   searchParams?: Promise<{ tab: string }>;
@@ -44,14 +30,17 @@ export default async function SettingsPage(props: {
   const { session, user } = await getCurrentSession();
 
   if (session === null) {
-    return redirect("/sign-in");
+    redirect("/sign-in");
   }
+
   if (user.totpKey && !session.twoFactorVerified) {
-    return redirect("/2fa");
+    redirect("/2fa");
   }
+
   let recoveryCode: string | null = null;
+
   if (user.totpKey) {
-    recoveryCode = await getUserRecoverCode(user.id);
+    recoveryCode = await getUserRecoveryCode(user.id);
   }
 
   const searchParams = await props.searchParams;
@@ -124,6 +113,7 @@ export default async function SettingsPage(props: {
           {tab === "security" && (
             <>
               <UpdatePasswordForm />
+              {user.totpKey && <UpdateTwoFactorVerification />}
             </>
           )}
 

@@ -1,16 +1,14 @@
 import { Hono } from "hono";
+import { getCookie, setCookie } from "hono/cookie";
 import { getConnInfo } from "hono/vercel";
 import { env } from "hono/adapter";
 import { HTTPException } from "hono/http-exception";
 import { and, eq } from "drizzle-orm";
-import { cookies } from "next/headers";
 import { ObjectParser } from "@pilcrowjs/object-parser";
 import {
-  // ArcticFetchError,
   decodeIdToken,
   generateCodeVerifier,
   generateState,
-  // OAuth2RequestError,
   type OAuth2Tokens,
 } from "arctic";
 
@@ -21,10 +19,12 @@ import { getErrorMessages } from "@/lib/error-message";
 import {
   createSession,
   generateSessionToken,
+  SessionFlags,
   setSessionTokenCookie,
 } from "@/lib/auth/session";
 
 import { type ErrorResponse, type SuccessResponse } from "@/types";
+import { generateRandomRecoveryCode } from "@/lib/utils";
 
 const app = new Hono()
   .get("/createGoogleAuthorizationURL", async (c) => {
@@ -37,7 +37,7 @@ const app = new Hono()
         ["email", "profile"],
       );
 
-      (await cookies()).set("google_oauth_state", state, {
+      setCookie(c, "google_oauth_state", state, {
         path: "/",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -45,7 +45,7 @@ const app = new Hono()
         sameSite: "lax",
       });
 
-      (await cookies()).set("google_code_verifier", codeVerifier, {
+      setCookie(c, "google_code_verifier", codeVerifier, {
         path: "/",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -75,11 +75,11 @@ const app = new Hono()
       const code = url.searchParams.get("code");
       const state = url.searchParams.get("state");
 
-      const storedState =
-        (await cookies()).get("google_oauth_state")?.value ?? null;
+      const storedState = getCookie(c, "google_oauth_state") ?? null;
+      // (await cookies()).get("google_oauth_state")?.value ?? null;
 
-      const codeVerifier =
-        (await cookies()).get("google_code_verifier")?.value ?? null;
+      const codeVerifier = getCookie(c, "google_code_verifier") ?? null;
+      // (await cookies()).get("google_code_verifier")?.value ?? null;
 
       if (
         code === null ||
@@ -126,6 +126,9 @@ const app = new Hono()
             .limit(1);
 
           if (!existingUser) {
+            const recoveryCode = generateRandomRecoveryCode();
+            // const encryptedRecoveryCode = encryptString(recoveryCode);
+
             const [createdUserRes] = await trx
               .insert(usersTable)
               .values({
@@ -133,6 +136,7 @@ const app = new Hono()
                 username,
                 avatar: picture,
                 emailVerified: true,
+                recoveryCode,
               })
               .returning({
                 id: usersTable.id,
@@ -226,13 +230,20 @@ const app = new Hono()
 
       const info = getConnInfo(c);
 
+      const sessionFlags: SessionFlags = {
+        twoFactorVerified: false,
+      };
+
       const sessionToken = generateSessionToken();
+
       const session = await createSession(
         sessionToken,
         transactionResponse.data.id,
+        sessionFlags,
         (info.remote.address ?? "127.0.0.1").split(",")[0],
       );
-      await setSessionTokenCookie(sessionToken, session.expiresAt);
+
+      await setSessionTokenCookie(c, sessionToken, session.expiresAt);
 
       return c.redirect(new URL("/", NEXT_PUBLIC_APP_URL).href, 302);
     } catch (error) {
@@ -315,6 +326,9 @@ const app = new Hono()
             .limit(1);
 
           if (!existingUser) {
+            const recoveryCode = generateRandomRecoveryCode();
+            // const encryptedRecoveryCode = encryptString(recoveryCode);
+
             const [createdUserRes] = await trx
               .insert(usersTable)
               .values({
@@ -322,6 +336,7 @@ const app = new Hono()
                 username,
                 avatar: picture,
                 emailVerified: true,
+                recoveryCode,
               })
               .returning({
                 id: usersTable.id,
@@ -419,14 +434,20 @@ const app = new Hono()
       }
 
       const info = getConnInfo(c);
+      const sessionFlags: SessionFlags = {
+        twoFactorVerified: false,
+      };
 
       const sessionToken = generateSessionToken();
+
       const session = await createSession(
         sessionToken,
         transactionResponse.data.id,
+        sessionFlags,
         (info.remote.address ?? "127.0.0.1").split(",")[0],
       );
-      await setSessionTokenCookie(sessionToken, session.expiresAt);
+
+      await setSessionTokenCookie(c, sessionToken, session.expiresAt);
 
       return c.redirect(new URL("/", NEXT_PUBLIC_APP_URL).href, 302);
     } catch (error) {

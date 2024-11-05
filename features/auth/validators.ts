@@ -51,3 +51,11 @@ export const passwordSchema = z.object({
     .min(8, { message: "Password must be at least 8 characters long" })
     .max(256),
 });
+
+export const twoFactorSetupSchema = z.object({
+  encodedKey: z.string(),
+  code: z.string(),
+});
+export const twoFactorSchema = z.object({
+  code: z.string(),
+});

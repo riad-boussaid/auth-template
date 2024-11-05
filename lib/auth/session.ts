@@ -1,5 +1,4 @@
 import { cache } from "react";
-import { cookies } from "next/headers";
 import { eq } from "drizzle-orm";
 import {
   encodeBase32LowerCaseNoPadding,
@@ -14,6 +13,9 @@ import {
   type User,
   type Session,
 } from "@/lib/db/schema";
+import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import { Context } from "hono";
+import { cookies } from "next/headers";
 
 export function generateSessionToken(): string {
   const bytes = new Uint8Array(20);
@@ -93,10 +95,19 @@ export type SessionValidationResult =
   | { session: null; user: null };
 
 export async function setSessionTokenCookie(
+  c: Context,
   token: string,
   expiresAt: Date,
 ): Promise<void> {
-  (await cookies()).set("session", token, {
+  // (await cookies()).set("session", token, {
+  //   httpOnly: true,
+  //   sameSite: "lax",
+  //   secure: process.env.NODE_ENV === "production",
+  //   expires: expiresAt,
+  //   path: "/",
+  // });
+
+  setCookie(c, "session", token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -105,8 +116,16 @@ export async function setSessionTokenCookie(
   });
 }
 
-export async function deleteSessionTokenCookie(): Promise<void> {
-  (await cookies()).set("session", "", {
+export async function deleteSessionTokenCookie(c: Context): Promise<void> {
+  // (await cookies()).set("session", "", {
+  //   httpOnly: true,
+  //   sameSite: "lax",
+  //   secure: process.env.NODE_ENV === "production",
+  //   maxAge: 0,
+  //   path: "/",
+  // });
+
+  deleteCookie(c, "session", {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -118,6 +137,7 @@ export async function deleteSessionTokenCookie(): Promise<void> {
 export const getCurrentSession = cache(
   async (): Promise<SessionValidationResult> => {
     const token = (await cookies()).get("session")?.value ?? null;
+    // const token = getCookie(c, "session") ?? null;
 
     if (token === null) {
       return { session: null, user: null };

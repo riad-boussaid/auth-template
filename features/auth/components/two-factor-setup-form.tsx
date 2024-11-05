@@ -25,6 +25,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "@/components/providers/session-provider";
+import { twoFactorSetupSchema } from "../validators";
+import { useTwoFactorVerificationSetup } from "../api/use-two-factor-verification-setup";
 
 export const TwoFactorSetupForm = ({
   encodedTOTPKey,
@@ -35,24 +37,19 @@ export const TwoFactorSetupForm = ({
 }) => {
   //   const { user } = useSession();
 
-  const twoFactorAuthenticationSetupCodeSchema = z.object({
-    code: z.string().min(6),
+  const form = useForm<z.infer<typeof twoFactorSetupSchema>>({
+    resolver: zodResolver(twoFactorSetupSchema),
+    defaultValues: {
+      encodedKey: encodedTOTPKey,
+      code: "",
+    },
   });
 
-  const form = useForm<z.infer<typeof twoFactorAuthenticationSetupCodeSchema>>({
-    resolver: zodResolver(twoFactorAuthenticationSetupCodeSchema),
-    defaultValues: { code: "" },
-  });
+  const { mutateAsync, isPending } = useTwoFactorVerificationSetup();
 
-  const isPending = false;
-
-  const onSubmit = () => {};
-
-  //   const totpKey = new Uint8Array(20);
-  //   crypto.getRandomValues(totpKey);
-  //   const encodedTOTPKey = encodeBase64(totpKey);
-  //   const keyURI = createTOTPKeyURI("Demo", user?.username!, totpKey, 30, 6);
-  //   const qrcode = renderSVG(keyURI);
+  const onSubmit = async (values: z.infer<typeof twoFactorSetupSchema>) => {
+    await mutateAsync({ form: values });
+  };
 
   return (
     <Card className="w-[400px]">
@@ -75,6 +72,23 @@ export const TwoFactorSetupForm = ({
             className="flex flex-col space-y-4"
           >
             <FormField
+              name="encodedKey"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      hidden
+                      // placeholder="Enter yoy code"
+                      // autoComplete="one-time-code"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
               name="code"
               control={form.control}
               render={({ field }) => (
@@ -90,6 +104,7 @@ export const TwoFactorSetupForm = ({
                 </FormItem>
               )}
             />
+
             <Button disabled={isPending}>
               {isPending && <Loader className="size-4 animate-spin" />}
               Continue

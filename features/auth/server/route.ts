@@ -13,6 +13,8 @@ import {
   ResetPasswordAuthSchema,
   SignInSchema,
   SignUpSchema,
+  twoFactorSchema,
+  twoFactorSetupSchema,
 } from "@/features/auth/validators";
 import {
   createSession,
@@ -46,7 +48,10 @@ import {
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { ErrorResponse, SuccessResponse } from "@/types";
 import { generateRandomRecoveryCode } from "@/lib/utils";
-import { encryptString } from "@/lib/encryption";
+import { encrypt, encryptString } from "@/lib/encryption";
+import { verifyTOTP } from "@oslojs/otp";
+import { decodeBase64 } from "@oslojs/encoding";
+import { getUserTOTPKey } from "@/lib/data/users";
 
 const app = new Hono()
   .get("/current", sessionMiddleware, (c) => {
@@ -103,7 +108,7 @@ const app = new Hono()
         emailVerificationRequest.code,
       );
 
-      await setEmailVerificationRequestCookie(emailVerificationRequest);
+      await setEmailVerificationRequestCookie(c, emailVerificationRequest);
 
       const info = getConnInfo(c); // info is `ConnInfo`
       const sessionFlags: SessionFlags = {
@@ -111,19 +116,15 @@ const app = new Hono()
       };
 
       const sessionToken = generateSessionToken();
+
       const session = await createSession(
         sessionToken,
         createdUser.userId,
         sessionFlags,
         (info.remote.address ?? "127.0.0.1").split(",")[0],
       );
-      await setSessionTokenCookie(sessionToken, session.expiresAt);
 
-      // await sendEmail({
-      //   html: `<a href="${url}">Verify your email</a>`,
-      //   subject: "Verify your email",
-      //   to: email,
-      // });
+      await setSessionTokenCookie(c, sessionToken, session.expiresAt);
 
       return c.json<SuccessResponse<{ userId: string }>>(
         {
@@ -179,7 +180,7 @@ const app = new Hono()
         sessionFlags,
         (info.remote.address ?? "127.0.0.1").split(",")[0],
       );
-      await setSessionTokenCookie(sessionToken, session.expiresAt);
+      await setSessionTokenCookie(c, sessionToken, session.expiresAt);
 
       if (existingUser.emailVerified === false) {
         // return c.redirect("/email-verification");
@@ -216,7 +217,7 @@ const app = new Hono()
 
       await invalidateSession(session.id);
 
-      await deleteSessionTokenCookie();
+      await deleteSessionTokenCookie(c);
 
       // const { NEXT_PUBLIC_APP_URL } = env<{ NEXT_PUBLIC_APP_URL: string }>(c);
 
@@ -245,7 +246,7 @@ const app = new Hono()
         const user = c.get("user");
 
         let verificationRequest =
-          await getUserEmailVerificationRequestFromRequest();
+          await getUserEmailVerificationRequestFromRequest(c);
 
         if (verificationRequest === null) {
           throw new HTTPException(400, { message: "Not authenticated" });
@@ -284,7 +285,7 @@ const app = new Hono()
           .set({ email: verificationRequest.email, emailVerified: true })
           .where(eq(usersTable.id, user.id));
 
-        await deleteEmailVerificationRequestCookie();
+        await deleteEmailVerificationRequestCookie(c);
 
         return c.json<SuccessResponse>(
           {
@@ -306,7 +307,7 @@ const app = new Hono()
       const user = c.get("user");
 
       let verificationRequest =
-        await getUserEmailVerificationRequestFromRequest();
+        await getUserEmailVerificationRequestFromRequest(c);
 
       if (user === null || user.email === null) {
         throw new HTTPException(400, { message: "No user or user email" });
@@ -333,7 +334,7 @@ const app = new Hono()
         verificationRequest.code,
       );
 
-      await setEmailVerificationRequestCookie(verificationRequest);
+      await setEmailVerificationRequestCookie(c, verificationRequest);
 
       return c.json<SuccessResponse>(
         {
@@ -486,15 +487,19 @@ const app = new Hono()
           .where(eq(usersTable.id, user.id));
 
         const info = getConnInfo(c);
+        const sessionFlags: SessionFlags = {
+          twoFactorVerified: false,
+        };
 
         const sessionToken = generateSessionToken();
         const session = await createSession(
           sessionToken,
           user.id,
+          sessionFlags,
           (info.remote.address ?? "127.0.0.1").split(",")[0],
         );
 
-        await setSessionTokenCookie(sessionToken, session.expiresAt);
+        await setSessionTokenCookie(c, sessionToken, session.expiresAt);
 
         await deletePasswordResetSessionTokenCookie();
 
@@ -505,6 +510,101 @@ const app = new Hono()
           },
           200,
         );
+      } catch (error) {
+        return c.json<ErrorResponse>({
+          success: false,
+          error: getErrorMessages(error),
+        });
+      }
+    },
+  )
+  .post(
+    "twoFactorVerificationSetup",
+    sessionMiddleware,
+    zValidator("form", twoFactorSetupSchema),
+    async (c) => {
+      try {
+        const session = c.get("session");
+        const user = c.get("user");
+
+        if (!user.emailVerified) {
+          throw new HTTPException(400, { message: "Email not verified" });
+        }
+
+        if (user.totpKey && !session.twoFactorVerified) {
+          throw new HTTPException(400, { message: "Forbidden" });
+        }
+
+        const { encodedKey, code } = c.req.valid("form");
+
+        // let key = decodeBase64(encodedKey);
+
+        // if (!verifyTOTP(key as unknown as Uint8Array, 30, 6, code)) {
+        //   throw new HTTPException(400, { message: "Invalid Code" });
+        // }
+
+        // updateUserTOTPKey(session.userId, key)
+        // const encrypted = encrypt(key);
+        await db
+          .update(usersTable)
+          .set({ totpKey: encodedKey })
+          .where(eq(usersTable.id, user.id));
+
+        // setSessionAs2FAVerified(session.id);
+        await db
+          .update(sessionsTable)
+          .set({ twoFactorVerified: true })
+          .where(eq(sessionsTable.id, session.id));
+
+        // return c.redirect("/recovery-code");
+        return c.json<SuccessResponse>({
+          success: true,
+          message: "2FA Setup success",
+        });
+      } catch (error) {
+        return c.json<ErrorResponse>({
+          success: false,
+          error: getErrorMessages(error),
+        });
+      }
+    },
+  )
+  .post(
+    "twoFactorVerification",
+    sessionMiddleware,
+    zValidator("form", twoFactorSchema),
+    async (c) => {
+      try {
+        const session = c.get("session");
+        const user = c.get("user");
+
+        if (!user.emailVerified || !user.totpKey || session.twoFactorVerified) {
+          throw new HTTPException(401, { message: "Forbidden" });
+        }
+
+        const { code } = c.req.valid("form");
+
+        const totpKey = await getUserTOTPKey(user.id);
+
+        if (totpKey === null) {
+          throw new HTTPException(401, { message: "Forbidden" });
+        }
+
+        // if (!verifyTOTP(totpKey, 30, 6, code)) {
+        //   throw new HTTPException(400, { message: "Invalid Code" });
+        // }
+
+        // setSessionAs2FAVerified(session.id);
+        await db
+          .update(sessionsTable)
+          .set({ twoFactorVerified: true })
+          .where(eq(sessionsTable.id, session.id));
+
+        // return c.redirect("/recovery-code");
+        return c.json<SuccessResponse>({
+          success: true,
+          message: "2FA Verified successfully",
+        });
       } catch (error) {
         return c.json<ErrorResponse>({
           success: false,
