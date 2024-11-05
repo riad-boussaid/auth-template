@@ -148,3 +148,10 @@ export const getCurrentSession = cache(
     return result;
   },
 );
+
+export const setSessionAs2FAVerified = async (sessionId: string) => {
+  await db
+    .update(sessionsTable)
+    .set({ twoFactorVerified: true })
+    .where(eq(sessionsTable.id, sessionId));
+};

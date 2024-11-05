@@ -23,6 +23,7 @@ import {
   getCurrentSession,
   invalidateSession,
   SessionFlags,
+  setSessionAs2FAVerified,
   setSessionTokenCookie,
 } from "@/lib/auth/session";
 import { getErrorMessages } from "@/lib/error-message";
@@ -50,7 +51,7 @@ import { ErrorResponse, SuccessResponse } from "@/types";
 import { generateRandomRecoveryCode } from "@/lib/utils";
 import { encrypt, encryptString } from "@/lib/encryption";
 import { verifyTOTP } from "@oslojs/otp";
-import { decodeBase64 } from "@oslojs/encoding";
+import { decodeBase64, encodeBase64 } from "@oslojs/encoding";
 import { getUserTOTPKey } from "@/lib/data/users";
 
 const app = new Hono()
@@ -537,11 +538,11 @@ const app = new Hono()
 
         const { encodedKey, code } = c.req.valid("form");
 
-        // let key = decodeBase64(encodedKey);
+        let key = decodeBase64(encodedKey);
 
-        // if (!verifyTOTP(key as unknown as Uint8Array, 30, 6, code)) {
-        //   throw new HTTPException(400, { message: "Invalid Code" });
-        // }
+        if (!verifyTOTP(key, 30, 6, code)) {
+          throw new HTTPException(400, { message: "Invalid Code" });
+        }
 
         // updateUserTOTPKey(session.userId, key)
         // const encrypted = encrypt(key);
@@ -550,11 +551,7 @@ const app = new Hono()
           .set({ totpKey: encodedKey })
           .where(eq(usersTable.id, user.id));
 
-        // setSessionAs2FAVerified(session.id);
-        await db
-          .update(sessionsTable)
-          .set({ twoFactorVerified: true })
-          .where(eq(sessionsTable.id, session.id));
+        await setSessionAs2FAVerified(session.id);
 
         // return c.redirect("/recovery-code");
         return c.json<SuccessResponse>({
@@ -590,17 +587,13 @@ const app = new Hono()
           throw new HTTPException(401, { message: "Forbidden" });
         }
 
-        // if (!verifyTOTP(totpKey, 30, 6, code)) {
-        //   throw new HTTPException(400, { message: "Invalid Code" });
-        // }
+        if (!verifyTOTP(decodeBase64(totpKey), 30, 6, code)) {
+          throw new HTTPException(400, { message: "Invalid Code" });
+        }
 
-        // setSessionAs2FAVerified(session.id);
-        await db
-          .update(sessionsTable)
-          .set({ twoFactorVerified: true })
-          .where(eq(sessionsTable.id, session.id));
+        await setSessionAs2FAVerified(session.id);
 
-        // return c.redirect("/recovery-code");
+        // return c.redirect("/");
         return c.json<SuccessResponse>({
           success: true,
           message: "2FA Verified successfully",

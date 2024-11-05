@@ -81,6 +81,6 @@ export const getUserTOTPKey = async (userId: string) => {
     throw new Error("Invalid userId");
   }
 
-  // return decrypt(result.totpKey);
+  // return decrypt(result.totpKey as unknown as Uint8Array);
   return result.totpKey;
 };
