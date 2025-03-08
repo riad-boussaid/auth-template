@@ -13,7 +13,7 @@ import {
   type User,
   type Session,
 } from "@/lib/db/schema";
-import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import { deleteCookie, setCookie } from "hono/cookie";
 import { Context } from "hono";
 import { cookies } from "next/headers";
 

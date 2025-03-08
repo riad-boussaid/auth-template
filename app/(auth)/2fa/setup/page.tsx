@@ -1,4 +1,4 @@
-import { encodeBase64, encodeBase64NoPadding } from "@oslojs/encoding";
+import { encodeBase64 } from "@oslojs/encoding";
 import { createTOTPKeyURI } from "@oslojs/otp";
 import { renderSVG } from "uqr";
 import { redirect } from "next/navigation";

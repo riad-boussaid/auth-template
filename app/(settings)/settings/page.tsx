@@ -12,7 +12,7 @@ import { getCurrentSession } from "@/lib/auth/session";
 import {
   getUserSessions,
   getUserAccounts,
-  getUserRecoveryCode,
+  // getUserRecoveryCode,
 } from "@/lib/auth/user";
 
 import { UpdateUsernameForm } from "@/features/user/components/update-username-form";
@@ -37,11 +37,11 @@ export default async function SettingsPage(props: {
     redirect("/2fa");
   }
 
-  let recoveryCode: string | null = null;
-
-  if (user.totpKey) {
-    recoveryCode = await getUserRecoveryCode(user.id);
-  }
+  
+  // let recoveryCode: string | null = null;
+  // if (user.totpKey) {
+  //   recoveryCode = await getUserRecoveryCode(user.id);
+  // }
 
   const searchParams = await props.searchParams;
   const tab = searchParams?.tab;

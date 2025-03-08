@@ -1,7 +1,7 @@
 import { encodeBase32 } from "@oslojs/encoding";
 import { and, eq } from "drizzle-orm";
 import { Context } from "hono";
-import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import {  setCookie } from "hono/cookie";
 
 import { db } from "@/lib/db";
 import { EmailVerification, emailVerificationsTable } from "@/lib/db/schema";

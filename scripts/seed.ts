@@ -14,6 +14,7 @@ async function main() {
   const user: typeof usersTable.$inferInsert = {
     username: "John",
     email: "john@example.com",
+    recoveryCode: ""
   };
 
   await db.insert(usersTable).values(user);

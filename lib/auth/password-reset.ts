@@ -38,6 +38,7 @@ export async function createPasswordResetSession(
     expiresAt: new Date(Date.now() + 1000 * 60 * 10),
     code: generateRandomOTP(),
     emailVerified: false,
+    twoFactorVerified:false
     
   };
 
@@ -73,6 +74,7 @@ export async function validatePasswordResetSessionToken(
     expiresAt: row.password_reset_sessions.expiresAt,
     code: row.password_reset_sessions.code,
     emailVerified: row.password_reset_sessions.emailVerified,
+    twoFactorVerified:row.password_reset_sessions.twoFactorVerified,
   };
   const user: User = {
     // id: row.number(7),
@@ -88,6 +90,8 @@ export async function validatePasswordResetSessionToken(
     role: row.users.role,
     createdAt: row.users.createdAt,
     updatedAt: row.users.updatedAt,
+    totpKey: null,
+    recoveryCode: ""
   };
 
   if (Date.now() >= session.expiresAt.getTime()) {

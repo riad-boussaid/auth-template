@@ -5,7 +5,7 @@ import auth from "@/features/auth/server/route";
 import oauth from "@/features/oauth/server/route";
 import user from "@/features/user/server/route";
 import { HTTPException } from "hono/http-exception";
-import { ErrorResponse, SuccessResponse } from "@/types";
+import { ErrorResponse } from "@/types";
 
 const app = new Hono();
 
