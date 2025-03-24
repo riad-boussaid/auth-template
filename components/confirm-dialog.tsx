@@ -36,7 +36,7 @@ export const ConfirmDialog = ({
   //   children: React.ReactNode;
 }) => {
   return (
-    <AlertDialog open={open} onOpenChange={() => {}}>
+    <AlertDialog open={open}>
       {/* <AlertDialogTrigger asChild>{children}</AlertDialogTrigger> */}
       <AlertDialogContent>
         <AlertDialogHeader>

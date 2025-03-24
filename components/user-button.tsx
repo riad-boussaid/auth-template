@@ -13,7 +13,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  // DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -106,13 +105,13 @@ export const UserButton = ({ user }: { user: User | null }) => {
           onCancel={() => setOpen(false)}
         />
 
-        <DropdownMenuItem
+        <button
           onClick={() => setOpen(true)}
-          className="cursor-pointer gap-x-4 rounded-none px-8 py-4"
+          className="hover:bg-accent hover:text-accent-foreground flex h-12 w-full cursor-pointer items-center gap-x-4 px-8 py-4 text-sm font-medium"
         >
           <LogOut className="size-4" />
           Logout
-        </DropdownMenuItem>
+        </button>
       </DropdownMenuContent>
     </DropdownMenu>
   );
