@@ -95,7 +95,7 @@ export const UpdateAvatarForm = ({
       <CardContent className="flex items-center gap-x-3">
         <Avatar className={cn("size-40", isUpdating && "animate-pulse")}>
           {image && <AvatarImage src={image} />}
-          <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50">
+          <AvatarFallback className="bg-linear-to-tr from-primary/75 to-primary/50">
             <p className="text-[75px] font-bold text-primary-foreground">
               {username?.charAt(0).toUpperCase()}
             </p>

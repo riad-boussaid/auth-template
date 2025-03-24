@@ -18,7 +18,7 @@ export const UsersTablecolumns: ColumnDef<User>[] = [
       return (
         <Avatar>
           <AvatarImage src={user?.avatar || ""} />
-          <AvatarFallback className="bg-gradient-to-tr from-primary/75 to-primary/50">
+          <AvatarFallback className="bg-linear-to-tr from-primary/75 to-primary/50">
             <p className="text-xl font-bold text-primary-foreground">
               {user?.username?.charAt(0).toUpperCase()}
             </p>

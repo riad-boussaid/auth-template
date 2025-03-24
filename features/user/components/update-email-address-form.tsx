@@ -68,7 +68,7 @@ export const UpdateEmailAddressForm = () => {
       </CardHeader>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <CardContent>
             <FormField
               name="email"
@@ -103,11 +103,7 @@ export const UpdateEmailAddressForm = () => {
                 </>
               )}
             </Button>
-            <Button
-              disabled={!isEditing}
-              type="submit"
-              className="rounded-full"
-            >
+            <Button disabled={!isEditing} type="submit" className="">
               <Save className="size-4" />
               Save
             </Button>

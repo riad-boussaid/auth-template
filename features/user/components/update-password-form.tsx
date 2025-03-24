@@ -55,7 +55,7 @@ export const UpdatePasswordForm = () => {
   return (
     <Card>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <CardHeader className="">
             <CardTitle>Password Settings</CardTitle>
             <CardDescription>Change your security settings.</CardDescription>
