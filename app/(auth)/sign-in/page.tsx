@@ -8,19 +8,13 @@ export default async function SigninPage() {
   const { session, user } = await getCurrentSession();
 
   if (session !== null) {
-    if (!user.emailVerified) {
-      return redirect("/email-verification");
-    }
-    
-    if (!user.totpKey) {
-			return redirect("/2fa/setup");
-		}
-    
-		if (!session.twoFactorVerified) {
-			return redirect("/2fa");
-		}
+    if (!user.emailVerified) redirect("/email-verification");
 
-    return redirect("/");
+    if (!user.totpKey) redirect("/2fa/setup");
+
+    if (!session.twoFactorVerified) redirect("/2fa");
+
+    redirect("/");
   }
 
   return <SigninForm />;

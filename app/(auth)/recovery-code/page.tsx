@@ -8,7 +8,7 @@ export default async function RecoveryCodePage() {
 
   if (!session) redirect("/sign-in");
 
-  if (!user.emailVerified) redirect("email-verification");
+  if (!user.emailVerified) redirect("/email-verification");
 
   if (!user.totpKey) redirect("/2fa/setup");
 

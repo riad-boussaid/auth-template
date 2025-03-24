@@ -37,7 +37,6 @@ export default async function SettingsPage(props: {
     redirect("/2fa");
   }
 
-  
   // let recoveryCode: string | null = null;
   // if (user.totpKey) {
   //   recoveryCode = await getUserRecoveryCode(user.id);

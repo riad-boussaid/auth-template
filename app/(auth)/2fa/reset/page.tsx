@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 
+import { TwoFactorResetForm } from "@/features/auth/components/two-factor-reset-form";
+
 import { getCurrentSession } from "@/lib/auth/session";
 
-import { TwoFactorVerificationForm } from "@/features/auth/components/two-factor-verification-form";
-
-export default async function TwoFactorAuthonticationPage() {
+export default async function Page() {
   const { session, user } = await getCurrentSession();
 
   if (session === null) redirect("/sign-in");
@@ -15,5 +15,5 @@ export default async function TwoFactorAuthonticationPage() {
 
   if (session.twoFactorVerified) redirect("/");
 
-  return <TwoFactorVerificationForm />;
+  return <TwoFactorResetForm />;
 }

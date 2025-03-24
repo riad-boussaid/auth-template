@@ -1,11 +1,11 @@
-import { Hono } from "hono";
-import { getConnInfo } from "hono/vercel";
 import { HTTPException } from "hono/http-exception";
-import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
-import { and, eq } from "drizzle-orm";
-import { verifyTOTP } from "@oslojs/otp";
 import { decodeBase64 } from "@oslojs/encoding";
+import { generateTOTP, verifyTOTP } from "@oslojs/otp";
+import { getConnInfo } from "hono/vercel";
+import { and, eq } from "drizzle-orm";
+import { Hono } from "hono";
+import { z } from "zod";
 import { hash, verify } from "@node-rs/argon2";
 
 import { db } from "@/lib/db";
@@ -39,18 +39,20 @@ import {
   setEmailVerificationRequestCookie,
 } from "@/lib/auth/email-verification";
 import { generateRandomRecoveryCode } from "@/lib/utils";
-import { getUserTOTPKey } from "@/lib/auth/user";
+import { getUserRecoveryCode, getUserTOTPKey } from "@/lib/auth/user";
 
 import {
   ForgotPasswordSchema,
   ResetPasswordAuthSchema,
   SignInSchema,
   SignUpSchema,
-  twoFactorSchema,
+  twoFactorResetSchema,
   twoFactorSetupSchema,
+  twoFactorVerificationSchema,
 } from "@/features/auth/validators";
 
 import { type ErrorResponse, type SuccessResponse } from "@/types";
+import { decrypt, encrypt, encryptString } from "@/lib/auth/encryption";
 
 const app = new Hono()
   .get("/current", sessionMiddleware, (c) => {
@@ -194,12 +196,12 @@ const app = new Hono()
         });
       }
 
-      if (!existingUser.totpKey) {
-        return c.json<ErrorResponse>({
-          success: false,
-          error: "2fa_not_registerd",
-        });
-      }
+      // if (!existingUser.totpKey) {
+      //   return c.json<ErrorResponse>({
+      //     success: false,
+      //     error: "2fa_not_registerd",
+      //   });
+      // }
 
       return c.json<SuccessResponse>(
         {
@@ -532,23 +534,29 @@ const app = new Hono()
         const user = c.get("user");
 
         if (!user.emailVerified) {
-          throw new HTTPException(400, { message: "Email not verified" });
+          throw new HTTPException(401, { message: "Email not verified" });
         }
 
         if (user.totpKey && !session.twoFactorVerified) {
-          throw new HTTPException(400, { message: "Forbidden" });
+          throw new HTTPException(401, { message: "Forbidden" });
         }
 
         const { encodedKey, code } = c.req.valid("form");
 
         let key = decodeBase64(encodedKey);
 
-        if (!verifyTOTP(key, 30, 6, code)) {
-          throw new HTTPException(400, { message: "Invalid Code" });
+        // const otp = generateTOTP(key, 30, 6);
+
+        const success = verifyTOTP(key, 30, 6, code);
+
+        console.log({ success, code });
+
+        if (!success) {
+          throw new HTTPException(401, { message: "Invalid Code" });
         }
 
-        // updateUserTOTPKey(session.userId, key)
         // const encrypted = encrypt(key);
+
         await db
           .update(usersTable)
           .set({ totpKey: encodedKey })
@@ -570,9 +578,65 @@ const app = new Hono()
     },
   )
   .post(
+    "twoFactorVerificationReset",
+    sessionMiddleware,
+    zValidator("form", twoFactorResetSchema),
+    async (c) => {
+      try {
+        const session = c.get("session");
+        const user = c.get("user");
+
+        if (!user.emailVerified) {
+          throw new HTTPException(401, { message: "Email not verified" });
+        }
+
+        if (!user.totpKey || session.twoFactorVerified) {
+          throw new HTTPException(401, { message: "Forbidden" });
+        }
+
+        // const { backupCode } = c.req.valid("form");
+
+        const encryptedRecoveryCode = await getUserRecoveryCode(user.id);
+
+        if (!encryptedRecoveryCode) {
+          throw new HTTPException(401, { message: "Invalid recovery code" });
+        }
+
+        const newRecoveryCode = generateRandomRecoveryCode();
+        // const encryptedNewRecoveryCode = encryptString(newRecoveryCode);
+
+        await db
+          .update(sessionsTable)
+          .set({ twoFactorVerified: false })
+          .where(eq(sessionsTable.userId, user.id));
+
+        // Compare old recovery code to ensure recovery code wasn't updated.
+        await db
+          .update(usersTable)
+          .set({ recoveryCode: newRecoveryCode, totpKey: null })
+          .where(
+            and(
+              eq(usersTable.id, user.id),
+              eq(usersTable.recoveryCode, encryptedRecoveryCode),
+            ),
+          );
+
+        return c.json<SuccessResponse>({
+          success: true,
+          message: "2FA Reset success",
+        });
+      } catch (error) {
+        return c.json<ErrorResponse>({
+          success: false,
+          error: getErrorMessages(error),
+        });
+      }
+    },
+  )
+  .post(
     "twoFactorVerification",
     sessionMiddleware,
-    zValidator("form", twoFactorSchema),
+    zValidator("form", twoFactorVerificationSchema),
     async (c) => {
       try {
         const session = c.get("session");
@@ -584,14 +648,18 @@ const app = new Hono()
 
         const { code } = c.req.valid("form");
 
-        const totpKey = await getUserTOTPKey(user.id);
+        const encodedTotpKey = await getUserTOTPKey(user.id);
 
-        if (totpKey === null) {
+        if (encodedTotpKey === null) {
           throw new HTTPException(401, { message: "Forbidden" });
         }
 
-        if (!verifyTOTP(decodeBase64(totpKey), 30, 6, code)) {
-          throw new HTTPException(400, { message: "Invalid Code" });
+        const totpKey = decodeBase64(encodedTotpKey);
+
+        const success = verifyTOTP(totpKey, 30, 6, code);
+
+        if (!success) {
+          throw new HTTPException(401, { message: "Invalid Code" });
         }
 
         await setSessionAs2FAVerified(session.id);

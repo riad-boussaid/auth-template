@@ -1,8 +1,12 @@
 "use client";
 
-import { encodeBase64 } from "@oslojs/encoding";
-import { createTOTPKeyURI } from "@oslojs/otp";
-import { renderSVG } from "uqr";
+// import { encodeBase64 } from "@oslojs/encoding";
+// import { createTOTPKeyURI } from "@oslojs/otp";
+// import { rendeimport { Loader } from "lucide-react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,20 +24,20 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader } from "lucide-react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useSession } from "@/components/providers/session-provider";
+
+// import { useSession } from "@/components/providers/session-provider";
 import { twoFactorSetupSchema } from "../validators";
 import { useTwoFactorVerificationSetup } from "../api/use-two-factor-verification-setup";
+import { Label } from "@/components/ui/label";
 
 export const TwoFactorSetupForm = ({
   encodedTOTPKey,
   qrcode,
+  secret,
 }: {
   encodedTOTPKey: string;
   qrcode: string;
+  secret: string;
 }) => {
   //   const { user } = useSession();
 
@@ -60,17 +64,21 @@ export const TwoFactorSetupForm = ({
         </CardDescription>
       </CardHeader>
       <div
-        className="mx-auto mb-6 h-[200px] w-[200px]"
+        className="mx-auto mb-6 size-[200px]"
         dangerouslySetInnerHTML={{
           __html: qrcode,
         }}
       ></div>
+
       <CardContent>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col space-y-4"
           >
+            <Label>Or do it manually</Label>
+            <Input readOnly value={secret} className="text-xs" />
+
             <FormField
               name="encodedKey"
               control={form.control}
@@ -78,9 +86,10 @@ export const TwoFactorSetupForm = ({
                 <FormItem>
                   <FormControl>
                     <Input
-                      hidden
+                      // hidden
                       // placeholder="Enter yoy code"
                       // autoComplete="one-time-code"
+                      className="hidden"
                       {...field}
                     />
                   </FormControl>

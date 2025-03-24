@@ -1,5 +1,9 @@
 "use client";
 
+import { ChevronRightIcon, CopyIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,15 +13,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Copy } from "lucide-react";
-import { useRef, useState } from "react";
 
 export const RecoveryCodesForm = ({
   recoveryCode,
 }: {
   recoveryCode: string;
 }) => {
-  const codeRef = useRef<HTMLParagraphElement>(null);
+  // const codeRef = useRef<HTMLParagraphElement>(null);
+  const router = useRouter();
   const [text, setText] = useState("Copy");
 
   return (
@@ -32,16 +35,26 @@ export const RecoveryCodesForm = ({
       <CardContent>
         <p>{recoveryCode}</p>
       </CardContent>
-      <CardFooter className="justify-end">
+      <CardFooter className="justify-end gap-x-2">
         <Button
+          variant={"secondary"}
           onClick={() => {
             navigator.clipboard.writeText(recoveryCode);
             setText("Copied");
             setTimeout(() => setText("Copy"), 1000);
           }}
         >
-          <Copy className="size-4" />
+          <CopyIcon />
           {text}
+        </Button>
+
+        <Button
+          onClick={() => {
+            router.push("/");
+          }}
+        >
+          Continue
+          <ChevronRightIcon />
         </Button>
       </CardFooter>
     </Card>

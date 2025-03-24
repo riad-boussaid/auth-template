@@ -8,20 +8,20 @@ import { client } from "@/lib/rpc";
 import { useToast } from "@/hooks/use-toast";
 
 type ResponseType = InferResponseType<
-  typeof client.api.auth.twoFactorVerificationSetup.$post
+  typeof client.api.auth.twoFactorVerificationReset.$post
 >;
 type RequestType = InferRequestType<
-  typeof client.api.auth.twoFactorVerificationSetup.$post
+  typeof client.api.auth.twoFactorVerificationReset.$post
 >;
 
-export const useTwoFactorVerificationSetup = () => {
+export const useTwoFactorVerificationReset = () => {
   const router = useRouter();
   const { toast } = useToast();
   // const queryClient = useQueryClient();
 
   return useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ form }) => {
-      const response = await client.api.auth.twoFactorVerificationSetup.$post({
+      const response = await client.api.auth.twoFactorVerificationReset.$post({
         form,
       });
 
@@ -42,7 +42,7 @@ export const useTwoFactorVerificationSetup = () => {
           description: data.message,
         });
         // queryClient.invalidateQueries({ queryKey: ["current"] });
-        router.push(`/recovery-code`);
+        router.push(`/2fa/setup`);
       }
     },
     onError: (error) => {

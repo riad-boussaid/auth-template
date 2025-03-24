@@ -56,6 +56,11 @@ export const twoFactorSetupSchema = z.object({
   encodedKey: z.string(),
   code: z.string(),
 });
-export const twoFactorSchema = z.object({
+
+export const twoFactorResetSchema = z.object({
+  backupCode: z.string(),
+});
+
+export const twoFactorVerificationSchema = z.object({
   code: z.string(),
 });

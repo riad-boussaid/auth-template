@@ -7,15 +7,13 @@ import { getUserEmailVerificationRequestFromRequest } from "@/lib/auth/email-ver
 
 export default async function VerifyEmailPage() {
   const { user } = await getCurrentSession();
-  if (user === null) {
-    return redirect("/sign-in");
-  }
+
+  if (user === null) redirect("/sign-in");
 
   const verificationRequest =
     await getUserEmailVerificationRequestFromRequest();
-  if (verificationRequest === null && user.emailVerified) {
-    return redirect("/");
-  }
+
+  if (verificationRequest === null && user.emailVerified) redirect("/");
 
   return <EmailVerificationForm />;
 }

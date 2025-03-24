@@ -40,7 +40,7 @@ export const useLogin = () => {
 
         queryClient.invalidateQueries({ queryKey: ["current"] });
 
-        router.push("/2fa");
+        router.push("/");
         router.refresh();
       }
     },

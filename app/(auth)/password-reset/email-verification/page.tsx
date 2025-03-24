@@ -5,14 +5,14 @@ import { validatePasswordResetSessionRequest } from "@/lib/auth/password-reset";
 
 export default async function PasswordResetEmailVerification() {
   const { session } = await validatePasswordResetSessionRequest();
-  if (session === null) {
-    return redirect("/forgot-password");
-  }
+
+  if (session === null) redirect("/forgot-password");
+
   if (session.emailVerified) {
-    if (!session.twoFactorVerified) {
-			return redirect("/password-reset/2fa");
-		}
-    return redirect("/password-reset");
+    if (!session.twoFactorVerified) redirect("/password-reset/2fa");
+
+    redirect("/password-reset");
   }
+  
   return <PasswordResetEmailVerificationForm />;
 }
