@@ -25,7 +25,7 @@ export const ChangeTheme = () => {
         <button disabled={theme === "light"} onClick={() => setTheme("light")}>
           <div
             className={cn(
-              "items-center rounded-md border-2 border-muted p-1 hover:border-primary hover:bg-accent",
+              "border-muted hover:border-primary hover:bg-accent items-center rounded-md border-2 p-1",
               theme === "light" && "border-primary",
             )}
           >
@@ -51,7 +51,7 @@ export const ChangeTheme = () => {
         <button disabled={theme === "dark"} onClick={() => setTheme("dark")}>
           <div
             className={cn(
-              "items-center rounded-md border-2 border-muted bg-popover p-1 hover:border-primary hover:bg-accent hover:text-accent-foreground",
+              "border-muted bg-popover hover:border-primary hover:bg-accent hover:text-accent-foreground items-center rounded-md border-2 p-1",
               theme === "dark" && "border-primary",
             )}
           >
@@ -78,15 +78,13 @@ export const ChangeTheme = () => {
         >
           <div
             className={cn(
-              "flex h-[148px]! w-[168px] cursor-pointer items-center justify-center rounded-md border-2 border-muted bg-popover p-1 text-3xl font-bold hover:border-primary hover:bg-accent hover:text-accent-foreground",
+              "border-muted bg-popover hover:border-primary hover:bg-accent hover:text-accent-foreground flex h-[148px]! w-[168px] cursor-pointer items-center justify-center rounded-md border-2 p-1 text-3xl font-bold",
               theme === "system" && "border-primary",
             )}
           >
             ?
           </div>
-          <span className="block w-full p-2 text-center font-normal">
-            System
-          </span>
+          <span className="block w-full p-2 text-center font-normal">Auto</span>
         </button>
       </CardContent>
     </Card>
