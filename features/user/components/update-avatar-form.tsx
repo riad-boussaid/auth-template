@@ -95,8 +95,8 @@ export const UpdateAvatarForm = ({
       <CardContent className="flex items-center gap-x-3">
         <Avatar className={cn("size-40", isUpdating && "animate-pulse")}>
           {image && <AvatarImage src={image} />}
-          <AvatarFallback className="bg-linear-to-tr from-primary/75 to-primary/50">
-            <p className="text-[75px] font-bold text-primary-foreground">
+          <AvatarFallback className="from-primary/75 to-primary/50 bg-linear-to-tr">
+            <p className="text-primary-foreground text-[75px] font-bold">
               {username?.charAt(0).toUpperCase()}
             </p>
           </AvatarFallback>
@@ -155,10 +155,10 @@ export const UpdateAvatarForm = ({
               </Button>
             )}
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-4 text-sm">
             Accepted formats .jpg .jpeg .png .ico .svg
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             Recommended size 1:1, up to 2MB
           </p>
         </div>
