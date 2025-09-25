@@ -12,13 +12,13 @@ export const updateRoleSchema = z.object({
 });
 
 export const avatarSchema = z.object({
-  avatar: z.string().min(1).url(),
+  avatar: z.url().min(1),
 });
 
 export const updateUsernameSchema = z.object({ username: z.string() });
 
 export const updateEmailSchema = z.object({
-  email: z.string().email().max(255),
+  email: z.email().max(255),
 });
 
 export const resetPasswordSchema = z
@@ -29,10 +29,10 @@ export const resetPasswordSchema = z
     // logoutFromOtherDevices: z.boolean(),
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
-    message: "Passwords do not match",
     path: ["confirmNewPassword"],
-  })
+      error: "Passwords do not match"
+})
   .refine((data) => data.newPassword !== data.password, {
-    message: "New password must be different from the current password",
     path: ["newPassword"],
-  });
+      error: "New password must be different from the current password"
+});
