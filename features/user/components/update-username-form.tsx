@@ -5,7 +5,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import {
   Form,
@@ -35,7 +34,6 @@ export const UpdateUsernameForm = () => {
   const { user } = useSession();
 
   const [isEditing, setIsEditing] = useState(false);
-  const router = useRouter();
 
   const toggleEditMode = () => {
     setIsEditing((current) => !current);

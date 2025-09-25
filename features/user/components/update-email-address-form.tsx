@@ -1,18 +1,10 @@
 "use client";
 
-import {
-  Ban,
-  Edit,
-  MoreHorizontal,
-  Plus,
-  PlusCircle,
-  Save,
-} from "lucide-react";
+import { Ban, Edit, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -54,7 +46,7 @@ export const UpdateEmailAddressForm = () => {
     },
   });
 
-  const { mutate: updateEmail, isPending: isUpdating } = useUpdateEmail();
+  const { mutate: updateEmail } = useUpdateEmail();
 
   const onSubmit = (values: z.infer<typeof updateEmailSchema>) => {
     updateEmail({ form: values });

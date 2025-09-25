@@ -18,7 +18,7 @@ export const UserSessionsTableActions = ({
 
   const router = useRouter();
 
-  const { mutate: deleteSession, isPending: isDeleting } = useDeleteSession();
+  const { mutate: deleteSession } = useDeleteSession();
 
   const onConfirm = () => {
     deleteSession(

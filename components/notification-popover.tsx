@@ -26,7 +26,7 @@ export const NotificationPopover = () => {
       >
         <div className="flex flex-col items-center justify-center gap-6">
           <Bell className="size-28" />
-          <p className="text-sm text-muted-foreground">Notifications</p>
+          <p className="text-muted-foreground text-sm">Notifications</p>
         </div>
       </PopoverContent>
     </Popover>

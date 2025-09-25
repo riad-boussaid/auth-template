@@ -9,8 +9,7 @@ import { ErrorResponse } from "@/types";
 
 const app = new Hono();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const routes = app
+const _routes = app
   .basePath("/api")
   .route("/auth", auth)
   .route("/oauth", oauth)
@@ -51,4 +50,4 @@ export const GET = handle(app);
 export const POST = handle(app);
 export const DELETE = handle(app);
 
-export type AppType = typeof routes;
+export type AppType = typeof _routes;

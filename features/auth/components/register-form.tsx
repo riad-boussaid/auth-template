@@ -54,7 +54,7 @@ export const RegisterForm = () => {
       <CardHeader>
         <div className="flex w-full flex-col items-center justify-center gap-y-4">
           <h1 className={"text-3xl font-semibold"}>{"Register"}</h1>
-          <p className="text-sm text-muted-foreground">{""}</p>
+          <p className="text-muted-foreground text-sm">{""}</p>
         </div>
       </CardHeader>
 
@@ -113,11 +113,7 @@ export const RegisterForm = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••"
-                        {...field}
-                      />
+                      <Input type="password" placeholder="••••" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -131,11 +127,7 @@ export const RegisterForm = () => {
                   <FormItem>
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••"
-                        {...field}
-                      />
+                      <Input type="password" placeholder="••••" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -158,7 +150,7 @@ export const RegisterForm = () => {
               </Button>
             </div>
 
-            <p className="mt-2 text-center text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-2 text-center text-xs">
               By clicking continue, you agree to our Terms of Service and
               Privacy Policy.
             </p>

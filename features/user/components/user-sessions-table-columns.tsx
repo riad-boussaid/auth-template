@@ -16,6 +16,7 @@ export const UserSessionsTablecolumns: ColumnDef<Session>[] = [
   {
     header: "Session",
     cell: ({ row }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const { session: currentSession } = useSession();
 
       return (
@@ -26,7 +27,7 @@ export const UserSessionsTablecolumns: ColumnDef<Session>[] = [
               currentSession?.id === row.original.id && "text-green-600",
             )}
           />
-          <p className="text-xs text-muted-foreground">{row.original.ip}</p>
+          <p className="text-muted-foreground text-xs">{row.original.ip}</p>
         </div>
       );
     },
@@ -38,7 +39,7 @@ export const UserSessionsTablecolumns: ColumnDef<Session>[] = [
       const session = row.original;
 
       return (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {formatRelative(session.createdAt, new Date())}
         </p>
       );
@@ -51,7 +52,7 @@ export const UserSessionsTablecolumns: ColumnDef<Session>[] = [
       const session = row.original;
 
       return (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {formatRelative(session.expiresAt, new Date())}
         </p>
       );

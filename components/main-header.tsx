@@ -18,7 +18,7 @@ export const MainHeader = () => {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 h-[80px] w-full bg-background/50 py-4 backdrop-blur-lg transition-shadow",
+        "bg-background/50 sticky top-0 z-30 h-[80px] w-full py-4 backdrop-blur-lg transition-shadow",
         scrollPosition > 0
           ? "border-b dark:border-b"
           : "border-none dark:border-none",

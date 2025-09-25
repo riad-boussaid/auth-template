@@ -38,8 +38,7 @@ export async function createPasswordResetSession(
     expiresAt: new Date(Date.now() + 1000 * 60 * 10),
     code: generateRandomOTP(),
     emailVerified: false,
-    twoFactorVerified:false
-    
+    twoFactorVerified: false,
   };
 
   await db.insert(passwordResetSessionsTable).values(session);
@@ -74,7 +73,7 @@ export async function validatePasswordResetSessionToken(
     expiresAt: row.password_reset_sessions.expiresAt,
     code: row.password_reset_sessions.code,
     emailVerified: row.password_reset_sessions.emailVerified,
-    twoFactorVerified:row.password_reset_sessions.twoFactorVerified,
+    twoFactorVerified: row.password_reset_sessions.twoFactorVerified,
   };
   const user: User = {
     // id: row.number(7),
@@ -91,7 +90,7 @@ export async function validatePasswordResetSessionToken(
     createdAt: row.users.createdAt,
     updatedAt: row.users.updatedAt,
     totpKey: null,
-    recoveryCode: ""
+    recoveryCode: "",
   };
 
   if (Date.now() >= session.expiresAt.getTime()) {
@@ -153,11 +152,13 @@ export async function invalidateUserPasswordResetSessions(userId: string) {
     .where(eq(passwordResetSessionsTable.userId, userId));
 }
 
-export async function setPasswordResetSessionAsEmailVerified(sessionId: string) {
+export async function setPasswordResetSessionAsEmailVerified(
+  sessionId: string,
+) {
   await db
-        .update(passwordResetSessionsTable)
-        .set({ emailVerified: true })
-        .where(eq(passwordResetSessionsTable.id, sessionId));
+    .update(passwordResetSessionsTable)
+    .set({ emailVerified: true })
+    .where(eq(passwordResetSessionsTable.id, sessionId));
 }
 
 export type PasswordResetSessionValidationResult =

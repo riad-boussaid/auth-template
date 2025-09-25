@@ -1,5 +1,5 @@
 import { InferResponseType, InferRequestType } from "hono";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { client } from "@/lib/rpc";
@@ -11,7 +11,6 @@ type RequestType = InferRequestType<typeof client.api.user.updateEmail.$post>;
 export const useUpdateEmail = () => {
   const router = useRouter();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   return useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ form }) => {

@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { Loader, Trash, Upload } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -30,7 +29,6 @@ export const UpdateAvatarForm = ({
 }) => {
   const [image, setImage] = useState<string | null>(imageUrl);
   const [open, setOpen] = useState(false);
-  const router = useRouter();
 
   const inputElementRef = useRef<HTMLInputElement>(null);
 

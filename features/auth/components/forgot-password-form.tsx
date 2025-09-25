@@ -46,7 +46,7 @@ export const ForgotPasswordForm = () => {
       <CardHeader>
         <div className="flex w-full flex-col items-center justify-center gap-y-4">
           <h1 className={"text-3xl font-semibold"}>Reset Password</h1>
-          <p className="text-sm text-muted-foreground">{""}</p>
+          <p className="text-muted-foreground text-sm">{""}</p>
         </div>
       </CardHeader>
 

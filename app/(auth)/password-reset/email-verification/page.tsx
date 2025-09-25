@@ -13,6 +13,6 @@ export default async function PasswordResetEmailVerification() {
 
     redirect("/password-reset");
   }
-  
+
   return <PasswordResetEmailVerificationForm />;
 }

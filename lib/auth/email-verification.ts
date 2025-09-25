@@ -1,7 +1,7 @@
 import { encodeBase32 } from "@oslojs/encoding";
 import { and, eq } from "drizzle-orm";
 import { Context } from "hono";
-import {  setCookie } from "hono/cookie";
+import { setCookie } from "hono/cookie";
 
 import { db } from "@/lib/db";
 import { EmailVerification, emailVerificationsTable } from "@/lib/db/schema";
@@ -121,9 +121,8 @@ export async function setEmailVerificationRequestCookie(
   });
 }
 
-export async function deleteEmailVerificationRequestCookie(
+export async function deleteEmailVerificationRequestCookie(): Promise<void> {
   // c: Context,
-): Promise<void> {
   (await cookies()).set("email_verification", "", {
     httpOnly: true,
     path: "/",
@@ -140,9 +139,8 @@ export async function deleteEmailVerificationRequestCookie(
   // });
 }
 
-export async function getUserEmailVerificationRequestFromRequest(
+export async function getUserEmailVerificationRequestFromRequest(): Promise<EmailVerification | null> {
   // c: Context,
-): Promise<EmailVerification | null> {
   const { user } = await getCurrentSession();
 
   if (user === null) {

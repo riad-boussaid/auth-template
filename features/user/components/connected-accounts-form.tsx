@@ -28,7 +28,7 @@ export const ConnectedAccountsForm = ({
   accounts: { id: string; provider: string }[];
 }) => {
   const router = useRouter();
-  const { mutate: deleteAccount, isPending: isDeleting } = useDeleteAccount();
+  const { mutate: deleteAccount } = useDeleteAccount();
 
   const onDelete = (accountId: string) => {
     deleteAccount(
@@ -53,7 +53,7 @@ export const ConnectedAccountsForm = ({
             return (
               <li
                 key={account.provider}
-                className="flex w-fit items-center gap-x-2 rounded-full border py-2 pl-4 pr-2"
+                className="flex w-fit items-center gap-x-2 rounded-full border py-2 pr-2 pl-4"
               >
                 {account.provider === "google" && (
                   <FcGoogle className="size-4" />

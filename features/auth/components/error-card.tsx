@@ -17,13 +17,13 @@ export const ErrorCard = () => {
       <CardHeader>
         <div className="flex w-full flex-col items-center justify-center gap-y-4">
           <h1 className={"text-3xl font-semibold"}>Error</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Oops! Something went wrong!
           </p>
         </div>
       </CardHeader>
       <CardContent>
-        <ShieldAlert className="mx-auto text-destructive" />
+        <ShieldAlert className="text-destructive mx-auto" />
       </CardContent>
       <CardFooter>
         <Button variant={"link"} size={"sm"} className="w-full" asChild>

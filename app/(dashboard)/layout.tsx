@@ -10,9 +10,9 @@ export default function DashboardLayout({
   return (
     <SidebarProvider className="">
       <AppSidebar />
-      <SidebarTrigger className="absolute bottom-5 right-5 m-4" />
+      <SidebarTrigger className="absolute right-5 bottom-5 m-4" />
 
-      <div className="container bg-slate-100 py-8 dark:bg-background">
+      <div className="dark:bg-background container bg-slate-100 py-8">
         {children}
       </div>
     </SidebarProvider>

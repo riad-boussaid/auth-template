@@ -8,7 +8,7 @@ export default function MainLayout({
   return (
     <div className="">
       <MainHeader />
-      <div className="container min-h-[calc(100dvh-80px)] bg-slate-100 py-8 dark:bg-background">
+      <div className="dark:bg-background container min-h-[calc(100dvh-80px)] bg-slate-100 py-8">
         {children}
       </div>
     </div>

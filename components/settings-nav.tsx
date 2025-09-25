@@ -44,7 +44,7 @@ export const SettingsNav = () => {
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Settings</h1>
 
-      <nav className="grid gap-2 text-sm text-muted-foreground">
+      <nav className="text-muted-foreground grid gap-2 text-sm">
         {items.map((item) => (
           <Button
             key={item.id}

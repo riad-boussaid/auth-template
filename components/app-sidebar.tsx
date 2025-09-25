@@ -110,8 +110,8 @@ export function AppSidebar() {
       <SidebarFooter className="m-4 flex flex-row items-center gap-x-3 rounded-full border p-2">
         <UserButton user={user} />
         <div>
-          <p className="text-xs text-muted-foreground">{user?.username}</p>
-          <p className="text-xs text-muted-foreground">{user?.email}</p>
+          <p className="text-muted-foreground text-xs">{user?.username}</p>
+          <p className="text-muted-foreground text-xs">{user?.email}</p>
         </div>
       </SidebarFooter>
     </Sidebar>

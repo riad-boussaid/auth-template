@@ -55,7 +55,7 @@ export const SigninForm = () => {
       <CardHeader>
         <div className="flex w-full flex-col items-center justify-center gap-y-4">
           <h1 className={"text-3xl font-semibold"}>{"Sign in"}</h1>
-          <p className="text-sm text-muted-foreground">{"Welcome back"}</p>
+          <p className="text-muted-foreground text-sm">{"Welcome back"}</p>
         </div>
       </CardHeader>
 
@@ -126,7 +126,7 @@ export const SigninForm = () => {
             </Button>
           </div>
 
-          <p className="mt-2 text-center text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-2 text-center text-xs">
             By clicking continue, you agree to our Terms of Service and Privacy
             Policy.
           </p>

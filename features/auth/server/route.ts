@@ -1,7 +1,7 @@
 import { HTTPException } from "hono/http-exception";
 import { zValidator } from "@hono/zod-validator";
 import { decodeBase64 } from "@oslojs/encoding";
-import { generateTOTP, verifyTOTP } from "@oslojs/otp";
+import { verifyTOTP } from "@oslojs/otp";
 import { getConnInfo } from "hono/vercel";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
@@ -52,11 +52,9 @@ import {
 } from "@/features/auth/validators";
 
 import { type ErrorResponse, type SuccessResponse } from "@/types";
-import { decrypt, encrypt, encryptString } from "@/lib/auth/encryption";
 
 const app = new Hono()
   .get("/current", sessionMiddleware, (c) => {
-    const user = c.get("user");
     const session = c.get("session");
 
     return c.json<SuccessResponse<{ userId: string }>>({
@@ -543,7 +541,7 @@ const app = new Hono()
 
         const { encodedKey, code } = c.req.valid("form");
 
-        let key = decodeBase64(encodedKey);
+        const key = decodeBase64(encodedKey);
 
         // const otp = generateTOTP(key, 30, 6);
 

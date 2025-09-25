@@ -1,1 +1,1 @@
-export const AUTH_COOKIE="123456789" 
+export const AUTH_COOKIE = "123456789";
